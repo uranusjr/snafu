@@ -116,3 +116,10 @@ How are Executables linked?
 With .bat one-liners like this::
 
     @%APPLOCALDATA%\Programs\Python\Python35\python.exe %*
+
+
+Why SNAFU?
+----------
+
+Because Python is hard, Windows is harder, and setting up Windows for Python
+development is SNAFU. Or it’s Supernatrual Administration for You.
