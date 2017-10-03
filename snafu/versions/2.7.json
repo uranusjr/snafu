@@ -1,0 +1,6 @@
+{
+    "url": "https://www.python.org/ftp/python/2.7.14/python-2.7.14.amd64.msi",
+    "md5_sum": "370014d73c3059f610c27365def62058",
+    "version_info": [2, 7, 14],
+    "installer_type": "cpython_msi"
+}
