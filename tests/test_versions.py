@@ -1,6 +1,31 @@
+import json
+import re
+
 import pytest
 
 import snafu.versions
+
+
+version_paths = list(snafu.versions.VERSIONS_DIR_PATH.iterdir())
+version_names = [p.stem for p in version_paths]
+
+
+@pytest.mark.parametrize('path', version_paths, ids=version_names)
+def test_version_definitions(path):
+    assert path.suffix == '.json', 'wrong extension'
+    assert re.match(r'^\d\.\d(?:\-32)?$', path.stem), 'invalid name'
+
+    with path.open() as f:
+        data = json.load(f)
+
+    assert data.pop('url')
+    assert re.match(r'^[a-f\d]{32}$', data.pop('md5_sum'))
+    assert isinstance(data.pop('version_info'), list)
+
+    possible_types = snafu.versions.InstallerType.__members__
+    assert data.pop('installer_type') in possible_types
+
+    assert not data, 'superfulous keys: {}'.format(', '.join(data.keys()))
 
 
 def test_get_version_cpython_msi():
