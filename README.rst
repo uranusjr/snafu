@@ -20,6 +20,10 @@ Scripts and library should be bundled with the
 CPython distribution and built into a `snafu.exe`, so the user can just install
 and run this without knowing the whole thing is implemented in Python.
 
+The installer bundle should contain a copy of the newest possible Python, and
+installs the py launcher from it along with SNAFU itself. SNAFU should manager
+the launcher’s upgrading when itself upgrades.
+
 I’m still poundering whether I should put the executable somewhere in PATH,
 *add* it to the PATH, or just leave this to the user. This can be discussed
 and decided on later.
@@ -36,10 +40,8 @@ pyenv, we don’t support installing patch versions. This is because there is no
 good way to deal with patch versions on Windows (the py launcher only supports
 major and minor versioning), and you should always use the latest patch anyway.
 
-If this is the first ever Python installed, the command should automatically
-install the py launcher as well. The py launcher is re-installed with every
-version since the installer only upgrades it if the version is newer, as
-`indicated <https://www.python.org/dev/peps/pep-0397/#id14>`__ in PEP 397.
+To avoid requiring administrator priviledge on every installation, the py
+launcher is not managed by SNAFU itself, and not installed here.
 
 After installing a version, `pythonX.Y` will be available as a command. (This
 can probably be done with a `.bat` file + launcher).

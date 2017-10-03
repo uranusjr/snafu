@@ -59,9 +59,9 @@ class CPythonVersion(Version):
         subprocess.check_call([
             cmd, '/passive', 'InstallAllUsers=0',
             'DefaultJustForMeTargetDir={}'.format(dirpath),
-            'Include_launcher=1', 'InstallLauncherAllUsers=1',
             'AssociateFiles=0', 'PrependPath=0', 'Shortcuts=0',
-            'Include_test=0', 'Include_tools=0',
+            'Include_launcher=0', 'Include_test=0', 'Include_tools=0',
+            'InstallLauncherAllUsers=0',
         ])
         return dirpath
 
