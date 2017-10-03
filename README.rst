@@ -9,7 +9,7 @@ of a version you specify, and manages the Path environment variable for you.
 Specification
 ==============
 
-(This is a overview of what the end result should look like. Most things are
+(This is an overview of what the end result should look like. Most things are
 not implemented yet.)
 
 Distribution
@@ -37,8 +37,9 @@ good way to deal with patch versions on Windows (the py launcher only supports
 major and minor versioning), and you should always use the latest patch anyway.
 
 If this is the first ever Python installed, the command should automatically
-install the py launcher as well. The py launcher is generally not re-installed,
-but may be updated if you’re installing a newer version of Python.
+install the py launcher as well. The py launcher is re-installed with every
+version since the installer only upgrades it if the version is newer, as
+`indicated <https://www.python.org/dev/peps/pep-0397/#id14>`__ in PEP 397.
 
 After installing a version, `pythonX.Y` will be available as a command. (This
 can probably be done with a `.bat` file + launcher).
@@ -88,6 +89,51 @@ To uninstall a version::
 Uninstalling an active version results in broken links. (A possible improvement
 candidate in the future.)
 
+Listing Versions
+----------------
+
+List installed versions::
+
+    snafu versions
+
+List all versions available, including those not installed::
+
+    snafu versions --all
+
+This results in something like this::
+
+    i 2.7
+      3.4
+    u 3.5
+    i 3.6
+
+* The ``i`` prefix means the version is installed.
+* ``u`` means the version is installed, and there is an update available.
+* No prefix if the version is not installed.
+
+The installation status is detected through the Windows registry.
+
+Upgrading Version
+-----------------
+
+Use this syntax::
+
+    snafu upgrade 3.6
+
+to upgrade an installed version (and errors if it is not installed).
+
+The upgrade is detected through semantic version checking. Every version file
+should contain a ``version_info`` field. This is compared to the currently
+installed version (by checking ``tuple(sys.version_info)`` through the py
+launcher), and download and run the installer if there is a newer version than
+installed.
+
+Need to clarify: What happens if the user has the version installed somewhere
+else? Can we upgrade *and* change the location at the same time? Probably not.
+If that’s not possible maybe a standalone installation log is needed, instead
+of relying on Python’s registry entries. Or maybe we can simply ignore versions
+installed somewhere else, or not installed as “only-for-me”.
+
 
 Architecture (Implementation Details)
 =====================================
@@ -116,6 +162,38 @@ How are Executables linked?
 With .bat one-liners like this::
 
     @%APPLOCALDATA%\Programs\Python\Python35\python.exe %*
+
+
+Get Python information from registry
+------------------------------------
+
+This snippet demostrates some common tasks::
+
+    import winreg as r
+
+    reg = r.ConnectRegistry(None, r.HKEY_CURRENT_USER)
+    # Note: Does it change to HKEY_CURRENT_MACHINE if the user installs
+    # the Python as ALL USERS? Do we care?
+
+    # Gets the root key of all Python installation information.
+    python_key = r.OpenKey(reg, r'Software\Python')
+
+    # Show installed Python versions.
+    i = 0
+    while True:
+        try:
+            print(r.EnumKey(python_key, i))
+        except OSError:     # [WinError 259] No more data is available
+            break
+        i += 1
+
+    # Get where Python 3.5 is installed.
+    try:
+        python35_installpath_key = r.OpenKey(python_key, r'3.5\InstallPath')
+    except FileNotFoundError:
+        # [WinError 2] The system cannot find the file specified
+        print('Not installed')
+    print(r.QueryValue(python35_installpath_key, ''))
 
 
 Why SNAFU?

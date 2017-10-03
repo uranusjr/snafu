@@ -1,5 +1,6 @@
 {
     "url": "https://www.python.org/ftp/python/3.6.2/python-3.6.2-amd64.exe",
     "md5_sum": "4377e7d4e6877c248446f7cd6a1430cf",
+    "version_info": [3, 6, 2],
     "installer_type": "cpython"
 }

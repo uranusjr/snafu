@@ -32,6 +32,7 @@ class Version:
     name = attr.ib()
     url = attr.ib()
     md5_sum = attr.ib()
+    version_info = attr.ib(convert=tuple)
 
     def save_installer(self, data, into_path):
         checksum = hashlib.md5(data).hexdigest()
@@ -55,13 +56,12 @@ class CPythonVersion(Version):
             os.environ['LocalAppData'], 'Programs', 'Python',
             'Python{}'.format(self.name.replace('.', '')),
         )
-        # TODO: If we're installing the newest version, upgrade the launcher.
         subprocess.check_call([
             cmd, '/passive', 'InstallAllUsers=0',
             'DefaultJustForMeTargetDir={}'.format(dirpath),
+            'Include_launcher=1', 'InstallLauncherAllUsers=1',
             'AssociateFiles=0', 'PrependPath=0', 'Shortcuts=0',
-            'Include_launcher=0', 'Include_test=0', 'Include_tools=0',
-            'InstallLauncherAllUsers=0',
+            'Include_test=0', 'Include_tools=0',
         ])
         return dirpath
 
