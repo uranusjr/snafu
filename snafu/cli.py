@@ -1,6 +1,6 @@
 import click
 
-from . import metadata, operations, versions
+from . import operations
 
 
 @click.group()
@@ -11,10 +11,8 @@ def cli():
 @cli.command()
 @click.argument('version')
 def install(version):
-    version = versions.get_version(version)
-    if version.is_installed():
-        click.echo('{} is already installed!'.format(version), err=True)
-        return
+    version = operations.get_version(version)
+    operations.check_status(version, False)
 
     click.echo('Downloading {}'.format(version.url))
     installer_path = operations.download_installer(version)
@@ -30,10 +28,8 @@ def install(version):
 @cli.command()
 @click.argument('version')
 def uninstall(version):
-    version = versions.get_version(version)
-    if not version.is_installed():
-        click.echo('{} is not installed.'.format(version), err=True)
-        return
+    version = operations.get_version(version)
+    operations.check_status(version, True)
 
     # TODO: Can we use the Windows built-in uninstalling mechanism instead?
     click.echo('Downloading {}'.format(version.url))

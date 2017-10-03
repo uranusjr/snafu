@@ -1,10 +1,13 @@
 import atexit
 import pathlib
 import shutil
+import sys
 import tempfile
 
 import click
 import requests
+
+from . import versions
 
 
 def download_installer(version):
@@ -35,3 +38,22 @@ def download_installer(version):
     version.save_installer(data, installer_path)
 
     return installer_path
+
+
+def get_version(name):
+    try:
+        return versions.get_version(name)
+    except versions.VersionNotFoundError:
+        click.echo('No such version: {}'.format(name), err=True)
+        sys.exit(1)
+
+
+def check_status(version, expection):
+    if version.is_installed() == expection:
+        return
+    if expection:
+        message = '{} is not installed.'
+    else:
+        message = '{} is already installed.'
+    click.echo(message.format(version), err=True)
+    sys.exit(1)
