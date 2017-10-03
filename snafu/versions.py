@@ -69,10 +69,12 @@ class CPythonVersion(Version):
         subprocess.check_call([cmd, '/uninstall'])
 
 
+VERSIONS_DIR_PATH = pathlib.Path(__file__).with_name('versions').resolve()
+
+
 def get_version(name):
-    path = pathlib.Path(__file__).with_name('{}.json'.format(name))
     try:
-        with path.open() as f:
+        with VERSIONS_DIR_PATH.joinpath('{}.json'.format(name)).open() as f:
             data = json.load(f)
     except FileNotFoundError:
         raise VersionNotFoundError(name)

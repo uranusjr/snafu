@@ -1,0 +1,6 @@
+{
+    "url": "https://www.python.org/ftp/python/3.4.3/python-3.4.3.amd64.msi",
+    "md5_sum": "f6ade29acaf8fcdc0463e69a6e7ccf87",
+    "version_info": [3, 4, 3],
+    "installer_type": "cpython_msi"
+}
