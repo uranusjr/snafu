@@ -178,7 +178,7 @@ This snippet demostrates some common tasks::
     # the Python as ALL USERS? Do we care?
 
     # Gets the root key of all Python installation information.
-    python_key = r.OpenKey(reg, r'Software\Python')
+    python_key = r.OpenKey(reg, r'Software\Python\PythonCore')
 
     # Show installed Python versions.
     i = 0

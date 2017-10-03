@@ -7,6 +7,8 @@ import subprocess
 
 import attr
 
+from . import metadata
+
 
 class VersionNotFoundError(ValueError):
     pass
@@ -33,6 +35,15 @@ class Version:
     url = attr.ib()
     md5_sum = attr.ib()
     version_info = attr.ib(convert=tuple)
+
+    def __str__(self):
+        return 'Python {}'.format(self.name)
+
+    def get_installation_path(self):
+        return metadata.get_installation_root_path(self.name)
+
+    def is_installed(self):
+        return metadata.is_installed(self.name)
 
     def save_installer(self, data, into_path):
         checksum = hashlib.md5(data).hexdigest()
