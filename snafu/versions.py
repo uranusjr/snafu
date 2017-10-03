@@ -43,19 +43,36 @@ class Version:
         with into_path.open('wb') as f:
             f.write(data)
 
+    def get_install_dir_path(self):
+        return pathlib.Path(
+            os.environ['LocalAppData'], 'Programs', 'Python',
+            'Python{}'.format(self.name.replace('.', '')),
+        )
+
 
 class CPythonMSIVersion(Version):
+
     def install(self, cmd):
-        pass
+        dirpath = self.get_install_dir_path()
+        parts = [
+            'msiexec', '/i', '/qb', '"{}"'.format(cmd),
+            'ALLUSERS=0', 'TARGETDIR="{}"'.format(dirpath),
+            'REMOVE=Extensions,Tools,Testsuite',
+        ]
+        subprocess.check_call(
+            ' '.join(parts),
+            shell=True,     # So we don't need to know where msiexec is.
+        )
+        return dirpath
+
+    def uninstall(self, cmd):
+        subprocess.check_call('msiexec /x "{}"'.format(cmd), shell=True)
 
 
 class CPythonVersion(Version):
 
     def install(self, cmd):
-        dirpath = pathlib.Path(
-            os.environ['LocalAppData'], 'Programs', 'Python',
-            'Python{}'.format(self.name.replace('.', '')),
-        )
+        dirpath = self.get_install_dir_path()
         subprocess.check_call([
             cmd, '/passive', 'InstallAllUsers=0',
             'DefaultJustForMeTargetDir={}'.format(dirpath),
