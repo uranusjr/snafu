@@ -63,9 +63,10 @@ Set Python 3.5 as default::
 
 This does two things:
 
-1. `python3` is mapped to Python 3.5. (Note: there is no `python3-32` because
-   it’s too tedious to manage).
-2. Scripts in `Python35\Scripts` are *linked* into PATH.
+1. `python3` and `python3.5` are mapped to Python 3.5. (Note: there is no
+   distinction between 32- and 64-bit versions because it’s too tedious to
+   manage.)
+2. Scripts in `Python35\\Scripts` are *linked* into PATH.
 
 Special case: `pip.exe` is **never** linked, to avoid any confusion. Use
 `pip3`, `pip3.5`, etc. instead.
