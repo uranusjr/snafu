@@ -116,14 +116,6 @@ def build_lib(container):
             shutil.copy2(str(path), str(libdir.joinpath(path.name)))
 
 
-def build_cmd(container):
-    cmddir = container.joinpath('cmd')
-    cmddir.mkdir()
-    cmddir.joinpath('snafu.cmd').write_text('@{python} -m snafu %*'.format(
-        python=container.joinpath('lib', 'python.exe'),
-    ))
-
-
 def build_python_setup(container):
     setup = get_python_installer()
     shutil.copy2(str(setup), str(container.joinpath('python-setup.exe')))
@@ -135,7 +127,6 @@ def build_files():
         shutil.rmtree(str(container))
     container.mkdir()
     build_lib(container)
-    build_cmd(container)
     build_python_setup(container)
 
 
