@@ -1,6 +1,6 @@
 import click
 
-from . import operations
+from . import configs, operations
 
 
 @click.group()
@@ -39,3 +39,27 @@ def uninstall(version):
     version.uninstall(str(installer_path))
 
     click.echo('{} is uninstalled succesfully.'.format(version))
+
+
+@cli.command()
+@click.argument('version', nargs=-1, required=True)
+def activate(version):
+    versions = [operations.get_version(v) for v in version]
+    for version in versions:
+        operations.check_status(version, True)
+
+    scripts_path = configs.get_scripts_dir_path()
+
+    click.echo('Removing scripts.')
+    for p in scripts_path.iterdir():
+        p.unlink()
+
+    for version in versions:
+        operations.publish_scripts(version, scripts_path)
+
+
+@cli.command()
+def deactivate():
+    click.echo('Removing scripts.')
+    for p in configs.get_scripts_dir_path().iterdir():
+        p.unlink()

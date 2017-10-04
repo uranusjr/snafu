@@ -39,8 +39,12 @@ class Version:
     def __str__(self):
         return 'Python {}'.format(self.name)
 
-    def get_installation_path(self):
-        return metadata.get_installation_root_path(self.name)
+    @property
+    def launcher_names(self):
+        return [
+            'python{0}'.format(*self.version_info),
+            'python{0}.{1}'.format(*self.version_info),
+        ]
 
     def is_installed(self):
         return metadata.is_installed(self.name)
@@ -59,6 +63,9 @@ class Version:
             os.environ['LocalAppData'], 'Programs', 'Python',
             'Python{}'.format(self.name.replace('.', '')),
         )
+
+    def get_scripts_dir_path(self):
+        return self.get_install_dir_path().joinpath('Scripts')
 
 
 class CPythonMSIVersion(Version):

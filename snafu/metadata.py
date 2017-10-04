@@ -1,5 +1,4 @@
 import contextlib
-import pathlib
 import winreg
 
 
@@ -30,14 +29,3 @@ def is_installed(name):
             return False
         winreg.CloseKey(key)
         return True
-
-
-def get_installation_root_path(name):
-    with open_python_key() as python_key:
-        try:
-            key = winreg.OpenKey(python_key, r'{}\InstallPath'.format(name))
-        except FileNotFoundError:
-            return None
-        path = pathlib.Path(winreg.QueryValue(key, ''))
-        winreg.CloseKey(key)
-        return path
