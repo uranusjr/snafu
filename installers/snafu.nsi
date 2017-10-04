@@ -19,6 +19,8 @@ Section "SNAFU Python Manager"
 
     File /r "snafu\*"
 
+    nsExec::ExecToLog '$INSTDIR\python-setup.exe /quiet LauncherOnly=1'
+
     WriteUninstaller "$INSTDIR\Uninstall.exe"
 SectionEnd
 

@@ -4,6 +4,7 @@ import shutil
 import subprocess
 import zipfile
 
+import click
 import pkg_resources
 import requests
 
@@ -17,19 +18,38 @@ PYTHON_INSTALLER_URL = \
 ROOT = pathlib.Path(__file__).parent.resolve()
 
 
+def download_file(url, path):
+    click.echo('Downloading {}'.format(url))
+    response = requests.get(url, stream=True)
+
+    installer_name = url.rsplit('/', 1)[-1]
+    total = response.headers.get('content-length', '')
+    chunks = []
+
+    if total.isdigit():
+        length = int(total)
+    else:
+        length = None
+    with click.progressbar(length=length, label=installer_name) as b:
+        for chunk in response.iter_content(chunk_size=4096):
+            chunks.append(chunk)
+            if length is not None:
+                b.update(len(chunk))
+
+    path.write_bytes(b''.join(chunks))
+
+
 def get_python_installer():
     installer_path = ROOT.joinpath(PYTHON_INSTALLER_URL.rsplit('/', 1)[-1])
     if not installer_path.exists():
-        response = requests.get(PYTHON_INSTALLER_URL)
-        installer_path.write_bytes(response.content)
+        download_file(PYTHON_INSTALLER_URL, installer_path)
     return installer_path
 
 
 def get_embed_bundle():
     bundle_path = ROOT.joinpath(PYTHON_EMBED_URL.rsplit('/', 1)[-1])
     if not bundle_path.exists():
-        response = requests.get(PYTHON_EMBED_URL)
-        bundle_path.write_bytes(response.content)
+        download_file(PYTHON_EMBED_URL, bundle_path)
     return bundle_path
 
 
@@ -71,10 +91,12 @@ def build_lib(container):
     libdir.mkdir()
 
     # Extract Python distribution.
+    click.echo('Populating Embeddable Python.')
     with zipfile.ZipFile(str(get_embed_bundle())) as f:
         f.extractall(str(libdir))
 
     # Copy SNAFU.
+    click.echo('Populate SNAFU.')
     shutil.copytree(
         str(ROOT.parent.joinpath('snafu')),
         str(libdir.joinpath('snafu')),
@@ -85,7 +107,9 @@ def build_lib(container):
         json.dump({'scripts_dir': '..\\..\\scripts'}, f)
 
     # Copy dependencies.
+    click.echo('Populate dependencies...')
     for path in get_package_paths():
+        click.echo('  {}'.format(path.stem))
         if path.is_dir():
             shutil.copytree(str(path), str(libdir.joinpath(path.name)))
         else:
@@ -100,6 +124,11 @@ def build_cmd(container):
     ))
 
 
+def build_python_setup(container):
+    setup = get_python_installer()
+    shutil.copy2(str(setup), str(container.joinpath('python-setup.exe')))
+
+
 def build_files():
     container = ROOT.joinpath('snafu')
     if container.exists():
@@ -107,18 +136,21 @@ def build_files():
     container.mkdir()
     build_lib(container)
     build_cmd(container)
+    build_python_setup(container)
 
 
 def build_installer():
     exe = ROOT.joinpath('snafu-setup.exe')
     if exe.exists():
         exe.unlink()
+    click.echo('Building installer.')
     subprocess.check_call(
         'makensis "{nsi}"'.format(nsi=ROOT.joinpath('snafu.nsi')),
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True,
+        shell=True,
     )
 
 
+@click.command()
 def build():
     build_files()
     build_installer()
