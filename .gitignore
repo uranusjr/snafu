@@ -3,5 +3,3 @@
 
 *.py[co]
 __pycache__
-
-/snafu/installation.json
