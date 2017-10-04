@@ -78,8 +78,12 @@ class CPythonMSIVersion(Version):
             'msiexec', '/i', '"{}"'.format(cmd),
 
             # Optional parameters and flags.
-            '/qb', 'ALLUSERS=0', 'TARGETDIR="{}"'.format(dirpath),
+            '/qb', 'TARGETDIR="{}"'.format(dirpath),
             'ADDLOCAL=DefaultFeature,TclTk,Documentation',
+
+            # This does not do what you think. DO NOT SUPPLY IT.
+            # The installer is per-user by default.
+            # 'ALLUSERS=0',
         ]
         subprocess.check_call(
             ' '.join(parts),
@@ -127,7 +131,7 @@ def get_version(name):
     return klass(name=name, **data)
 
 
-VERSION_NAME_RE = re.compile(r'^\d+\.\d+(:?\-32)$')
+VERSION_NAME_RE = re.compile(r'^\d+\.\d+(:?\-32)?$')
 
 
 def get_versions():
