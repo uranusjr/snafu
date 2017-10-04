@@ -1,6 +1,6 @@
 import click
 
-from . import configs, operations
+from . import configs, metadata, operations, versions
 
 
 class SnafuGroup(click.Group):
@@ -70,6 +70,25 @@ def deactivate():
     click.echo('Removing scripts.')
     for p in configs.get_scripts_dir_path().iterdir():
         p.unlink()
+
+
+@cli.command(name='list')
+@click.option('--all', 'list_all', is_flag=True)
+def list_(list_all):
+    if list_all:
+        vers = versions.get_versions()
+    else:
+        vers = [
+            versions.get_version(name)
+            for name in metadata.get_installed_version_names()
+        ]
+    for v in vers:
+        marker = ' '
+        if v.is_installed():
+            marker = 'i'
+        # TODO: Show upgrade marker if defined version is newer than installed.
+        # TODO: Show * if the version is active.
+        click.echo('{} {}'.format(marker, v.name))
 
 
 if __name__ == '__main__':

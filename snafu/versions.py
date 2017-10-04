@@ -3,6 +3,7 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import subprocess
 
 import attr
@@ -124,3 +125,14 @@ def get_version(name):
     }[installer_type]
 
     return klass(name=name, **data)
+
+
+VERSION_NAME_RE = re.compile(r'^\d+\.\d+(:?\-32)$')
+
+
+def get_versions():
+    return [
+        get_version(p.stem)
+        for p in VERSIONS_DIR_PATH.iterdir()
+        if p.suffix == '.json' and VERSION_NAME_RE.match(p.stem)
+    ]
