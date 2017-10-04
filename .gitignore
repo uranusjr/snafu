@@ -3,3 +3,5 @@
 
 *.py[co]
 __pycache__
+
+/runenv
