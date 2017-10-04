@@ -72,10 +72,13 @@ class CPythonMSIVersion(Version):
 
     def install(self, cmd):
         dirpath = self.get_install_dir_path()
-        parts = [
-            'msiexec', '/i', '/qb', '"{}"'.format(cmd),
-            'ALLUSERS=0', 'TARGETDIR="{}"'.format(dirpath),
-            'REMOVE=Extensions,Tools,Testsuite',
+        parts = [   # Argument ordering is very important.
+            # Options and required parameters.
+            'msiexec', '/i', '"{}"'.format(cmd),
+
+            # Optional parameters and flags.
+            '/qb', 'ALLUSERS=0', 'TARGETDIR="{}"'.format(dirpath),
+            'ADDLOCAL=DefaultFeature,TclTk,Documentation',
         ]
         subprocess.check_call(
             ' '.join(parts),
@@ -84,7 +87,7 @@ class CPythonMSIVersion(Version):
         return dirpath
 
     def uninstall(self, cmd):
-        subprocess.check_call('msiexec /x "{}"'.format(cmd), shell=True)
+        subprocess.check_call('msiexec /x "{}" /qb'.format(cmd), shell=True)
 
 
 class CPythonVersion(Version):

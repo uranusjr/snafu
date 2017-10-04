@@ -24,8 +24,9 @@ def get_installed_version_names():
 def is_installed(name):
     with open_python_key() as python_key:
         try:
-            key = winreg.OpenKey(python_key, name)
+            key = winreg.OpenKey(python_key, r'{}\InstallPath'.format(name))
         except FileNotFoundError:
             return False
+        install_path = winreg.QueryValue(key, '')
         winreg.CloseKey(key)
-        return True
+        return bool(install_path)
