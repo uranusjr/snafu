@@ -41,6 +41,8 @@ def download_installer(version):
 
 
 def get_version(name):
+    # TODO: If the host is 32-bit and the user requests a 64-bit version,
+    # automatically correct (and echo a message) it to the 32-bit variant.
     try:
         return versions.get_version(name)
     except versions.VersionNotFoundError:
@@ -60,7 +62,7 @@ def check_status(version, expection):
 
 
 def publish_python(source, target_dir, name, *, overwrite):
-    target = target_dir.joinpath('{}.bat'.format(name))
+    target = target_dir.joinpath('{}.cmd'.format(name))
     if not overwrite and target.exists():
         return
     click.echo('  {}'.format(target.name))
@@ -71,7 +73,7 @@ def publish_script(source, target, *, overwrite):
     if not overwrite and target.exists():
         return
     click.echo('  {}'.format(target.name))
-    shutil.copy(str(source.resolve()), str(target))
+    shutil.copy2(str(source.resolve()), str(target))
 
 
 def publish_scripts(version, target_dir, *, overwrite=False):
