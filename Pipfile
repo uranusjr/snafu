@@ -4,18 +4,13 @@ url = "https://pypi.python.org/simple"
 verify_ssl = true
 
 [dev-packages]
-
 pytest = "*"
 "pytest-pythonpath" = "*"
-
 
 [requires]
 python_version = "3.5"
 
 [packages]
-
 click = "*"
 requests = "*"
-toml = "*"
 attrs = "*"
-colorama = "*"
