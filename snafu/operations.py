@@ -61,12 +61,12 @@ def check_status(version, expection):
     sys.exit(1)
 
 
-def publish_python(source, target_dir, name, *, overwrite):
-    target = target_dir.joinpath('{}.cmd'.format(name))
+def publish_python(version, target, *, overwrite, quiet=False):
     if not overwrite and target.exists():
         return
-    click.echo('  {}'.format(target.name))
-    target.write_text('@{} %*'.format(source))
+    if not quiet:
+        click.echo('  {}'.format(target.name))
+    target.write_text('@py -{} %*'.format(version.name))
 
 
 def publish_script(source, target, *, overwrite):
@@ -78,10 +78,11 @@ def publish_script(source, target, *, overwrite):
 
 def publish_scripts(version, target_dir, *, overwrite=False):
     click.echo('Publishing {}...'.format(version))
+
+    target = target_dir.joinpath('python{}.cmd'.format(version.major_version))
+    publish_python(version, target, overwrite=overwrite)
+
     install_dir_path = version.get_install_dir_path()
-    python = install_dir_path.joinpath('python.exe')
-    for name in version.launcher_names:
-        publish_python(python, target_dir, name, overwrite=overwrite)
     for path in install_dir_path.joinpath('Scripts').iterdir():
         if path.stem in ('easy_install', 'pip'):
             # Special case: do not publish versionless pip and easy_install.

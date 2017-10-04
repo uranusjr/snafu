@@ -150,10 +150,16 @@ def build_installer():
     )
 
 
+def cleanup():
+    container = ROOT.joinpath('snafu')
+    shutil.rmtree(str(container))
+
+
 @click.command()
 def build():
     build_files()
     build_installer()
+    cleanup()
 
 
 if __name__ == '__main__':

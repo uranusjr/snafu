@@ -1,3 +1,5 @@
+import re
+
 import click
 
 from . import configs, metadata, operations, versions
@@ -27,6 +29,11 @@ def install(version):
     click.echo('Running installer at {}'.format(installer_path))
     dirpath = version.install(str(installer_path))
 
+    click.echo('Publishing {}'.format(version.launcher.name))
+    operations.publish_python(
+        version, version.launcher, overwrite=True, quiet=True,
+    )
+
     click.echo('{} is installed succesfully to {}'.format(
         version, dirpath,
     ))
@@ -42,10 +49,28 @@ def uninstall(version):
     click.echo('Downloading {}'.format(version.url))
     installer_path = operations.download_installer(version)
 
-    click.echo('Running installer at {}'.format(installer_path))
+    click.echo('Running uninstaller at {}'.format(installer_path))
     version.uninstall(str(installer_path))
 
+    click.echo('Unlinking {}'.format(version.launcher.name))
+    version.launcher.unlink()
+
     click.echo('{} is uninstalled succesfully.'.format(version))
+
+
+@cli.command()
+@click.argument('version')
+def link(version):
+    version = operations.get_version(version)
+    operations.check_status(version, True)
+
+    operations.publish_python(
+        version, version.launcher, overwrite=True, quiet=True,
+    )
+    click.echo('Published {}'.format(version.launcher.name))
+
+
+MINOR_LAUNCHER_NAME_RE = re.compile(r'^python\d\.\d(?:\-32)?\.cmd$')
 
 
 @cli.command()
@@ -59,6 +84,8 @@ def activate(version):
 
     click.echo('Removing scripts.')
     for p in scripts_path.iterdir():
+        if MINOR_LAUNCHER_NAME_RE.match(p.name):
+            continue
         p.unlink()
 
     for version in versions:

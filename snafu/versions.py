@@ -8,7 +8,7 @@ import subprocess
 
 import attr
 
-from . import metadata
+from . import configs, metadata
 
 
 class VersionNotFoundError(ValueError):
@@ -41,11 +41,13 @@ class Version:
         return 'Python {}'.format(self.name)
 
     @property
-    def launcher_names(self):
-        return [
-            'python{0}'.format(*self.version_info),
-            'python{0}.{1}'.format(*self.version_info),
-        ]
+    def major_version(self):
+        return str(self.version_info[0])
+
+    @property
+    def launcher(self):
+        scriptd_dir = configs.get_scripts_dir_path()
+        return scriptd_dir.joinpath('python{}.cmd'.format(self.name))
 
     def is_installed(self):
         return metadata.is_installed(self.name)
