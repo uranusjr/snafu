@@ -161,41 +161,15 @@ this rule to older versions as well for consistency.
 How are Executables linked?
 ---------------------------
 
-With .bat one-liners like this::
+Script executables are *copied*. PY files works as well because they have
+appropriate shebang lines, and can be handled by the py launcher, as specified
+in `PEP 397 <https://www.python.org/dev/peps/pep-0397/>`_.
+
+The python launchers (python.exe) cannot be copied as-is because they require
+additional DLL files to work, so they are exposed with one-liner BATCH files,
+like this::
 
     @%APPLOCALDATA%\Programs\Python\Python35\python.exe %*
-
-
-Get Python information from registry
-------------------------------------
-
-This snippet demostrates some common tasks::
-
-    import winreg as r
-
-    reg = r.ConnectRegistry(None, r.HKEY_CURRENT_USER)
-    # Note: Does it change to HKEY_CURRENT_MACHINE if the user installs
-    # the Python as ALL USERS? Do we care?
-
-    # Gets the root key of all Python installation information.
-    python_key = r.OpenKey(reg, r'Software\Python\PythonCore')
-
-    # Show installed Python versions.
-    i = 0
-    while True:
-        try:
-            print(r.EnumKey(python_key, i))
-        except OSError:     # [WinError 259] No more data is available
-            break
-        i += 1
-
-    # Get where Python 3.5 is installed.
-    try:
-        python35_installpath_key = r.OpenKey(python_key, r'3.5\InstallPath')
-    except FileNotFoundError:
-        # [WinError 2] The system cannot find the file specified
-        print('Not installed')
-    print(r.QueryValue(python35_installpath_key, ''))
 
 
 Why SNAFU?
