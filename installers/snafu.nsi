@@ -21,6 +21,10 @@ Section "SNAFU Python Manager"
 
     nsExec::ExecToLog '$INSTDIR\python-setup.exe /quiet LauncherOnly=1'
 
+    # TODO: Add option to automatically append snafu to user's PATH.
+    # This should be done with registry I guess.
+    # The values are at `HKEY_CURRENT_USER\Environment`.
+
     WriteUninstaller "$INSTDIR\Uninstall.exe"
 SectionEnd
 
