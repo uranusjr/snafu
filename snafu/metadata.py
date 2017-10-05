@@ -15,15 +15,6 @@ def open_python_key():
     winreg.CloseKey(key)
 
 
-def get_installed_version_names():
-    with open_python_key() as python_key:
-        count, _, _ = winreg.QueryInfoKey(python_key)
-        return [
-            winreg.EnumKey(python_key, i)
-            for i in range(count)
-        ]
-
-
 def get_install_path(name):
     with open_python_key() as python_key:
         key = winreg.OpenKey(python_key, r'{}\InstallPath'.format(name))

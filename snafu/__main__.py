@@ -112,19 +112,15 @@ def deactivate():
 @cli.command(name='list')
 @click.option('--all', 'list_all', is_flag=True)
 def list_(list_all):
-    if list_all:
-        vers = versions.get_versions()
-    else:
-        vers = [
-            versions.get_version(name)
-            for name in metadata.get_installed_version_names()
-        ]
+    vers = versions.get_versions()
     for v in vers:
         marker = ' '
         if v.is_installed():
             marker = 'i'
         # TODO: Show upgrade marker if defined version is newer than installed.
         # TODO: Show * if the version is active.
+        if not list_all and not v.is_installed():
+            continue
         click.echo('{} {}'.format(marker, v.name))
 
 

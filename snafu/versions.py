@@ -171,7 +171,7 @@ VERSION_NAME_RE = re.compile(r'^\d+\.\d+(:?\-32)?$')
 
 def get_versions():
     return [
-        get_version(p.stem)
+        get_version(p.stem, force_32=False)
         for p in VERSIONS_DIR_PATH.iterdir()
         if p.suffix == '.json' and VERSION_NAME_RE.match(p.stem)
     ]
