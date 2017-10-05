@@ -7,7 +7,7 @@ import tempfile
 import click
 import requests
 
-from . import versions
+from . import metadata, versions
 
 
 def download_installer(version):
@@ -41,13 +41,17 @@ def download_installer(version):
 
 
 def get_version(name):
-    # TODO: If the host is 32-bit and the user requests a 64-bit version,
-    # automatically correct (and echo a message) it to the 32-bit variant.
+    force_32 = not metadata.can_install_64bit()
     try:
-        return versions.get_version(name)
+        version = versions.get_version(name, force_32=force_32)
     except versions.VersionNotFoundError:
         click.echo('No such version: {}'.format(name), err=True)
         sys.exit(1)
+    if version.name != name:
+        click.echo('Note: Selecting {} instead of {}'.format(
+            version.name, name,
+        ))
+    return version
 
 
 def check_status(version, expection):
@@ -82,8 +86,7 @@ def publish_scripts(version, target_dir, *, overwrite=False):
     target = target_dir.joinpath('python{}.cmd'.format(version.major_version))
     publish_python(version, target, overwrite=overwrite)
 
-    install_dir_path = version.get_install_dir_path()
-    for path in install_dir_path.joinpath('Scripts').iterdir():
+    for path in version.get_scripts_dir_path().iterdir():
         if path.stem in ('easy_install', 'pip'):
             # Special case: do not publish versionless pip and easy_install.
             continue
