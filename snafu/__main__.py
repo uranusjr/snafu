@@ -70,6 +70,16 @@ def link(version):
     click.echo('Published {}'.format(version.launcher.name))
 
 
+@cli.command()
+@click.argument('version')
+def unlink(version):
+    version = operations.get_version(version)
+    operations.check_status(version, True)
+
+    version.launcher.unlink()
+    click.echo('Unpublished {}'.format(version.launcher.name))
+
+
 MINOR_LAUNCHER_NAME_RE = re.compile(r'^python\d\.\d(?:\-32)?\.cmd$')
 
 
