@@ -23,10 +23,9 @@ def install(version):
     version = operations.get_version(version)
     operations.check_status(version, False)
 
-    click.echo('Downloading {}'.format(version.url))
     installer_path = operations.download_installer(version)
 
-    click.echo('Running installer at {}'.format(installer_path))
+    click.echo('Running installer {}'.format(installer_path))
     dirpath = version.install(str(installer_path))
 
     click.echo('Publishing {}'.format(version.launcher.name))
@@ -45,12 +44,13 @@ def uninstall(version):
     version = operations.get_version(version)
     operations.check_status(version, True)
 
-    # TODO: Can we use the Windows built-in uninstalling mechanism instead?
-    click.echo('Downloading {}'.format(version.url))
-    installer_path = operations.download_installer(version)
+    try:
+        uninstaller_path = version.get_cached_uninstaller()
+    except FileNotFoundError:
+        uninstaller_path = operations.download_installer(version)
 
-    click.echo('Running uninstaller at {}'.format(installer_path))
-    version.uninstall(str(installer_path))
+    click.echo('Running uninstaller {}'.format(uninstaller_path))
+    version.uninstall(str(uninstaller_path))
 
     click.echo('Unlinking {}'.format(version.launcher.name))
     version.launcher.unlink()

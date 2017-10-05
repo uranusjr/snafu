@@ -11,6 +11,7 @@ from . import metadata, versions
 
 
 def download_installer(version):
+    click.echo('Downloading {}'.format(version.url))
     response = requests.get(version.url, stream=True)
 
     installer_name = version.url.rsplit('/', 1)[-1]

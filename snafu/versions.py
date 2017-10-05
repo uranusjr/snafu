@@ -123,6 +123,9 @@ class CPythonMSIVersion(Version):
         )
         return dirpath
 
+    def get_cached_uninstaller(self):
+        return metadata.find_uninstaller_id(self.name)
+
     def uninstall(self, cmd):
         subprocess.check_call('msiexec /x "{}" /qb'.format(cmd), shell=True)
 
@@ -151,6 +154,9 @@ class CPythonVersion(Version):
             'InstallLauncherAllUsers=0',
         ])
         return dirpath
+
+    def get_cached_uninstaller(self):
+        return metadata.get_bundle_cache_path(self.name)
 
     def uninstall(self, cmd):
         subprocess.check_call([cmd, '/uninstall'])

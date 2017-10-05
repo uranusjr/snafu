@@ -18,9 +18,69 @@ def open_python_key():
 def get_install_path(name):
     with open_python_key() as python_key:
         key = winreg.OpenKey(python_key, r'{}\InstallPath'.format(name))
-        install_path = winreg.QueryValue(key, '')
+        install_path = winreg.QueryValue(key, None)
         winreg.CloseKey(key)
     return pathlib.Path(install_path).resolve()
+
+
+def find_uninstaller_id(name):
+    # Look for EVERY entry in the uninstaller list to find one that looks like
+    # the matching version's uninstaller. This is crazy, but the best way I
+    # can think of right now. And it's still faster than downloading the MSI.
+    key = winreg.OpenKey(
+        winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE),
+        r'Software\Microsoft\Windows\CurrentVersion\Uninstall',
+    )
+
+    match = None
+    subkey_count, _, _ = winreg.QueryInfoKey(key)
+    for i in range(subkey_count):
+        sub_name = winreg.EnumKey(key, i)
+        subkey = winreg.OpenKey(key, sub_name)
+        try:
+            display_name, _ = winreg.QueryValueEx(subkey, 'DisplayName')
+            publisher, _ = winreg.QueryValueEx(subkey, 'Publisher')
+        except FileNotFoundError:
+            continue
+        finally:
+            winreg.CloseKey(subkey)
+        if (display_name.startswith('Python {}.'.format(name)) and
+                publisher == 'Python Software Foundation'):
+            match = sub_name
+            break
+
+    winreg.CloseKey(key)
+
+    if not match:
+        raise FileNotFoundError
+    return match
+
+
+def get_bundle_cache_path(name):
+    key = winreg.OpenKey(
+        winreg.ConnectRegistry(None, winreg.HKEY_CLASSES_ROOT),
+        r'Installer\Dependencies\CPython-{}'.format(name),
+    )
+    guid = winreg.QueryValue(key, '')
+    winreg.CloseKey(key)
+
+    for reg in (winreg.HKEY_CURRENT_USER, winreg.HKEY_LOCAL_MACHINE):
+        registry = winreg.ConnectRegistry(None, reg)
+        key_parts = [
+            'Software', 'Microsoft', 'Windows',
+            'CurrentVersion', 'Uninstall', guid,
+        ]
+        try:
+            key = winreg.OpenKey(registry, '\\'.join(key_parts))
+            value, _ = winreg.QueryValueEx(key, 'BundleCachePath')
+            path = pathlib.Path(value).resolve()
+        except FileNotFoundError:
+            continue
+        else:
+            return path
+        finally:
+            winreg.CloseKey(key)
+    raise FileNotFoundError
 
 
 @functools.lru_cache(maxsize=1)
