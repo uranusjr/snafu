@@ -1,6 +1,12 @@
 {
-    "url": "https://www.python.org/ftp/python/3.4.3/python-3.4.3.amd64.msi",
-    "md5_sum": "f6ade29acaf8fcdc0463e69a6e7ccf87",
+    "$schema": "cpython_msi",
     "version_info": [3, 4, 3],
-    "installer_type": "cpython_msi"
+    "amd64": {
+        "url": "https://www.python.org/ftp/python/3.4.3/python-3.4.3.amd64.msi",
+        "md5_sum": "f6ade29acaf8fcdc0463e69a6e7ccf87"
+    },
+    "x86": {
+        "url": "https://www.python.org/ftp/python/3.4.3/python-3.4.3.msi",
+        "md5_sum": "cb450d1cc616bfc8f7a2d6bd88780bf6"
+    }
 }

@@ -21,6 +21,11 @@ Section "SNAFU Python Manager"
 
     nsExec::ExecToLog '$INSTDIR\python-setup.exe /quiet LauncherOnly=1'
 
+    # HACK: The installer registers the main Python distribution as installed,
+    # and interferes with SNAFU. This removes Python from registry, but not
+    # the Py launcher. <https://bugs.python.org/issue31694>
+    nsExec::ExecToLog '$INSTDIR\python-setup.exe /quiet /uninstall'
+
     FileOpen $0 "$INSTDIR\cmd\snafu.cmd" w
     FileWrite $0 "@$\"$INSTDIR\lib\python.exe$\" -m snafu %*"
     FileClose $0

@@ -1,4 +1,7 @@
 import contextlib
+import functools
+import pathlib
+import struct
 import winreg
 
 
@@ -21,12 +24,16 @@ def get_installed_version_names():
         ]
 
 
-def is_installed(name):
+def get_install_path(name):
     with open_python_key() as python_key:
-        try:
-            key = winreg.OpenKey(python_key, r'{}\InstallPath'.format(name))
-        except FileNotFoundError:
-            return False
+        key = winreg.OpenKey(python_key, r'{}\InstallPath'.format(name))
         install_path = winreg.QueryValue(key, '')
         winreg.CloseKey(key)
-        return bool(install_path)
+    return pathlib.Path(install_path).resolve()
+
+
+@functools.lru_cache(maxsize=1)
+def can_install_64bit():
+    # Check the size of a C pointer to determine architecture.
+    # https://github.com/kennethreitz-archive/its.py/blob/master/its.py
+    return struct.calcsize('P') * 8 >= 64

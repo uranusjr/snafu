@@ -1,6 +1,6 @@
 {
-    "url": "https://www.python.org/ftp/python/3.5.4/python-3.5.4-amd64.exe",
-    "md5_sum": "4276742a4a75a8d07260f13fe956eec4",
+    "$schema": "cpython",
     "version_info": [3, 5, 4],
-    "installer_type": "cpython"
+    "url": "https://www.python.org/ftp/python/3.5.4/python-3.5.4-amd64.exe",
+    "md5_sum": "4276742a4a75a8d07260f13fe956eec4"
 }
