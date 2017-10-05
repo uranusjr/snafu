@@ -48,6 +48,7 @@ class Version:
     url = attr.ib()
     md5_sum = attr.ib()
     version_info = attr.ib(convert=tuple)
+    guid = attr.ib(default=None)
 
     def __str__(self):
         return 'Python {}'.format(self.name)
@@ -101,6 +102,7 @@ class CPythonMSIVersion(Version):
             version_info=data['version_info'],
             url=variant['url'],
             md5_sum=variant['md5_sum'],
+            guid=variant.get('guid'),
         )
 
     def install(self, cmd):
@@ -124,6 +126,8 @@ class CPythonMSIVersion(Version):
         return dirpath
 
     def get_cached_uninstaller(self):
+        if self.guid:
+            return self.guid
         return metadata.find_uninstaller_id(self.name)
 
     def uninstall(self, cmd):

@@ -3,10 +3,12 @@
     "version_info": [2, 7, 14],
     "amd64": {
         "url": "https://www.python.org/ftp/python/2.7.14/python-2.7.14.amd64.msi",
-        "md5_sum": "370014d73c3059f610c27365def62058"
+        "md5_sum": "370014d73c3059f610c27365def62058",
+        "guid": "{0398A685-FD8D-46B3-9816-C47319B0CF5F}"
     },
     "x86": {
         "url": "https://www.python.org/ftp/python/2.7.14/python-2.7.14.msi",
-        "md5_sum": "fff688dc4968ec80bbb0eedf45de82db"
+        "md5_sum": "fff688dc4968ec80bbb0eedf45de82db",
+        "guid": "{0398A685-FD8D-46B3-9816-C47319B0CF5E}"
     }
 }
