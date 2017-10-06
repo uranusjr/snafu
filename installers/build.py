@@ -187,7 +187,7 @@ def cleanup():
 
 
 @click.command()
-@click.argument('arch', type=click.Choices(['win32', 'amd64']))
+@click.argument('arch', type=click.Choice(['win32', 'amd64']))
 @click.option('--out', default=None)
 def build(arch, out):
     if out is None:
