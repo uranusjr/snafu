@@ -1,4 +1,4 @@
-!include "MUI.nsh"
+!include "MUI2.nsh"
 
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW ModifyWelcome
 !define MUI_PAGE_CUSTOMFUNCTION_LEAVE LeaveWelcome
