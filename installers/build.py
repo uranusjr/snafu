@@ -168,6 +168,7 @@ def build_files(arch):
     container = ROOT.joinpath('snafu')
     if container.exists():
         shutil.rmtree(str(container))
+    container.mkdir()
     build_lib(arch, container)
 
 
