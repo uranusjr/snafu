@@ -17,7 +17,7 @@ install:
 build: off
 
 test_script:
-  - "pipenv run pytest -n 8 tests"
+  - "pipenv run pytest tests"
 
 after_test:
   - "python .\\installers\\build.py win32"
