@@ -2,6 +2,10 @@
 SNAFU the Python Manager
 =========================
 
+.. image:: https://ci.appveyor.com/api/projects/status/jjix3jifn79maf8q?svg=true
+    :target: https://ci.appveyor.com/project/uranusjr/snafu
+    :alt: Build status
+
 SNAFU is a Python installer manager for Windows. It fetches and installs Python
 of a version you specify, and manages the Path environment variable for you.
 
