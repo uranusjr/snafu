@@ -1,0 +1,26 @@
+environment:
+  matrix:
+    - PYTHON: "C:\\Python35-x64"
+      PYTHON_VERSION: "3.5.x"
+      PYTHON_ARCH: "64"
+
+install:
+  - ps: if (-not(Test-Path($env:PYTHON))) { & _appveyor\install-python.ps1 }
+  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+  - "python --version"
+  - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
+
+  - "pip install --disable-pip-version-check --user --upgrade pip"
+  - "pip install --user --upgrade pipenv"
+  - "pipenv install --system --dev --skip-lock"
+
+test_script:
+  - "pipenv run pytest -n 8 tests"
+
+after_test:
+  - "python .\\installers\\build.py win32"
+  - "python .\\installers\\build.py amd64"
+  - ps: "ls .\\installers\\*.exe"
+
+artifacts:
+  - path: ".\\installers\\*.exe"

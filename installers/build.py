@@ -169,15 +169,16 @@ def build_files(arch):
     build_lib(arch, container)
 
 
-def build_installer():
-    exe = ROOT.joinpath('snafu-setup.exe')
-    if exe.exists():
-        exe.unlink()
+def build_installer(outpath):
+    if outpath.exists():
+        outpath.unlink()
     click.echo('Building installer.')
     subprocess.check_call(
         'makensis "{nsi}"'.format(nsi=ROOT.joinpath('snafu.nsi')),
         shell=True,
     )
+    click.echo('snafu-setup.exe -> {}'.format(outpath))
+    shutil.move(str(ROOT.joinpath('snafu-setup.exe')), str(outpath))
 
 
 def cleanup():
@@ -187,9 +188,16 @@ def cleanup():
 
 @click.command()
 @click.argument('arch', type=click.Choices(['win32', 'amd64']))
-def build(arch):
+@click.option('--out', default=None)
+def build(arch, out):
+    if out is None:
+        out = 'snafu-setup-{}.exe'.format(arch)
+    outpath = pathlib.Path(out)
+    if not outpath.is_absolute():
+        outpath = ROOT.joinpath(outpath)
+
     build_files(arch)
-    build_installer()
+    build_installer(outpath)
     cleanup()
 
 
