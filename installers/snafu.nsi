@@ -1,5 +1,9 @@
 !include "MUI.nsh"
 
+!define MUI_PAGE_CUSTOMFUNCTION_SHOW ModifyWelcome
+!define MUI_PAGE_CUSTOMFUNCTION_LEAVE LeaveWelcome
+
+!insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_UNPAGE_WELCOME
 !insertmacro MUI_UNPAGE_INSTFILES
@@ -12,8 +16,12 @@ Name "SNAFU Python Manager"
 OutFile "snafu-setup.exe"
 InstallDir "$LOCALAPPDATA\Programs\SNAFU"
 
-Var LIB
-Var PYTHON
+
+Function ModifyWelcome
+    ${NSD_CreateCheckbox} 120u -18u 50% 12u "Append PATH environment variable."
+    Pop $1
+    SetCtlColors $1 "" ${MUI_BGCOLOR}
+FunctionEnd
 
 Section "SNAFU Python Manager"
     CreateDirectory "$INSTDIR"
@@ -23,30 +31,30 @@ Section "SNAFU Python Manager"
     CreateDirectory "$INSTDIR\cmd"
     CreateDirectory "$INSTDIR\scripts"
 
-    StrCpy $LIB = "$INSTDIR\lib"
-    StrCpy $PYTHON "$LIB\python\python.exe"
-
     # Write snafu entry point.
     FileOpen $0 "$INSTDIR\cmd\snafu.cmd" w
-    FileWrite $0 "@$\"$PYTHON$\" -m snafu %*"
+    FileWrite $0 "@$\"$INSTDIR\lib\python\python.exe$\" -m snafu %*"
     FileClose $0
 
     # Install Py launcher.
-    nsExec::ExecToLog "msiexec /i $\"$LIB\snafusetup\py.msi$\" /quiet"
-
-    # Setup environment.
-    # TODO: Add option whether to perform this.
-    nsExec::ExecToLog "$\"$PYTHON$\" $\"$LIB\snafusetup\env.py$\" $\"$INSTDIR$\""
+    nsExec::ExecToLog "msiexec /i $\"$INSTDIR\lib\snafusetup\py.msi$\" /quiet"
 
     WriteUninstaller "$INSTDIR\Uninstall.exe"
 SectionEnd
 
+Function LeaveWelcome
+    # Setup environment if the user wishes.
+    ${NSD_GetState} $1 $0
+    ${If} $0 <> 0
+        nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
+            $\"$INSTDIR\lib\snafusetup\env.py$\" $\"$INSTDIR$\""
+    ${EndIf}
+FunctionEnd
+
 
 Section "un.Uninstaller"
-    StrCpy $LIB = "$INSTDIR\lib"
-    StrCpy $PYTHON "$LIB\python\python.exe"
-
-    nsExec::ExecToLog "$\"$PYTHON$\" $\"$LIB\snafusetup\env.py$\" $\"$INSTDIR$\" --uninstall"
-
+    nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
+        $\"$INSTDIR\lib\snafusetup\env.py$\" $\"$INSTDIR$\" \
+        --uninstall"
     Rmdir /r "$INSTDIR"
 SectionEnd
