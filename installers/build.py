@@ -23,6 +23,9 @@ def get_python_embed_url(architecture):
 
 
 def get_py_launcher_url(architecture):
+    # I dug this URL out of Python's webinstaller build.
+    # See this part in the build script for description.
+    # https://github.com/python/cpython/blob/v3.6.3/Tools/msi/buildrelease.bat
     return '{pre}/{vers}/python/{vers}/{arch}/launcher.msi'.format(
         pref=DOWNLOAD_PREFIX,
         vers=VERSION,
@@ -123,7 +126,10 @@ def build_python(arch, container):
 
     # Write SNAFU configurations.
     with pythondir.joinpath('snafu', 'installation.json').open('w') as f:
-        json.dump({'scripts_dir': '..\\..\\scripts'}, f)
+        json.dump({
+            'cmd_dir': '..\\..\\cmd',
+            'scripts_dir': '..\\..\\scripts',
+        }, f)
 
     # Copy dependencies.
     click.echo('Populate dependencies...')

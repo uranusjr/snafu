@@ -1,8 +1,6 @@
-import re
-
 import click
 
-from . import configs, metadata, operations, versions
+from . import configs, operations, versions
 
 
 class SnafuGroup(click.Group):
@@ -80,9 +78,6 @@ def unlink(version):
     click.echo('Unpublished {}'.format(version.launcher.name))
 
 
-MINOR_LAUNCHER_NAME_RE = re.compile(r'^python\d\.\d(?:\-32)?\.cmd$')
-
-
 @cli.command()
 @click.argument('version', nargs=-1, required=True)
 def activate(version):
@@ -94,8 +89,6 @@ def activate(version):
 
     click.echo('Removing scripts.')
     for p in scripts_path.iterdir():
-        if MINOR_LAUNCHER_NAME_RE.match(p.name):
-            continue
         p.unlink()
 
     for version in versions:

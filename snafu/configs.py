@@ -13,3 +13,10 @@ def get_scripts_dir_path():
     path = pathlib.Path(__file__).parent.joinpath(value)
     path.mkdir(parents=True, exist_ok=True)
     return path.resolve()
+
+
+def get_cmd_dir_path():
+    value = get_value('cmd_dir')
+    path = pathlib.Path(__file__).parent.joinpath(value)
+    path.mkdir(parents=True, exist_ok=True)
+    return path.resolve()

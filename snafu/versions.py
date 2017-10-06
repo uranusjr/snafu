@@ -59,7 +59,7 @@ class Version:
 
     @property
     def launcher(self):
-        scriptd_dir = configs.get_scripts_dir_path()
+        scriptd_dir = configs.get_cmd_dir_path()
         return scriptd_dir.joinpath('python{}.cmd'.format(self.name))
 
     @property
