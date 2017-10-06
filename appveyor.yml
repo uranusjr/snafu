@@ -6,7 +6,7 @@ environment:
 
 install:
   - ps: if (-not(Test-Path($env:PYTHON))) { & _appveyor\install-python.ps1 }
-  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;C:\Program Files (x86)\\NSIS\\Bin;%PATH%"
   - "python --version"
   - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
 
