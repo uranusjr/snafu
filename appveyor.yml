@@ -17,6 +17,7 @@ install:
 build: off
 
 test_script:
+  - "flake8 ."
   - "pytest tests"
 
 after_test:
