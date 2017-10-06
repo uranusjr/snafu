@@ -1,7 +1,6 @@
 !include "MUI2.nsh"
 
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW ModifyWelcome
-!define MUI_PAGE_CUSTOMFUNCTION_LEAVE LeaveWelcome
 
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_INSTFILES
@@ -39,18 +38,15 @@ Section "SNAFU Python Manager"
     # Install Py launcher.
     nsExec::ExecToLog "msiexec /i $\"$INSTDIR\lib\snafusetup\py.msi$\" /quiet"
 
-    WriteUninstaller "$INSTDIR\Uninstall.exe"
-SectionEnd
-
-Function LeaveWelcome
     # Setup environment if the user wishes.
     ${NSD_GetState} $1 $0
     ${If} $0 <> 0
         nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
             $\"$INSTDIR\lib\snafusetup\env.py$\" $\"$INSTDIR$\""
     ${EndIf}
-FunctionEnd
 
+    WriteUninstaller "$INSTDIR\Uninstall.exe"
+SectionEnd
 
 Section "un.Uninstaller"
     nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
