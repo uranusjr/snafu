@@ -143,6 +143,7 @@ def build_python(arch, libdir):
 
 def build_snafusetup(arch, libdir):
     snafusetupdir = libdir.joinpath('snafusetup')
+    snafusetupdir.mkdir()
 
     # Copy Py launcher MSI.
     click.echo('Copy py.msi')
