@@ -49,6 +49,7 @@ class Version:
     md5_sum = attr.ib()
     version_info = attr.ib(convert=tuple)
     guid = attr.ib(default=None)
+    forced_32 = attr.ib(default=False)
 
     def __str__(self):
         return 'Python {}'.format(self.name)
@@ -58,9 +59,14 @@ class Version:
         return str(self.version_info[0])
 
     @property
-    def launcher(self):
+    def launchers(self):
         scriptd_dir = configs.get_cmd_dir_path()
-        return scriptd_dir.joinpath('python{}.cmd'.format(self.name))
+        launchers = [scriptd_dir.joinpath('python{}.cmd'.format(self.name))]
+        if self.forced_32:
+            launchers.append(scriptd_dir.joinpath('python{}.cmd'.format(
+                self.name.split('-', 1)[0])
+            ))
+        return launchers
 
     @property
     def installation(self):
@@ -142,14 +148,17 @@ class CPythonVersion(Version):
 
     @classmethod
     def load(cls, name, data, *, force_32):
+        forced_32 = False
         if force_32 and not name.endswith('-32'):
             name = '{}-32'.format(name)
             data = load_version_data(name)
+            forced_32 = True
         return cls(
             name=name,
             version_info=data['version_info'],
             url=data['url'],
             md5_sum=data['md5_sum'],
+            forced_32=forced_32,
         )
 
     def install(self, cmd):

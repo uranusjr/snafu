@@ -26,10 +26,11 @@ def install(version):
     click.echo('Running installer {}'.format(installer_path))
     dirpath = version.install(str(installer_path))
 
-    click.echo('Publishing {}'.format(version.launcher.name))
-    operations.publish_python(
-        version, version.launcher, overwrite=True, quiet=True,
-    )
+    for launcher in version.launchers:
+        click.echo('Publishing {}'.format(launcher.name))
+        operations.publish_python(
+            version, launcher, overwrite=True, quiet=True,
+        )
 
     click.echo('{} is installed succesfully to {}'.format(
         version, dirpath,
@@ -50,8 +51,9 @@ def uninstall(version):
     click.echo('Running uninstaller {}'.format(uninstaller_path))
     version.uninstall(str(uninstaller_path))
 
-    click.echo('Unlinking {}'.format(version.launcher.name))
-    version.launcher.unlink()
+    for launcher in version.launchers:
+        click.echo('Unlinking {}'.format(launcher.name))
+        launcher.unlink()
 
     click.echo('{} is uninstalled succesfully.'.format(version))
 
@@ -62,10 +64,11 @@ def link(version):
     version = operations.get_version(version)
     operations.check_status(version, True)
 
-    operations.publish_python(
-        version, version.launcher, overwrite=True, quiet=True,
-    )
-    click.echo('Published {}'.format(version.launcher.name))
+    for launcher in version.launchers:
+        operations.publish_python(
+            version, launcher, overwrite=True, quiet=True,
+        )
+        click.echo('Published {}'.format(launcher.name))
 
 
 @cli.command()
@@ -74,8 +77,9 @@ def unlink(version):
     version = operations.get_version(version)
     operations.check_status(version, True)
 
-    version.launcher.unlink()
-    click.echo('Unpublished {}'.format(version.launcher.name))
+    for launcher in version.launchers:
+        launcher.unlink()
+        click.echo('Unpublished {}'.format(launcher.name))
 
 
 @cli.command()
