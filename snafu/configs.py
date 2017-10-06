@@ -15,6 +15,10 @@ def get_scripts_dir_path():
     return path.resolve()
 
 
+def get_python_versions_path():
+    return get_scripts_dir_path().joinpath('.python-versions.txt')
+
+
 def get_cmd_dir_path():
     value = get_value('cmd_dir')
     path = pathlib.Path(__file__).parent.joinpath(value)

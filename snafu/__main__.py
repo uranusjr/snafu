@@ -1,6 +1,6 @@
 import click
 
-from . import configs, operations, versions
+from . import operations, versions
 
 
 class SnafuGroup(click.Group):
@@ -79,41 +79,37 @@ def unlink(version):
 
 
 @cli.command()
-@click.argument('version', nargs=-1, required=True)
+@click.argument('version', nargs=-1)
 def activate(version):
+    if not version:
+        version = operations.get_active_names()
     versions = [operations.get_version(v) for v in version]
     for version in versions:
         operations.check_status(version, True)
-
-    scripts_path = configs.get_scripts_dir_path()
-
-    click.echo('Removing scripts.')
-    for p in scripts_path.iterdir():
-        p.unlink()
-
-    for version in versions:
-        operations.publish_scripts(version, scripts_path)
+    # TODO: Be smarter and calculate diff, instead of rebuilding every time.
+    operations.deactivate()
+    operations.activate(versions)
 
 
 @cli.command()
 def deactivate():
-    click.echo('Removing scripts.')
-    for p in configs.get_scripts_dir_path().iterdir():
-        p.unlink()
+    operations.deactivate()
 
 
 @cli.command(name='list')
 @click.option('--all', 'list_all', is_flag=True)
 def list_(list_all):
     vers = versions.get_versions()
+    active_names = set(operations.get_active_names())
     for v in vers:
         marker = ' '
-        if v.is_installed():
-            marker = 'i'
-        # TODO: Show upgrade marker if defined version is newer than installed.
-        # TODO: Show * if the version is active.
         if not list_all and not v.is_installed():
             continue
+        if v.name in active_names:
+            marker = '*'
+        elif v.is_installed():
+            marker = 'o'
+        # TODO: Show '+' if there is a newer version.
         click.echo('{} {}'.format(marker, v.name))
 
 

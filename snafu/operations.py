@@ -7,7 +7,7 @@ import tempfile
 import click
 import requests
 
-from . import metadata, versions
+from . import configs, metadata, versions
 
 
 def download_installer(version):
@@ -74,18 +74,20 @@ def publish_python(version, target, *, overwrite, quiet=False):
     target.write_text('@py -{} %*'.format(version.name))
 
 
-def publish_script(source, target, *, overwrite):
+def publish_script(source, target, *, quiet, overwrite):
     if not overwrite and target.exists():
         return
-    click.echo('  {}'.format(target.name))
+    if not quiet:
+        click.echo('  {}'.format(target.name))
     shutil.copy2(str(source.resolve()), str(target))
 
 
-def publish_scripts(version, target_dir, *, overwrite=False):
-    click.echo('Publishing {}...'.format(version))
+def publish_version_scripts(version, target_dir, *, quiet, overwrite=False):
+    if not quiet:
+        click.echo('Publishing {}...'.format(version))
 
     target = target_dir.joinpath('python{}.cmd'.format(version.major_version))
-    publish_python(version, target, overwrite=overwrite)
+    publish_python(version, target, quiet=quiet, overwrite=overwrite)
 
     try:
         scripts_dir = version.get_scripts_dir_path()
@@ -97,4 +99,28 @@ def publish_scripts(version, target_dir, *, overwrite=False):
                 # Don't publish versionless pip and easy_install.
                 continue
             target = target_dir.joinpath(path.name)
-            publish_script(path, target, overwrite=overwrite)
+            publish_script(path, target, quiet=quiet, overwrite=overwrite)
+
+
+def deactivate(*, quiet=False):
+    if not quiet:
+        click.echo('Removing scripts.')
+    for p in configs.get_scripts_dir_path().iterdir():
+        p.unlink()
+
+
+def activate(versions, *, quiet=False):
+    scripts_dir = configs.get_scripts_dir_path()
+    for version in versions:
+        publish_version_scripts(version, scripts_dir, quiet=quiet)
+    configs.get_python_versions_path().write_text(
+        '\n'.join(version.name for version in versions),
+    )
+
+
+def get_active_names():
+    try:
+        content = configs.get_python_versions_path().read_text()
+    except FileNotFoundError:
+        return ()
+    return tuple(v for v in content.split() if v)
