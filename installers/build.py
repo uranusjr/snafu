@@ -108,8 +108,8 @@ def get_package_paths():
     return paths
 
 
-def build_python(arch, container):
-    pythondir = container.joinpath('lib', 'python')
+def build_python(arch, libdir):
+    pythondir = libdir.joinpath('python')
     pythondir.mkdir()
 
     # Extract Python distribution.
@@ -141,8 +141,8 @@ def build_python(arch, container):
             shutil.copy2(str(path), str(pythondir.joinpath(path.name)))
 
 
-def build_snafusetup(arch, container):
-    snafusetupdir = container.joinpath('lib', 'snafusetup')
+def build_snafusetup(arch, libdir):
+    snafusetupdir = libdir.joinpath('snafusetup')
 
     # Copy Py launcher MSI.
     click.echo('Copy py.msi')
@@ -158,8 +158,10 @@ def build_snafusetup(arch, container):
 
 
 def build_lib(arch, container):
-    build_python(arch, container)
-    build_snafusetup(arch, container)
+    libdir = container.joinpath('lib')
+    libdir.mkdir()
+    build_python(arch, libdir)
+    build_snafusetup(arch, libdir)
 
 
 def build_files(arch):
