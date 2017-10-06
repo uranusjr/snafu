@@ -107,13 +107,17 @@ class CPythonMSIVersion(Version):
 
     def install(self, cmd):
         dirpath = self.get_target_for_install()
+        features = [
+            'DefaultFeature', 'PrivateCRT', 'TclTk', 'Documentation',
+            'pip_feature',
+        ]
         parts = [   # Argument ordering is very important.
             # Options and required parameters.
             'msiexec', '/i', '"{}"'.format(cmd),
 
             # Optional parameters and flags.
             '/qb', 'TARGETDIR="{}"'.format(dirpath),
-            'ADDLOCAL=DefaultFeature,TclTk,Documentation',
+            'ADDLOCAL={}'.format(','.join(features)),
 
             # This does not do what you think. DO NOT SUPPLY IT.
             # The installer is per-user by default.
