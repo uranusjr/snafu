@@ -15,7 +15,7 @@ DOWNLOAD_PREFIX = 'https://www.python.org/ftp/python'
 
 
 def get_python_embed_url(architecture):
-    return '{pre}/{vers}/python-{vers}-embed-{arch}.zip'.format(
+    return '{pref}/{vers}/python-{vers}-embed-{arch}.zip'.format(
         pref=DOWNLOAD_PREFIX,
         vers=VERSION,
         arch=architecture,
@@ -26,7 +26,7 @@ def get_py_launcher_url(architecture):
     # I dug this URL out of Python's webinstaller build.
     # See this part in the build script for description.
     # https://github.com/python/cpython/blob/v3.6.3/Tools/msi/buildrelease.bat
-    return '{pre}/{vers}/python/{vers}/{arch}/launcher.msi'.format(
+    return '{pref}/{vers}/python/{vers}/{arch}/launcher.msi'.format(
         pref=DOWNLOAD_PREFIX,
         vers=VERSION,
         arch=architecture,
