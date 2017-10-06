@@ -10,8 +10,8 @@ install:
   - "python --version"
   - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
 
-  - "pip install --disable-pip-version-check --user --upgrade pip"
-  - "pip install --user --upgrade pipenv"
+  - "pip install --disable-pip-version-check --upgrade pip"
+  - "pip install --upgrade pipenv"
   - "pipenv install --system --dev --skip-lock"
 
 test_script:
