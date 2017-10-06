@@ -87,9 +87,14 @@ def publish_scripts(version, target_dir, *, overwrite=False):
     target = target_dir.joinpath('python{}.cmd'.format(version.major_version))
     publish_python(version, target, overwrite=overwrite)
 
-    for path in version.get_scripts_dir_path().iterdir():
-        if path.stem in ('easy_install', 'pip'):
-            # Special case: do not publish versionless pip and easy_install.
-            continue
-        target = target_dir.joinpath(path.name)
-        publish_script(path, target, overwrite=overwrite)
+    try:
+        scripts_dir = version.get_scripts_dir_path()
+    except FileNotFoundError:
+        pass
+    else:
+        for path in scripts_dir.iterdir():
+            if path.stem in ('easy_install', 'pip'):
+                # Don't publish versionless pip and easy_install.
+                continue
+            target = target_dir.joinpath(path.name)
+            publish_script(path, target, overwrite=overwrite)
