@@ -73,6 +73,7 @@ def test_get_version_cpython_switch():
         url='https://www.python.org/ftp/python/3.5.4/python-3.5.4.exe',
         md5_sum='9693575358f41f452d03fd33714f223f',
         version_info=(3, 5, 4),
+        forced_32=True,
     )
 
 
