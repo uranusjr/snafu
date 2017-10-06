@@ -127,8 +127,8 @@ def build_python(arch, libdir):
     # Write SNAFU configurations.
     with pythondir.joinpath('snafu', 'installation.json').open('w') as f:
         json.dump({
-            'cmd_dir': '..\\..\\cmd',
-            'scripts_dir': '..\\..\\scripts',
+            'cmd_dir': '..\\..\\..\\cmd',
+            'scripts_dir': '..\\..\\..\\scripts',
         }, f)
 
     # Copy dependencies.
