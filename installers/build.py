@@ -9,11 +9,26 @@ import pkg_resources
 import requests
 
 
-PYTHON_EMBED_URL = \
-    'https://www.python.org/ftp/python/3.6.3/python-3.6.3-embed-amd64.zip'
+VERSION = '3.6.3'
 
-PYTHON_INSTALLER_URL = \
-    'https://www.python.org/ftp/python/3.6.3/python-3.6.3-amd64.exe'
+DOWNLOAD_PREFIX = 'https://www.python.org/ftp/python'
+
+
+def get_python_embed_url(architecture):
+    return '{pre}/{vers}/python-{vers}-embed-{arch}.zip'.format(
+        pref=DOWNLOAD_PREFIX,
+        vers=VERSION,
+        arch=architecture,
+    )
+
+
+def get_py_launcher_url(architecture):
+    return '{pre}/{vers}/python/{vers}/{arch}/launcher.msi'.format(
+        pref=DOWNLOAD_PREFIX,
+        vers=VERSION,
+        arch=architecture,
+    )
+
 
 ROOT = pathlib.Path(__file__).parent.resolve()
 
@@ -39,17 +54,21 @@ def download_file(url, path):
     path.write_bytes(b''.join(chunks))
 
 
-def get_python_installer():
-    installer_path = ROOT.joinpath(PYTHON_INSTALLER_URL.rsplit('/', 1)[-1])
+def get_py_launcher(arch):
+    installer_path = ROOT.joinpath('py-{vers}-{arch}.msi'.format(
+        vers=VERSION,
+        arch=arch,
+    ))
     if not installer_path.exists():
-        download_file(PYTHON_INSTALLER_URL, installer_path)
+        download_file(get_py_launcher_url(arch), installer_path)
     return installer_path
 
 
-def get_embed_bundle():
-    bundle_path = ROOT.joinpath(PYTHON_EMBED_URL.rsplit('/', 1)[-1])
+def get_embed_bundle(arch):
+    url = get_python_embed_url(arch)
+    bundle_path = ROOT.joinpath(url.rsplit('/', 1)[-1])
     if not bundle_path.exists():
-        download_file(PYTHON_EMBED_URL, bundle_path)
+        download_file(url, bundle_path)
     return bundle_path
 
 
@@ -86,24 +105,24 @@ def get_package_paths():
     return paths
 
 
-def build_lib(container):
-    libdir = container.joinpath('lib')
-    libdir.mkdir()
+def build_python(arch, container):
+    pythondir = container.joinpath('lib', 'python')
+    pythondir.mkdir()
 
     # Extract Python distribution.
     click.echo('Populating Embeddable Python.')
-    with zipfile.ZipFile(str(get_embed_bundle())) as f:
-        f.extractall(str(libdir))
+    with zipfile.ZipFile(str(get_embed_bundle(arch))) as f:
+        f.extractall(str(pythondir))
 
     # Copy SNAFU.
     click.echo('Populate SNAFU.')
     shutil.copytree(
         str(ROOT.parent.joinpath('snafu')),
-        str(libdir.joinpath('snafu')),
+        str(pythondir.joinpath('snafu')),
     )
 
     # Write SNAFU configurations.
-    with libdir.joinpath('snafu', 'installation.json').open('w') as f:
+    with pythondir.joinpath('snafu', 'installation.json').open('w') as f:
         json.dump({'scripts_dir': '..\\..\\scripts'}, f)
 
     # Copy dependencies.
@@ -111,23 +130,37 @@ def build_lib(container):
     for path in get_package_paths():
         click.echo('  {}'.format(path.stem))
         if path.is_dir():
-            shutil.copytree(str(path), str(libdir.joinpath(path.name)))
+            shutil.copytree(str(path), str(pythondir.joinpath(path.name)))
         else:
-            shutil.copy2(str(path), str(libdir.joinpath(path.name)))
+            shutil.copy2(str(path), str(pythondir.joinpath(path.name)))
 
 
-def build_python_setup(container):
-    setup = get_python_installer()
-    shutil.copy2(str(setup), str(container.joinpath('python-setup.exe')))
+def build_snafusetup(arch, container):
+    snafusetupdir = container.joinpath('lib', 'snafusetup')
+
+    # Copy Py launcher MSI.
+    click.echo('Copy py.msi')
+    msi = get_py_launcher(arch)
+    shutil.copy2(str(msi), str(snafusetupdir.joinpath('py.msi')))
+
+    # Copy environment setup script.
+    click.echo('Copy env.py')
+    shutil.copy2(
+        str(ROOT.joinpath('env.py')),
+        str(snafusetupdir.joinpath('env.py')),
+    )
 
 
-def build_files():
+def build_lib(arch, container):
+    build_python(arch, container)
+    build_snafusetup(arch, container)
+
+
+def build_files(arch):
     container = ROOT.joinpath('snafu')
     if container.exists():
         shutil.rmtree(str(container))
-    container.mkdir()
-    build_lib(container)
-    build_python_setup(container)
+    build_lib(arch, container)
 
 
 def build_installer():
@@ -147,8 +180,9 @@ def cleanup():
 
 
 @click.command()
-def build():
-    build_files()
+@click.argument('arch', type=click.Choices(['win32', 'amd64']))
+def build(arch):
+    build_files(arch)
     build_installer()
     cleanup()
 

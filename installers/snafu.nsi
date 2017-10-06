@@ -12,32 +12,41 @@ Name "SNAFU Python Manager"
 OutFile "snafu-setup.exe"
 InstallDir "$LOCALAPPDATA\Programs\SNAFU"
 
+Var LIB
+Var PYTHON
 
 Section "SNAFU Python Manager"
     CreateDirectory "$INSTDIR"
     SetOutPath "$INSTDIR"
 
-    File /r "snafu\*"
+    File /r 'snafu\*'
+    CreateDirectory "$INSTDIR\cmd"
+    CreateDirectory "$INSTDIR\scripts"
 
-    nsExec::ExecToLog '$INSTDIR\python-setup.exe /quiet LauncherOnly=1'
+    StrCpy $LIB = "$INSTDIR\lib"
+    StrCpy $PYTHON "$LIB\python\python.exe"
 
-    # HACK: The installer registers the main Python distribution as installed,
-    # and interferes with SNAFU. This removes Python from registry, but not
-    # the Py launcher. <https://bugs.python.org/issue31694>
-    nsExec::ExecToLog '$INSTDIR\python-setup.exe /quiet /uninstall'
-
+    # Write snafu entry point.
     FileOpen $0 "$INSTDIR\cmd\snafu.cmd" w
-    FileWrite $0 "@$\"$INSTDIR\lib\python.exe$\" -m snafu %*"
+    FileWrite $0 "@$\"$PYTHON$\" -m snafu %*"
     FileClose $0
 
-    # TODO: Add option to automatically append snafu to user's PATH.
-    # This should be done with registry I guess.
-    # The values are at `HKEY_CURRENT_USER\Environment`.
+    # Install Py launcher.
+    nsExec::ExecToLog "msiexec /i $\"$LIB\snafusetup\py.msi$\" /quiet"
+
+    # Setup environment.
+    # TODO: Add option whether to perform this.
+    nsExec::ExecToLog "$\"$PYTHON$\" $\"$LIB\snafusetup\env.py$\" $\"$INSTDIR$\""
 
     WriteUninstaller "$INSTDIR\Uninstall.exe"
 SectionEnd
 
 
 Section "un.Uninstaller"
+    StrCpy $LIB = "$INSTDIR\lib"
+    StrCpy $PYTHON "$LIB\python\python.exe"
+
+    nsExec::ExecToLog "$\"$PYTHON$\" $\"$LIB\snafusetup\env.py$\" $\"$INSTDIR$\" --uninstall"
+
     Rmdir /r "$INSTDIR"
 SectionEnd
