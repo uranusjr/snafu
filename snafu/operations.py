@@ -55,7 +55,7 @@ def get_version(name):
     return version
 
 
-def check_status(version, expection):
+def check_status(version, expection, *, on_exit=None):
     if version.is_installed() == expection:
         return
     if expection:
@@ -63,6 +63,8 @@ def check_status(version, expection):
     else:
         message = '{} is already installed.'
     click.echo(message.format(version), err=True)
+    if on_exit:
+        on_exit()
     sys.exit(1)
 
 

@@ -23,7 +23,15 @@ def cli():
 @click.option('--file', 'from_file', type=click.Path(exists=True))
 def install(version, from_file):
     version = operations.get_version(version)
-    operations.check_status(version, False)
+
+    def link_launchers():
+        for launcher in version.launchers:
+            click.echo('Publishing {}'.format(launcher.name))
+            operations.publish_python(
+                version, launcher, overwrite=True, quiet=True,
+            )
+
+    operations.check_status(version, False, on_exit=link_launchers)
 
     if from_file is None:
         installer_path = operations.download_installer(version)
@@ -33,12 +41,7 @@ def install(version, from_file):
     click.echo('Running installer {}'.format(installer_path))
     dirpath = version.install(str(installer_path))
 
-    for launcher in version.launchers:
-        click.echo('Publishing {}'.format(launcher.name))
-        operations.publish_python(
-            version, launcher, overwrite=True, quiet=True,
-        )
-
+    link_launchers()
     click.echo('{} is installed succesfully to {}'.format(
         version, dirpath,
     ))
@@ -67,36 +70,6 @@ def uninstall(version, from_file):
         launcher.unlink()
 
     click.echo('{} is uninstalled succesfully.'.format(version))
-
-
-@cli.command(
-    help='Link pythonX.Y command for a Python version.',
-    short_help='Link pythonX.Y command.',
-)
-@click.argument('version')
-def link(version):
-    version = operations.get_version(version)
-    operations.check_status(version, True)
-
-    for launcher in version.launchers:
-        operations.publish_python(
-            version, launcher, overwrite=True, quiet=True,
-        )
-        click.echo('Published {}'.format(launcher.name))
-
-
-@cli.command(
-    help='Remove pythonX.Y command for a Python version.',
-    short_help='Remove pythonX.Y command.',
-)
-@click.argument('version')
-def unlink(version):
-    version = operations.get_version(version)
-    operations.check_status(version, True)
-
-    for launcher in version.launchers:
-        launcher.unlink()
-        click.echo('Unpublished {}'.format(launcher.name))
 
 
 @cli.command(
