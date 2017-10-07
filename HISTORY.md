@@ -2,6 +2,8 @@
 
 ## Next (not released)
 
+## Version 0.2
+
 ### UI Changes
 
 * `uninstall` now attempts to use Windows’s uninstall feature to avoid re-download.
@@ -9,6 +11,7 @@
   **IMPORTANT:** Correctness of the installer is not checked. The user is responsible for choosing the correct and valid installer file. Results of installing a faulty installer is undefined.
 * New command `where` to show where the actual interpreter is. This is useful if you need to pass it to another command (e.g. `pipenv --python`).
 * `list` shows activeness.
+* `snafu --version` shows program version.
 
 ### Behavioural Changes
 
