@@ -37,11 +37,14 @@ Section "SNAFU Python Manager"
     FileClose $0
 
     # Setup environment.
+    # Do this BEFORE py launcher installation to let it help publish the
+    # environ registry. Don't know how they do it, but let's ride their back.
     # TODO: Add checkbox to disable this,
     nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
         $\"$INSTDIR\lib\snafusetup\env.py$\" $\"$INSTDIR$\""
 
     # Install Py launcher.
+    DetailPrint "Installing Python Launcher (py.exe)..."
     nsExec::ExecToLog "msiexec /i $\"$INSTDIR\lib\snafusetup\py.msi$\" /quiet"
 
     WriteUninstaller "$INSTDIR\Uninstall.exe"
