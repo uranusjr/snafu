@@ -140,21 +140,19 @@ def where(version):
 @cli.command(name='list', help='List Python versions (installed or all).')
 @click.option('--all', 'list_all', is_flag=True)
 def list_(list_all):
-    vers = versions.get_versions()
+    vers = operations.get_versions(not list_all)
     active_names = set(operations.get_active_names())
-    seen = False
+
     for v in vers:
         marker = ' '
-        if not list_all and not v.is_installed():
-            continue
         if v.name in active_names:
             marker = '*'
         elif v.is_installed():
             marker = 'o'
         # TODO: Show '+' if there is a newer version.
         click.echo('{} {}'.format(marker, v.name))
-        seen = True
-    if not list_all and not seen:
+
+    if not list_all and not vers:
         click.echo(
             'No installed versions. Use --all to list all available versions '
             'for installation.',
