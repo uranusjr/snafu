@@ -3,17 +3,15 @@ name = "pypi"
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 
-[dev-packages]
-
-pytest = "*"
-"pytest-pythonpath" = "*"
-"flake8" = "*"
-
 [requires]
-python_version = "3.5"
+python_version = "3.6"
 
 [packages]
-
+attrs = "*"
 click = "*"
 requests = "*"
-attrs = "*"
+
+[dev-packages]
+flake8 = "*"
+pytest = "*"
+pytest-pythonpath = "*"
