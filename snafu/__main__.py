@@ -1,4 +1,5 @@
 import pathlib
+import sys
 
 import click
 
@@ -100,6 +101,9 @@ def activate(version):
     versions = [operations.get_version(v) for v in version]
     for version in versions:
         operations.check_status(version, True)
+    if not versions:
+        click.echo('No active versions."', err=True)
+        sys.exit(1)
     # TODO: Be smarter and calculate diff, instead of rebuilding every time.
     operations.deactivate()
     operations.activate(versions)
