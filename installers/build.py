@@ -97,6 +97,11 @@ def build_package_path(location, name):
 
 
 def get_package_paths():
+    # TODO: This only works for pure Python packages.
+    # This will fail if we need binary dependencies (e.g. pypiwin32) in the
+    # future because the host will only have either 32- or 64-bit binary, but
+    # we need both to build installers for each architecture. We should instead
+    # download wheels from PyPI, and extract to get the packages.
     paths = []
     for name in get_dependency_names():
         dist = pkg_resources.get_distribution(name)
