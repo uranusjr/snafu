@@ -115,6 +115,7 @@ def deactivate():
 def list_(list_all):
     vers = versions.get_versions()
     active_names = set(operations.get_active_names())
+    seen = False
     for v in vers:
         marker = ' '
         if not list_all and not v.is_installed():
@@ -125,6 +126,13 @@ def list_(list_all):
             marker = 'o'
         # TODO: Show '+' if there is a newer version.
         click.echo('{} {}'.format(marker, v.name))
+        seen = True
+    if not list_all and not seen:
+        click.echo(
+            'No installed versions. Use --all to list all available versions '
+            'for installation.',
+            err=True,
+        )
 
 
 if __name__ == '__main__':
