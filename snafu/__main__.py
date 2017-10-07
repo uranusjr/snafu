@@ -3,7 +3,7 @@ import sys
 
 import click
 
-from . import operations, versions
+from . import operations
 
 
 class SnafuGroup(click.Group):
