@@ -4,6 +4,7 @@ import sys
 import click
 
 from . import operations
+from . import __version__
 
 
 class SnafuGroup(click.Group):
@@ -13,9 +14,14 @@ class SnafuGroup(click.Group):
         return super().make_context('snafu', *args, **kwargs)
 
 
-@click.group(cls=SnafuGroup)
-def cli():
-    pass
+@click.group(cls=SnafuGroup, invoke_without_command=True)
+@click.option('--version', is_flag=True, help='Print version and exit.')
+@click.pass_context
+def cli(ctx, version):
+    if version:
+        click.echo('SNAFU {}'.format(__version__))
+        return
+    click.echo(ctx.get_help(), color=ctx.color)
 
 
 @cli.command(help='Install a Python version.')
