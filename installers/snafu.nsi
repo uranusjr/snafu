@@ -13,6 +13,10 @@ Name "SNAFU Python Manager"
 OutFile "snafu-setup.exe"
 InstallDir "$LOCALAPPDATA\Programs\SNAFU"
 
+!define UNINSTALL_REGKEY \
+    "Software\Microsoft\Windows\CurrentVersion\Uninstall\SNAFU"
+
+!define UNINSTALL_EXE "$INSTDIR\Uninstall.exe"
 
 !define SNAFU_CMD_STRING "@echo off$\r$\n\
 IF [%SNAFU_JUST_TERMINATE%] == [OKAY] ($\r$\n\
@@ -47,7 +51,10 @@ Section "SNAFU Python Manager"
     DetailPrint "Installing Python Launcher (py.exe)..."
     nsExec::ExecToLog "msiexec /i $\"$INSTDIR\lib\snafusetup\py.msi$\" /quiet"
 
-    WriteUninstaller "$INSTDIR\Uninstall.exe"
+    WriteUninstaller "${UNINSTALL_EXE}"
+    WriteRegStr HKLM "${UNINSTALL_REGKEY}" "DisplayName" "$NAME"
+    WriteRegStr HKLM "${UNINSTALL_REGKEY}" "UninstallString" "${UNINSTALL_EXE}"
+
 SectionEnd
 
 Section "un.Uninstaller"
@@ -55,4 +62,5 @@ Section "un.Uninstaller"
         $\"$INSTDIR\lib\snafusetup\env.py$\" $\"$INSTDIR$\" \
         --uninstall"
     Rmdir /r "$INSTDIR"
+    DeleteRegKey HKLM "${UNINSTALL_REGKEY}"
 SectionEnd

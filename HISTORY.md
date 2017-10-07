@@ -5,7 +5,7 @@
 ### UI Changes
 
 * `uninstall` now attempts to use Windows’s uninstall feature to avoid re-download.
-* `install` and `uninstall` receives a `--file` option to allow using local installers without re-downloading.  
+* `install` and `uninstall` receives a `--file` option to allow using local installers without re-downloading.
   **IMPORTANT:** Correctness of the installer is not checked. The user is responsible for choosing the correct and valid installer file. Results of installing a faulty installer is undefined.
 * New command `where` to show where the actual interpreter is. This is useful if you need to pass it to another command (e.g. `pipenv --python`).
 * `list` shows activeness.
@@ -20,6 +20,7 @@
 * Environment variables are now set up automatically during installation.
 * Extract the py launcher MSI to make the distribution substentially smaller.
 * The installer now comes with both 64- and 32-bit flavours.
+* The uninstaller is now added to registry, so you can remove SNAFU in Control Panel.
 
 
 ## Version 0.1
