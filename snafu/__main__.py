@@ -1,3 +1,5 @@
+import pathlib
+
 import click
 
 from . import operations, versions
@@ -17,11 +19,15 @@ def cli():
 
 @cli.command()
 @click.argument('version')
-def install(version):
+@click.option('--file', 'from_file', type=click.Path(exists=True))
+def install(version, from_file):
     version = operations.get_version(version)
     operations.check_status(version, False)
 
-    installer_path = operations.download_installer(version)
+    if from_file is None:
+        installer_path = operations.download_installer(version)
+    else:
+        installer_path = pathlib.Path(from_file)
 
     click.echo('Running installer {}'.format(installer_path))
     dirpath = version.install(str(installer_path))
@@ -39,14 +45,18 @@ def install(version):
 
 @cli.command()
 @click.argument('version')
-def uninstall(version):
+@click.option('--file', 'from_file', type=click.Path(exists=True))
+def uninstall(version, from_file):
     version = operations.get_version(version)
     operations.check_status(version, True)
 
     try:
         uninstaller_path = version.get_cached_uninstaller()
     except FileNotFoundError:
-        uninstaller_path = operations.download_installer(version)
+        if from_file is None:
+            uninstaller_path = operations.download_installer(version)
+        else:
+            uninstaller_path = pathlib.Path(from_file)
 
     click.echo('Running uninstaller {}'.format(uninstaller_path))
     version.uninstall(str(uninstaller_path))
