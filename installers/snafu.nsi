@@ -7,11 +7,7 @@
 !insertmacro MUI_LANGUAGE "English"
 
 
-ShowInstDetails hide
-
-Name "SNAFU Python Manager"
-OutFile "snafu-setup.exe"
-InstallDir "$LOCALAPPDATA\Programs\SNAFU"
+!define NAME "SNAFU Python Manager"
 
 !define UNINSTALL_REGKEY \
     "Software\Microsoft\Windows\CurrentVersion\Uninstall\SNAFU"
@@ -26,6 +22,13 @@ IF [%SNAFU_JUST_TERMINATE%] == [OKAY] ($\r$\n\
   SET SNAFU_JUST_TERMINATE=OKAY$\r$\n\
   CALL <NUL %0 %*$\r$\n\
 )"
+
+
+ShowInstDetails hide
+
+Name "${NAME}"
+OutFile "snafu-setup.exe"
+InstallDir "$LOCALAPPDATA\Programs\SNAFU"
 
 Section "SNAFU Python Manager"
     CreateDirectory "$INSTDIR"
@@ -52,7 +55,7 @@ Section "SNAFU Python Manager"
     nsExec::ExecToLog "msiexec /i $\"$INSTDIR\lib\snafusetup\py.msi$\" /quiet"
 
     WriteUninstaller "${UNINSTALL_EXE}"
-    WriteRegStr HKLM "${UNINSTALL_REGKEY}" "DisplayName" "$NAME"
+    WriteRegStr HKLM "${UNINSTALL_REGKEY}" "DisplayName" "${NAME}"
     WriteRegStr HKLM "${UNINSTALL_REGKEY}" "UninstallString" "${UNINSTALL_EXE}"
 
 SectionEnd
