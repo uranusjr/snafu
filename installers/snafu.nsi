@@ -14,6 +14,15 @@ OutFile "snafu-setup.exe"
 InstallDir "$LOCALAPPDATA\Programs\SNAFU"
 
 
+!define SNAFU_CMD_STRING "@echo off$\r$\n\
+IF [%SNAFU_JUST_TERMINATE%] == [OKAY] ($\r$\n\
+  SET SNAFU_JUST_TERMINATE=$\r$\n\
+  $\"$INSTDIR\lib\python\python.exe$\" -m snafu %*$\r$\n\
+) ELSE ($\r$\n\
+  SET SNAFU_JUST_TERMINATE=OKAY$\r$\n\
+  CALL <NUL %0 %*$\r$\n\
+)"
+
 Section "SNAFU Python Manager"
     CreateDirectory "$INSTDIR"
     SetOutPath "$INSTDIR"
@@ -24,7 +33,7 @@ Section "SNAFU Python Manager"
 
     # Write snafu entry point.
     FileOpen $0 "$INSTDIR\cmd\snafu.cmd" w
-    FileWrite $0 "@$\"$INSTDIR\lib\python\python.exe$\" -m snafu %*"
+    FileWrite $0 "${SNAFU_CMD_STRING}"
     FileClose $0
 
     # Install Py launcher.
