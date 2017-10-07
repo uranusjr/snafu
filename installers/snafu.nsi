@@ -1,7 +1,5 @@
 !include "MUI2.nsh"
 
-!define MUI_PAGE_CUSTOMFUNCTION_SHOW ModifyWelcome
-
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_UNPAGE_WELCOME
@@ -15,12 +13,6 @@ Name "SNAFU Python Manager"
 OutFile "snafu-setup.exe"
 InstallDir "$LOCALAPPDATA\Programs\SNAFU"
 
-
-Function ModifyWelcome
-    ${NSD_CreateCheckbox} 120u -18u 50% 12u "Append PATH environment variable."
-    Pop $1
-    SetCtlColors $1 "" ${MUI_BGCOLOR}
-FunctionEnd
 
 Section "SNAFU Python Manager"
     CreateDirectory "$INSTDIR"
@@ -38,12 +30,10 @@ Section "SNAFU Python Manager"
     # Install Py launcher.
     nsExec::ExecToLog "msiexec /i $\"$INSTDIR\lib\snafusetup\py.msi$\" /quiet"
 
-    # Setup environment if the user wishes.
-    ${NSD_GetState} $1 $0
-    ${If} $0 <> 0
-        nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
-            $\"$INSTDIR\lib\snafusetup\env.py$\" $\"$INSTDIR$\""
-    ${EndIf}
+    # Setup environment.
+    # TODO: Add checkbox to disable this,
+    nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
+        $\"$INSTDIR\lib\snafusetup\env.py$\" $\"$INSTDIR$\""
 
     WriteUninstaller "$INSTDIR\Uninstall.exe"
 SectionEnd

@@ -27,8 +27,10 @@ def get_path_values():
 
 
 def set_path_values(values, vtype):
+    joined_value = ';'.join(values)
     with open_environment_key(winreg.KEY_SET_VALUE) as key:
-        winreg.SetValueEx(key, 'Path', 0, vtype, ';'.join(values))
+        winreg.SetValueEx(key, 'Path', 0, vtype, joined_value)
+    print('Set Path={}'.format(joined_value))
 
 
 def get_snafu_path_values(instdir):
