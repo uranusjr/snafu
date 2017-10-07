@@ -6,5 +6,6 @@ __pycache__
 
 /installers/snafu
 /installers/*.exe
+/installers/*.msi
 /installers/*.zip
 /runenv
