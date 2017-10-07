@@ -36,13 +36,13 @@ Section "SNAFU Python Manager"
     FileWrite $0 "${SNAFU_CMD_STRING}"
     FileClose $0
 
-    # Install Py launcher.
-    nsExec::ExecToLog "msiexec /i $\"$INSTDIR\lib\snafusetup\py.msi$\" /quiet"
-
     # Setup environment.
     # TODO: Add checkbox to disable this,
     nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
         $\"$INSTDIR\lib\snafusetup\env.py$\" $\"$INSTDIR$\""
+
+    # Install Py launcher.
+    nsExec::ExecToLog "msiexec /i $\"$INSTDIR\lib\snafusetup\py.msi$\" /quiet"
 
     WriteUninstaller "$INSTDIR\Uninstall.exe"
 SectionEnd
