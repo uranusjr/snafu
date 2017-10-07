@@ -18,7 +18,7 @@ def cli():
     pass
 
 
-@cli.command()
+@cli.command(help='Install a Python version.')
 @click.argument('version')
 @click.option('--file', 'from_file', type=click.Path(exists=True))
 def install(version, from_file):
@@ -44,7 +44,7 @@ def install(version, from_file):
     ))
 
 
-@cli.command()
+@cli.command(help='Uninstall a Python version.')
 @click.argument('version')
 @click.option('--file', 'from_file', type=click.Path(exists=True))
 def uninstall(version, from_file):
@@ -69,7 +69,10 @@ def uninstall(version, from_file):
     click.echo('{} is uninstalled succesfully.'.format(version))
 
 
-@cli.command()
+@cli.command(
+    help='Link pythonX.Y command for a Python version.',
+    short_help='Link pythonX.Y command.',
+)
 @click.argument('version')
 def link(version):
     version = operations.get_version(version)
@@ -82,7 +85,10 @@ def link(version):
         click.echo('Published {}'.format(launcher.name))
 
 
-@cli.command()
+@cli.command(
+    help='Remove pythonX.Y command for a Python version.',
+    short_help='Remove pythonX.Y command.',
+)
 @click.argument('version')
 def unlink(version):
     version = operations.get_version(version)
@@ -93,7 +99,10 @@ def unlink(version):
         click.echo('Unpublished {}'.format(launcher.name))
 
 
-@cli.command()
+@cli.command(
+    help='Set pythonX commands to, and link scripts for Python versions.',
+    short_help='Set versions as active.',
+)
 @click.argument('version', nargs=-1)
 def activate(version):
     if not version:
@@ -109,12 +118,18 @@ def activate(version):
     operations.activate(versions)
 
 
-@cli.command()
+@cli.command(
+    help='Remove pythonX and linked Python script commands.',
+    short_help='Deactivate all versions.',
+)
 def deactivate():
     operations.deactivate()
 
 
-@cli.command()
+@cli.command(
+    help='Prints where the executable of Python version is.',
+    short_help='Print python.exe location.',
+)
 @click.argument('version')
 def where(version):
     version = operations.get_version(version)
@@ -122,7 +137,7 @@ def where(version):
     click.echo(str(version.installation.joinpath('python.exe')))
 
 
-@cli.command(name='list')
+@cli.command(name='list', help='List Python versions (installed or all).')
 @click.option('--all', 'list_all', is_flag=True)
 def list_(list_all):
     vers = versions.get_versions()
