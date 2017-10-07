@@ -114,6 +114,14 @@ def deactivate():
     operations.deactivate()
 
 
+@cli.command()
+@click.argument('version')
+def where(version):
+    version = operations.get_version(version)
+    operations.check_status(version, True)
+    click.echo(str(version.installation.joinpath('python.exe')))
+
+
 @cli.command(name='list')
 @click.option('--all', 'list_all', is_flag=True)
 def list_(list_all):
