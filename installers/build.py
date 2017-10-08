@@ -197,10 +197,9 @@ def cleanup():
 
 @click.command()
 @click.argument('arch', type=click.Choice(['win32', 'amd64']))
-@click.option('--out', default=None)
-def build(arch, out):
-    if out is None:
-        out = 'snafu-setup-{}.exe'.format(arch)
+@click.argument('version', default='dev')
+def build(arch, version):
+    out = 'snafu-setup-{}-{}.exe'.format(arch, version.strip())
     outpath = pathlib.Path(out)
     if not outpath.is_absolute():
         outpath = ROOT.joinpath(outpath)

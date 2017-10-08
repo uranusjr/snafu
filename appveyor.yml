@@ -21,8 +21,9 @@ test_script:
   - "pytest tests"
 
 after_test:
-  - "python .\\installers\\build.py win32"
-  - "python .\\installers\\build.py amd64"
+  - "for /f %i in ('git describe') do @set SNAFU_GIT_VERSION=%i"
+  - "python .\\installers\\build.py win32 %SNAFU_GIT_VERSION%"
+  - "python .\\installers\\build.py amd64 %SNAFU_GIT_VERSION%"
   - ps: "ls .\\installers\\*.exe"
 
 artifacts:
