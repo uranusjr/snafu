@@ -18,10 +18,11 @@ class SnafuGroup(click.Group):
 @click.option('--version', is_flag=True, help='Print version and exit.')
 @click.pass_context
 def cli(ctx, version):
-    if version:
-        click.echo('SNAFU {}'.format(__version__))
-        return
-    click.echo(ctx.get_help(), color=ctx.color)
+    if ctx.invoked_subcommand is None:
+        if version:
+            click.echo('SNAFU {}'.format(__version__))
+        else:
+            click.echo(ctx.get_help(), color=ctx.color)
 
 
 @cli.command(help='Install a Python version.')
