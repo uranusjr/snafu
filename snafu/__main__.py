@@ -1,3 +1,4 @@
+import functools
 import pathlib
 import sys
 
@@ -30,15 +31,9 @@ def cli(ctx, version):
 @click.option('--file', 'from_file', type=click.Path(exists=True))
 def install(version, from_file):
     version = operations.get_version(version)
-
-    def link_launchers():
-        for launcher in version.launchers:
-            click.echo('Publishing {}'.format(launcher.name))
-            operations.publish_python(
-                version, launcher, overwrite=True, quiet=True,
-            )
-
-    operations.check_status(version, False, on_exit=link_launchers)
+    operations.check_status(version, False, on_exit=functools.partial(
+        operations.link_commands, version,
+    ))
 
     if from_file is None:
         installer_path = operations.download_installer(version)
@@ -48,7 +43,7 @@ def install(version, from_file):
     click.echo('Running installer {}'.format(installer_path))
     dirpath = version.install(str(installer_path))
 
-    link_launchers()
+    operations.link_commands(version)
     click.echo('{} is installed succesfully to {}'.format(
         version, dirpath,
     ))
@@ -59,7 +54,9 @@ def install(version, from_file):
 @click.option('--file', 'from_file', type=click.Path(exists=True))
 def uninstall(version, from_file):
     version = operations.get_version(version)
-    operations.check_status(version, True)
+    operations.check_status(version, True, on_exit=functools.partial(
+        operations.unlink_commands, version,
+    ))
 
     try:
         uninstaller_path = version.get_cached_uninstaller()
@@ -71,17 +68,7 @@ def uninstall(version, from_file):
 
     click.echo('Running uninstaller {}'.format(uninstaller_path))
     version.uninstall(str(uninstaller_path))
-
-    for launcher in version.launchers:
-        click.echo('Unlinking {}'.format(launcher.name))
-        if launcher.exists():
-            try:
-                launcher.unlink()
-            except OSError as e:
-                click.echo('WARNING: Failed to remove {} ({})'.format(
-                    launcher, e,
-                ), err=True)
-
+    operations.unlink_commands(version)
     click.echo('{} is uninstalled succesfully.'.format(version))
 
 

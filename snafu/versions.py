@@ -59,14 +59,26 @@ class Version:
         return str(self.version_info[0])
 
     @property
-    def launchers(self):
+    def script_version_names(self):
+        if self.forced_32 and '-' in self.name:
+            return [self.name, self.name.split('-', 1)[0]]
+        return [self.name]
+
+    @property
+    def pythons(self):
         scriptd_dir = configs.get_cmd_dir_path()
-        launchers = [scriptd_dir.joinpath('python{}.cmd'.format(self.name))]
-        if self.forced_32:
-            launchers.append(scriptd_dir.joinpath('python{}.cmd'.format(
-                self.name.split('-', 1)[0])
-            ))
-        return launchers
+        return [
+            scriptd_dir.joinpath('python{}.cmd'.format(name))
+            for name in self.script_version_names
+        ]
+
+    @property
+    def pips(self):
+        scriptd_dir = configs.get_cmd_dir_path()
+        return [
+            scriptd_dir.joinpath('pip{}.cmd'.format(name))
+            for name in self.script_version_names
+        ]
 
     @property
     def installation(self):

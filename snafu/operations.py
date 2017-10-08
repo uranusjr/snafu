@@ -1,4 +1,5 @@
 import atexit
+import itertools
 import pathlib
 import shutil
 import sys
@@ -77,6 +78,14 @@ def publish_python(version, target, *, overwrite, quiet=False):
     target.write_text('@py -{} %*'.format(version.name))
 
 
+def publish_pip(version, target, *, overwrite, quiet=False):
+    if not overwrite and target.exists():
+        return
+    if not quiet:
+        click.echo('  {}'.format(target.name))
+    target.write_text('@py -{} -m pip %*'.format(version.name))
+
+
 def publish_script(source, target, *, quiet, overwrite):
     if not overwrite and target.exists():
         return
@@ -119,6 +128,25 @@ def activate(versions, *, quiet=False):
     configs.get_python_versions_path().write_text(
         '\n'.join(version.name for version in versions),
     )
+
+
+def link_commands(version):
+    for path in version.pythons:
+        click.echo('Publishing {}'.format(path.name))
+        publish_python(version, path, overwrite=True, quiet=True)
+    for path in version.pips:
+        click.echo('Publishing {}'.format(path.name))
+        publish_pip(version, path, overwrite=True, quiet=True)
+
+
+def unlink_commands(version):
+    for p in itertools.chain(version.pythons, version.pips):
+        click.echo('Unlinking {}'.format(p.name))
+        if p.exists():
+            try:
+                p.unlink()
+            except OSError as e:
+                click.echo('Failed to remove {} ({})'.format(p, e), err=True)
 
 
 def get_active_names():
