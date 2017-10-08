@@ -2,6 +2,10 @@
 
 ## Next (not released)
 
+### UI Changes
+
+* New `upgrade` command to install a newer patch version on an installed version.
+
 ### Behavioural Changes
 
 * `pip-X.Y` are now published on install.
