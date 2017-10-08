@@ -59,13 +59,13 @@ def uninstall(version, from_file):
     ))
     operations.update_active_versions(remove=[version])
 
-    try:
-        uninstaller_path = version.get_cached_uninstaller()
-    except FileNotFoundError:
-        if from_file is None:
+    if from_file is not None:
+        uninstaller_path = pathlib.Path(from_file)
+    else:
+        try:
+            uninstaller_path = version.get_cached_uninstaller()
+        except FileNotFoundError:
             uninstaller_path = operations.download_installer(version)
-        else:
-            uninstaller_path = pathlib.Path(from_file)
 
     click.echo('Running uninstaller {}'.format(uninstaller_path))
     version.uninstall(str(uninstaller_path))
