@@ -1,4 +1,5 @@
 import contextlib
+import ctypes
 import pathlib
 import sys
 import winreg
@@ -54,8 +55,20 @@ def uninstall(instdir):
     set_path_values(values, vtype)
 
 
+SendMessage = ctypes.windll.user32.SendMessageW
+SendMessage.argtypes = (ctypes.HWND, ctypes.UINT, ctypes.WPARAM, ctypes.LPVOID)
+SendMessage.restype = ctypes.LRESULT
+HWND_BROADCAST = 0xFFFF
+WM_SETTINGCHANGE = 0x1A
+
+
+def publish():
+    SendMessage(HWND_BROADCAST, WM_SETTINGCHANGE, 0, 'Environment')
+
+
 if __name__ == '__main__':
     if len(sys.argv) > 2 and '--uninstall' in sys.argv[2:]:
         uninstall(pathlib.Path(sys.argv[1]))
     else:
         install(pathlib.Path(sys.argv[1]))
+    publish()
