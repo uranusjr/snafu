@@ -135,7 +135,7 @@ The python launchers (python.exe) cannot be copied as-is because they require
 additional DLL files to work, so they are exposed with one-liner BATCH files
 like this::
 
-    @%APPLOCALDATA%\Programs\Python\Python35\python.exe %*
+    @%LOCALAPPDATA%\Programs\Python\Python35\python.exe %*
 
 
 Why the Name?
