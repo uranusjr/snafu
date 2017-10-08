@@ -181,7 +181,7 @@ def update_active_versions(*, remove=frozenset()):
         try:
             active_names.remove(version.name)
         except ValueError:
-            continue:
+            continue
         click.echo('Deactivating {}'.format(version))
     if len(current_active_names) != len(active_names):
         deactivate()
