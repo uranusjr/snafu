@@ -57,6 +57,7 @@ def uninstall(version, from_file):
     operations.check_status(version, True, on_exit=functools.partial(
         operations.unlink_commands, version,
     ))
+    operations.update_active_versions(remove=[version])
 
     try:
         uninstaller_path = version.get_cached_uninstaller()

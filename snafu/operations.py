@@ -172,3 +172,17 @@ def get_versions(installed_only):
         return True
 
     return [v for v in vers if should_include(v)]
+
+
+def update_active_versions(*, remove=frozenset()):
+    current_active_names = set(get_active_names())
+    active_names = [n for n in current_active_names]
+    for version in remove:
+        try:
+            active_names.remove(version.name)
+        except ValueError:
+            continue:
+        click.echo('Deactivating {}'.format(version))
+    if len(current_active_names) != len(active_names):
+        deactivate()
+        activate([get_version(n) for n in active_names])

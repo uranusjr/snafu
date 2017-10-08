@@ -5,6 +5,7 @@
 ### Behavioural Changes
 
 * `pip-X.Y` are now published on install.
+* Automatically deactivate an uninstalling active version.
 * A Python exception will be raised early on download error, instead of failing later during installation.
 * Uninstallation now skips gracefully if launcher scripts do not exist.
 
