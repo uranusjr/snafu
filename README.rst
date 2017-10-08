@@ -19,18 +19,7 @@ not implemented yet.)
 Distribution
 ------------
 
-Scripts and library should be bundled with the
-`Embeddable <https://blogs.msdn.microsoft.com/pythonengineering/?p=563>`__
-CPython distribution and built into a `snafu.exe`, so the user can just install
-and run this without knowing the whole thing is implemented in Python.
-
-The installer bundle should contain a copy of the newest possible Python, and
-installs the py launcher from it along with SNAFU itself. SNAFU should manager
-the launcher’s upgrading when itself upgrades.
-
-I’m still poundering whether I should put the executable somewhere in PATH,
-*add* it to the PATH, or just leave this to the user. This can be discussed
-and decided on later.
+Find installers in `Releases <https://github.com/uranusjr/snafu/releases>`__. Install, and restart your shell.
 
 Installing Pythons
 ------------------
@@ -39,24 +28,25 @@ Install Python 3.6::
 
     snafu install 3.6
 
-This should install the *latest patch version* of CPython 3.6. Note that unlike
-pyenv, we don’t support installing patch versions. This is because there is no
-good way to deal with patch versions on Windows (the py launcher only supports
-major and minor versioning), and you should always use the latest patch anyway.
+This should install the *latest patch version* of CPython 3.6. We don’t support
+installing patch versions. This is because there is no good way to deal with
+patch versions on Windows (the py launcher only supports major and minor
+versioning), and you should always use the latest patch anyway.
 
-To avoid requiring administrator priviledge on every installation, the py
-launcher is not managed by SNAFU itself, and not installed here.
+After installing a version, `pythonX.Y` will be available as a command.
 
-After installing a version, `pythonX.Y` will be available as a command. (This
-can probably be done with a `.bat` file + launcher).
-
-The 64-bit version is installed by default, unless you’re on a 32-bit OS. To
-install a 32-bit version on a 64-bit machine, use a `-32` suffix::
+If you’re on a 64-bit OS, the 64-bit version is installed by default. To
+install a 32-bit version on a 64-bit machine, use the `-32` suffix::
 
     snafu install 3.6-32
 
-The 64- and 32-bit versions can co-exist. In such case, `pythonX.Y` points to
-the 64-bit version, while `pythonX.Y-32` 32-bit.
+If you install both 32- and 64-bit Pythons, `pythonX.Y` will point to the
+64-bit version, and `pythonX.Y-32` 32-bit.
+
+(Note: Due to restrictions in the standard Python installer, versions up to
+3.4 are available in *either* 64- or 32-bit, not both.)
+
+On 32-bit hosts, only 32-bit Pythons are available. Not suffixes are needed.
 
 Set Default Python Version
 --------------------------
@@ -67,16 +57,11 @@ Set Python 3.5 as default::
 
 This does two things:
 
-1. `python3` and `python3.5` are mapped to Python 3.5. (Note: there is no
-   distinction between 32- and 64-bit versions because it’s too tedious to
-   manage.)
-2. Scripts in `Python35\\Scripts` are *linked* into PATH.
+1. `python3` is mapped to Python 3.5.
+2. Scripts in `Python35\\Scripts` are linked into PATH.
 
-Special case: `pip.exe` is **never** linked, to avoid any confusion. Use
-`pip3`, `pip3.5`, etc. instead.
-
-There is also no `python` command. You should not use it anyway (and should
-always use `python2` or `python3` instead).
+Special case: `python`, `pip` and `easy_install` are never linked, to avoid any
+confusion. Use `python3`, `pip3`, `pip3.5`, etc. instead.
 
 You can activate multiple versions together::
 
@@ -93,53 +78,29 @@ To uninstall a version::
 
     snafu uninstall 3.5
 
-Uninstalling an active version results in broken links. (A possible improvement
-candidate in the future.)
-
 Listing Versions
 ----------------
 
 List installed versions::
 
-    snafu versions
+    snafu list
 
 List all versions available, including those not installed::
 
-    snafu versions --all
+    snafu list --all
 
 This results in something like this::
 
-    i 2.7
-      3.4
-    u 3.5
-    i 3.6
+    o 2.7
+    o 3.4
+      3.5
+    * 3.6
 
-* The ``i`` prefix means the version is installed.
-* ``u`` means the version is installed, and there is an update available.
+* The ``o`` prefix means the version is installed.
+* ``*`` signifies an active version.
 * No prefix if the version is not installed.
 
 The installation status is detected through the Windows registry.
-
-Upgrading Version
------------------
-
-Use this syntax::
-
-    snafu upgrade 3.6
-
-to upgrade an installed version (and errors if it is not installed).
-
-The upgrade is detected through semantic version checking. Every version file
-should contain a ``version_info`` field. This is compared to the currently
-installed version (by checking ``tuple(sys.version_info)`` through the py
-launcher), and download and run the installer if there is a newer version than
-installed.
-
-Need to clarify: What happens if the user has the version installed somewhere
-else? Can we upgrade *and* change the location at the same time? Probably not.
-If that’s not possible maybe a standalone installation log is needed, instead
-of relying on Python’s registry entries. Or maybe we can simply ignore versions
-installed somewhere else, or not installed as “only-for-me”.
 
 
 Architecture (Implementation Details)
@@ -158,27 +119,27 @@ non-interactive manner. For more details check out the relevant documentation:
 Where are Pythons installed?
 ----------------------------
 
-``%APPLOCALDATA%\Programs\Python\Python36`` (for Python 3.6). This is the
-standard “only-for-me” installation location for Python 3.5+, and we retrofit
-this rule to older versions as well for consistency.
+``%LOCALAPPDATA%\Programs\Python\<version>``. This is the standard
+“only-for-me” installation location for Python 3.5+, and we retrofit this rule
+to older versions as well for consistency.
 
 
 How are Executables linked?
 ---------------------------
 
-Script executables are *copied*. PY files works as well because they have
+Script executables are *copied*. `.py` files works as well because they have
 appropriate shebang lines, and can be handled by the py launcher, as specified
 in `PEP 397 <https://www.python.org/dev/peps/pep-0397/>`_.
 
 The python launchers (python.exe) cannot be copied as-is because they require
-additional DLL files to work, so they are exposed with one-liner BATCH files,
+additional DLL files to work, so they are exposed with one-liner BATCH files
 like this::
 
     @%APPLOCALDATA%\Programs\Python\Python35\python.exe %*
 
 
-Why SNAFU?
-----------
+Why the Name?
+-------------
 
 Because Python is hard, Windows is harder, and setting up Windows for Python
 development is SNAFU. Or it’s Supernatrual Administration for You.
