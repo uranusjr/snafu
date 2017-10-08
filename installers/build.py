@@ -146,6 +146,13 @@ def build_python(arch, libdir):
         else:
             shutil.copy2(str(path), str(pythondir.joinpath(path.name)))
 
+    # Cleanup.
+    click.echo('Remove junks...')
+    for p in pythondir.rglob('__pycache__'):
+        shutil.rmtree(str(p))
+    for p in pythondir.rglob('*.py[co]'):
+        shutil.rmtree(str(p))
+
 
 def build_snafusetup(arch, libdir):
     snafusetupdir = libdir.joinpath('snafusetup')
