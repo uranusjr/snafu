@@ -56,6 +56,7 @@ Section "SNAFU Python Manager"
 
     WriteUninstaller "${UNINSTALL_EXE}"
     WriteRegStr HKLM "${UNINSTALL_REGKEY}" "DisplayName" "${NAME}"
+    WriteRegStr HKLM "${UNINSTALL_REGKEY}" "Publisher" "Tzu-ping Chung"
     WriteRegStr HKLM "${UNINSTALL_REGKEY}" "UninstallString" "${UNINSTALL_EXE}"
 
 SectionEnd
