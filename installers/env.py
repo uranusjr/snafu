@@ -57,7 +57,7 @@ def uninstall(instdir):
 
 SendMessage = ctypes.windll.user32.SendMessageW
 SendMessage.argtypes = (ctypes.HWND, ctypes.UINT, ctypes.WPARAM, ctypes.LPVOID)
-SendMessage.restype = ctypes.LRESULT
+SendMessage.restype = ctypes.LPARAM     # Synonymous to LRESULT.
 HWND_BROADCAST = 0xFFFF
 WM_SETTINGCHANGE = 0x1A
 
