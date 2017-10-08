@@ -2,6 +2,13 @@
 
 ## Next (not released)
 
+### Behavioural Changes
+
+* `pip-X.Y` are now published on install.
+* A Python exception will be raised early on download error, instead of failing later during installation.
+* Uninstallation now skips gracefully if launcher scripts do not exist.
+
+
 ## Version 0.2
 
 ### UI Changes
