@@ -73,6 +73,35 @@ def uninstall(version, from_file):
     click.echo('{} is uninstalled succesfully.'.format(version))
 
 
+@cli.command(help='Upgrade an installed Python version.')
+@click.argument('version')
+@click.option('--file', 'from_file', type=click.Path(exists=True))
+def upgrade(version, from_file):
+    version = operations.get_version(version)
+    operations.check_status(version, True, on_exit=functools.partial(
+        operations.link_commands, version,
+    ))
+    installation_vi = version.get_installation_version_info()
+    if installation_vi >= version.version_info:
+        click.echo('Python {} is up to date.'.format(
+            '.'.join(str(i) for i in installation_vi),
+        ))
+        return
+
+    if from_file is None:
+        installer_path = operations.download_installer(version)
+    else:
+        installer_path = pathlib.Path(from_file)
+
+    click.echo('Running installer {}'.format(installer_path))
+    version.upgrade(str(installer_path))
+
+    operations.link_commands(version)
+    click.echo('{} is upgraded succesfully at {}'.format(
+        version, version.installation,
+    ))
+
+
 @cli.command(
     help='Set pythonX commands to, and link scripts for Python versions.',
     short_help='Set versions as active.',

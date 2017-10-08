@@ -91,6 +91,17 @@ class Version:
             return False
         return exists
 
+    def get_installation_version_info(self):
+        output = subprocess.check_output(
+            'py -{} -V'.format(self.name), shell=True,
+        ).decode('ascii', 'ignore')
+        match = re.match(r'^Python (\d+)\.(\d+)\.(\d+).*$', output.strip())
+        if not match:
+            raise RuntimeError(
+                'Could not read installed version for {}'.format(self),
+            )
+        return tuple(int(g) for g in match.groups())
+
     def save_installer(self, data, into_path):
         checksum = hashlib.md5(data).hexdigest()
         if checksum != self.md5_sum:
@@ -123,8 +134,7 @@ class CPythonMSIVersion(Version):
             guid=variant.get('guid'),
         )
 
-    def install(self, cmd):
-        dirpath = self.get_target_for_install()
+    def _run_installer(self, cmd, target_dirpath):
         features = [
             'DefaultFeature', 'PrivateCRT', 'TclTk', 'Documentation',
             'pip_feature',
@@ -134,7 +144,7 @@ class CPythonMSIVersion(Version):
             'msiexec', '/i', '"{}"'.format(cmd),
 
             # Optional parameters and flags.
-            '/qb', 'TARGETDIR="{}"'.format(dirpath),
+            '/qb', 'TARGETDIR="{}"'.format(target_dirpath),
             'ADDLOCAL={}'.format(','.join(features)),
 
             # This does not do what you think. DO NOT SUPPLY IT.
@@ -145,7 +155,17 @@ class CPythonMSIVersion(Version):
             ' '.join(parts),
             shell=True,     # So we don't need to know where msiexec is.
         )
+
+    def install(self, cmd):
+        dirpath = self.get_target_for_install()
+        self._run_installer(cmd, dirpath)
         return dirpath
+
+    def upgrade(self, cmd):
+        # There is no way to know what was installed from the previous MSI
+        # installer; all we can do is installing what we want to the same
+        # location, and leave the rest untouched hoping they won't be needed.
+        self._run_installer(cmd, self.installation)
 
     def get_cached_uninstaller(self):
         if self.guid:
@@ -183,6 +203,10 @@ class CPythonVersion(Version):
             'InstallLauncherAllUsers=0',
         ])
         return dirpath
+
+    def upgrade(self, cmd):
+        # The installer handles all feature detection for us.
+        subprocess.check_call([cmd, '/passive'])
 
     def get_cached_uninstaller(self):
         return metadata.get_bundle_cache_path(self.name)
