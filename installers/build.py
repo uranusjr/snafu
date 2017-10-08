@@ -39,6 +39,7 @@ ROOT = pathlib.Path(__file__).parent.resolve()
 def download_file(url, path):
     click.echo('Downloading {}'.format(url))
     response = requests.get(url, stream=True)
+    response.raise_for_status()
 
     installer_name = url.rsplit('/', 1)[-1]
     total = response.headers.get('content-length', '')

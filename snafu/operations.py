@@ -13,6 +13,7 @@ from . import configs, metadata, versions
 def download_installer(version):
     click.echo('Downloading {}'.format(version.url))
     response = requests.get(version.url, stream=True)
+    response.raise_for_status()
 
     installer_name = version.url.rsplit('/', 1)[-1]
     total = response.headers.get('content-length', '')
