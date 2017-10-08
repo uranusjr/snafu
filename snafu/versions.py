@@ -1,5 +1,6 @@
 import enum
 import hashlib
+import itertools
 import json
 import os
 import pathlib
@@ -66,17 +67,17 @@ class Version:
 
     @property
     def pythons(self):
-        scriptd_dir = configs.get_cmd_dir_path()
+        scripts_dir = configs.get_cmd_dir_path()
         return [
-            scriptd_dir.joinpath('python{}.cmd'.format(name))
+            scripts_dir.joinpath('python{}.cmd'.format(name))
             for name in self.script_version_names
         ]
 
     @property
     def pips(self):
-        scriptd_dir = configs.get_cmd_dir_path()
+        scripts_dir = configs.get_cmd_dir_path()
         return [
-            scriptd_dir.joinpath('pip{}.cmd'.format(name))
+            scripts_dir.joinpath('pip{}.cmd'.format(name))
             for name in self.script_version_names
         ]
 
@@ -119,6 +120,18 @@ class Version:
 
     def get_scripts_dir_path(self):
         return self.installation.joinpath('Scripts')
+
+    def find_script_path(self, name):
+        extensions = os.environ['PathExt'].split(';')
+        command_filename_iter = itertools.chain(
+            [name], ('{}{}'.format(name, ext) for ext in extensions),
+        )
+        scripts_dir = self.get_scripts_dir_path()
+        for fn in command_filename_iter:
+            path = scripts_dir.joinpath(fn)
+            if path.exists():
+                return path.resolve()
+        raise FileNotFoundError(name)
 
 
 class CPythonMSIVersion(Version):

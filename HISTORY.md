@@ -5,6 +5,7 @@
 ### UI Changes
 
 * New `upgrade` command to install a newer patch version on an installed version.
+* New `link` command to manually publish a script from the active Python versions.
 
 ### Behavioural Changes
 

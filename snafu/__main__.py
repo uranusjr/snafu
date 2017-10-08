@@ -4,7 +4,7 @@ import sys
 
 import click
 
-from . import operations
+from . import configs, operations
 from . import __version__
 
 
@@ -161,6 +161,41 @@ def list_(list_all):
             'for installation.',
             err=True,
         )
+
+
+@cli.command(help='Make a command from active versions available.')
+@click.argument('command')
+@click.option('--force', is_flag=True)
+def link(command, force):
+    command_name = command
+    active_names = operations.get_active_names()
+
+    command = None
+    for version_name in active_names:
+        version = operations.get_version(version_name)
+        try:
+            command = version.find_script_path(command_name)
+        except FileNotFoundError:
+            continue
+        break
+    if command is None:
+        click.echo('Command "{}" not found. Looked in {}: {}'.format(
+            command_name,
+            'version' if len(active_names) == 1 else 'versions',
+            ', '.join(active_names),
+        ), err=True)
+        sys.exit(1)
+
+    target_name = command.name
+    target = configs.get_scripts_dir_path().joinpath(target_name)
+    if target.exists() and not force:
+        if target.read_bytes() == command.read_bytes():
+            # If the two files are identical, we're good anyway.
+            return
+        click.echo('{} already exists. Use --force to overwrite.', err=True)
+        sys.exit(1)
+    operations.publish_script(command, target, overwrite=True, quiet=True)
+    click.echo('Published {} from {}'.format(target_name, version))
 
 
 if __name__ == '__main__':
