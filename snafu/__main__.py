@@ -74,7 +74,13 @@ def uninstall(version, from_file):
 
     for launcher in version.launchers:
         click.echo('Unlinking {}'.format(launcher.name))
-        launcher.unlink()
+        if launcher.exists():
+            try:
+                launcher.unlink()
+            except OSError as e:
+                click.echo('WARNING: Failed to remove {} ({})'.format(
+                    launcher, e,
+                ), err=True)
 
     click.echo('{} is uninstalled succesfully.'.format(version))
 
