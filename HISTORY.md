@@ -13,6 +13,10 @@
 * A Python exception will be raised early on download error, instead of failing later during installation.
 * Uninstallation now skips gracefully if launcher scripts do not exist.
 
+### Installer Changes
+
+* Environment variables changes can now propagate correctly without OS restart.
+
 
 ## Version 0.2
 
