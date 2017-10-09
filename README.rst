@@ -10,11 +10,8 @@ SNAFU is a Python installer manager for Windows. It fetches and installs Python
 of a version you specify, and manages the Path environment variable for you.
 
 
-Specification
-==============
-
-(This is an overview of what the end result should look like. Most things are
-not implemented yet.)
+Basics
+======
 
 Distribution
 ------------
