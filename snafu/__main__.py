@@ -152,7 +152,8 @@ def list_(list_all):
             marker = '*'
         elif v.is_installed():
             marker = 'o'
-        # TODO: Show '+' if there is a newer version.
+        # TODO: Show '+' for upgradable.
+        # How should we show an upgradable *and* active version?
         click.echo('{} {}'.format(marker, v.name))
 
     if not list_all and not vers:
