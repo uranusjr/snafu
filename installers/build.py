@@ -58,6 +58,9 @@ def get_kb_msu_url(architecture, wver, warc):
 
 ROOT = pathlib.Path(__file__).parent.resolve()
 
+ASSETSDIR = ROOT.joinpath('assets')
+ASSETSDIR.mkdir(exist_ok=True)
+
 
 def download_file(url, path):
     click.echo('Downloading {}'.format(url))
@@ -82,7 +85,7 @@ def download_file(url, path):
 
 
 def get_py_launcher(arch):
-    installer_path = ROOT.joinpath('py-{vers}-{arch}.msi'.format(
+    installer_path = ASSETSDIR.joinpath('py-{vers}-{arch}.msi'.format(
         vers=VERSION,
         arch=arch,
     ))
@@ -93,7 +96,7 @@ def get_py_launcher(arch):
 
 def get_embed_bundle(arch):
     url = get_python_embed_url(arch)
-    bundle_path = ROOT.joinpath(url.rsplit('/', 1)[-1])
+    bundle_path = ASSETSDIR.joinpath(url.rsplit('/', 1)[-1])
     if not bundle_path.exists():
         download_file(url, bundle_path)
     return bundle_path
@@ -101,7 +104,7 @@ def get_embed_bundle(arch):
 
 def get_kb_msu(arch, winver, winarc):
     url = get_kb_msu_url(arch, winver, winarc)
-    msu_path = ROOT.joinpath(url.rsplit('/', 1)[-1])
+    msu_path = ASSETSDIR.joinpath(url.rsplit('/', 1)[-1])
     if not msu_path.exists():
         download_file(url, msu_path)
     return msu_path

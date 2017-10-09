@@ -4,9 +4,6 @@
 *.py[co]
 __pycache__
 
-/installers/snafu
 /installers/*.exe
-/installers/*.msi
-/installers/*.msu
-/installers/*.zip
+/installers/assets/
 /runenv
