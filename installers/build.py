@@ -100,11 +100,11 @@ def get_embed_bundle(arch):
 
 
 def get_kb_mcu(arch, winver, winarch):
-    url = get_python_embed_url(arch)
-    bundle_path = ROOT.joinpath(url.rsplit('/', 1)[-1])
-    if not bundle_path.exists():
-        download_file(url, bundle_path)
-    return bundle_path
+    url = get_kb_msu_url(arch)
+    mcu_file = ROOT.joinpath(url.rsplit('/', 1)[-1])
+    if not mcu_file.exists():
+        download_file(url, mcu_file)
+    return mcu_file
 
 
 def get_dependency_names():
@@ -195,7 +195,7 @@ def build_snafusetup(arch, libdir):
         mcu_path = get_kb_mcu(arch, winver, winarc)
         shutil.copy2(
             str(mcu_path),
-            snafusetupdir.joinpath('mcu', mcu_path.name),
+            snafusetupdir.joinpath(mcu_path.name),
         )
 
     # Copy Py launcher MSI.
