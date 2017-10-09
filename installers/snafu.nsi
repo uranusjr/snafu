@@ -39,7 +39,7 @@ InstallDir "$LOCALAPPDATA\Programs\SNAFU"
 
 Function .onInit
     ${IfNot} ${AtLeastWinVista}
-        MessageBox "SNAFU only supports Windows Vista or above."
+        MessageBox MB_OK "SNAFU only supports Windows Vista or above."
         Quit
     ${EndIf}
 FunctionEnd
