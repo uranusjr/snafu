@@ -63,6 +63,7 @@ Function InstallMCU
         StrCpy $1 'x32'
     ${EndIf}
 
+    DetailPrint "Installing Windows update ${KBCODE} for your system..."
     nsExec::ExecToLog "wusa /quiet /norestart \
         $\"$INSTDIR\lib\snafusetup\mcu\Windows$0-${KBCODE}-$1.msu$\""
 FunctionEnd
