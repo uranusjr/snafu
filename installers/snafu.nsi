@@ -44,7 +44,7 @@ Function .onInit
     ${EndIf}
 FunctionEnd
 
-Function InstallMCU
+Function InstallMSU
     ${If} ${AtLeastWin10}
         Return
     ${ElseIf} ${IsWin8.1}
@@ -82,7 +82,7 @@ Section "SNAFU Python Manager"
     FileClose $0
 
     # Ensure appropriate CRT is installed.
-    Call InstallMCU
+    Call InstallMSU
 
     # Setup environment.
     # Do this BEFORE py launcher installation to let it help publish the

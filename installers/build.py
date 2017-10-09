@@ -46,7 +46,7 @@ def get_py_launcher_url(architecture):
 
 
 def get_kb_msu_url(architecture, wver, warc):
-    return '{pref}/{vers}/{arch}/Windows{wver}-{code}-{warc}.mcu'.format(
+    return '{pref}/{vers}/{arch}/Windows{wver}-{code}-{warc}.msu'.format(
         pref=DOWNLOAD_PREFIX,
         vers=VERSION,
         arch=architecture,
@@ -99,12 +99,12 @@ def get_embed_bundle(arch):
     return bundle_path
 
 
-def get_kb_mcu(arch, winver, winarc):
+def get_kb_msu(arch, winver, winarc):
     url = get_kb_msu_url(arch, winver, winarc)
-    mcu_file = ROOT.joinpath(url.rsplit('/', 1)[-1])
-    if not mcu_file.exists():
-        download_file(url, mcu_file)
-    return mcu_file
+    msu_path = ROOT.joinpath(url.rsplit('/', 1)[-1])
+    if not msu_path.exists():
+        download_file(url, msu_path)
+    return msu_path
 
 
 def get_dependency_names():
@@ -190,12 +190,12 @@ def build_snafusetup(arch, libdir):
     snafusetupdir.mkdir()
 
     # Copy necessary updates.
-    click.echo('Copy *.mcu')
     for winver, winarc in itertools.product(WINVERS, WINARCS):
-        mcu_path = get_kb_mcu(arch, winver, winarc)
+        msu_path = get_kb_msu(arch, winver, winarc)
+        click.echo('Copy {}'.format(msu_path.name))
         shutil.copy2(
-            str(mcu_path),
-            snafusetupdir.joinpath(mcu_path.name),
+            str(msu_path),
+            snafusetupdir.joinpath(msu_path.name),
         )
 
     # Copy Py launcher MSI.
