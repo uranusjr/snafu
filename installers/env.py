@@ -1,5 +1,6 @@
 import contextlib
 import ctypes
+import ctypes.wintypes
 import pathlib
 import sys
 import winreg
@@ -56,8 +57,11 @@ def uninstall(instdir):
 
 
 SendMessage = ctypes.windll.user32.SendMessageW
-SendMessage.argtypes = (ctypes.HWND, ctypes.UINT, ctypes.WPARAM, ctypes.LPVOID)
-SendMessage.restype = ctypes.LPARAM     # Synonymous to LRESULT.
+SendMessage.argtypes = (
+    ctypes.wintypes.HWND, ctypes.wintypes.UINT,
+    ctypes.wintypes.WPARAM, ctypes.wintypes.LPVOID,
+)
+SendMessage.restype = ctypes.wintypes.LPARAM    # Synonymous to LRESULT.
 HWND_BROADCAST = 0xFFFF
 WM_SETTINGCHANGE = 0x1A
 
