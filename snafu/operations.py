@@ -32,8 +32,6 @@ def download_installer(version):
 
     data = b''.join(chunks)
 
-    # TODO: Maybe we should cache the installer to a consistent location
-    # instead, so we don't need to download again when uninstalling?
     tempdir_path = pathlib.Path(tempfile.mkdtemp())
     atexit.register(shutil.rmtree, str(tempdir_path), ignore_errors=True)
 
