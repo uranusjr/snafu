@@ -99,8 +99,8 @@ def get_embed_bundle(arch):
     return bundle_path
 
 
-def get_kb_mcu(arch, winver, winarch):
-    url = get_kb_msu_url(arch)
+def get_kb_mcu(arch, winver, winarc):
+    url = get_kb_msu_url(arch, winver, winarc)
     mcu_file = ROOT.joinpath(url.rsplit('/', 1)[-1])
     if not mcu_file.exists():
         download_file(url, mcu_file)
