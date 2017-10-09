@@ -1,3 +1,4 @@
+import itertools
 import json
 import pathlib
 import shutil
@@ -14,6 +15,15 @@ VERSION = '3.6.3'
 DOWNLOAD_PREFIX = 'https://www.python.org/ftp/python'
 
 KB_CODE = 'KB2999226'
+
+WINVERS = [
+    '6.0',      # Vista.
+    '6.1',      # 7.
+    '8-RT',     # 8.
+    '8.1',      # 8.1.
+]
+
+WINARCS = ['x86', 'x64']
 
 
 def get_python_embed_url(architecture):
@@ -32,6 +42,17 @@ def get_py_launcher_url(architecture):
         pref=DOWNLOAD_PREFIX,
         vers=VERSION,
         arch=architecture,
+    )
+
+
+def get_kb_msu_url(architecture, wver, warc):
+    return '{pref}/{vers}/{arch}/Windows{wver}-{code}-{warc}.mcu'.format(
+        pref=DOWNLOAD_PREFIX,
+        vers=VERSION,
+        arch=architecture,
+        code=KB_CODE,
+        wver=wver,
+        warc=warc,
     )
 
 
@@ -71,6 +92,14 @@ def get_py_launcher(arch):
 
 
 def get_embed_bundle(arch):
+    url = get_python_embed_url(arch)
+    bundle_path = ROOT.joinpath(url.rsplit('/', 1)[-1])
+    if not bundle_path.exists():
+        download_file(url, bundle_path)
+    return bundle_path
+
+
+def get_kb_mcu(arch, winver, winarch):
     url = get_python_embed_url(arch)
     bundle_path = ROOT.joinpath(url.rsplit('/', 1)[-1])
     if not bundle_path.exists():
@@ -162,7 +191,12 @@ def build_snafusetup(arch, libdir):
 
     # Copy necessary updates.
     click.echo('Copy *.mcu')
-    shutil.copytree(str(ROOT.joinpath(KB_CODE)), snafusetupdir.joinpath('mcu'))
+    for winver, winarc in itertools.combination(WINVERS, WINARCS):
+        mcu_path = get_kb_mcu(arch, winver, winarc)
+        shutil.copy2(
+            str(mcu_path),
+            snafusetupdir.joinpath('mcu', mcu_path.name),
+        )
 
     # Copy Py launcher MSI.
     click.echo('Copy py.msi')
