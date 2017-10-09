@@ -13,6 +13,8 @@ VERSION = '3.6.3'
 
 DOWNLOAD_PREFIX = 'https://www.python.org/ftp/python'
 
+KB_CODE = 'KB2999226'
+
 
 def get_python_embed_url(architecture):
     return '{pref}/{vers}/python-{vers}-embed-{arch}.zip'.format(
@@ -157,6 +159,10 @@ def build_python(arch, libdir):
 def build_snafusetup(arch, libdir):
     snafusetupdir = libdir.joinpath('snafusetup')
     snafusetupdir.mkdir()
+
+    # Copy necessary updates.
+    click.echo('Copy *.mcu')
+    shutil.copytree(str(ROOT.joinpath(KB_CODE)), snafusetupdir.joinpath('mcu'))
 
     # Copy Py launcher MSI.
     click.echo('Copy py.msi')

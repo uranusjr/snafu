@@ -1,4 +1,7 @@
 !include "MUI2.nsh"
+!include "LogicLib.nsh"
+!include "WinVer.nsh"
+!include "x64.nsh"
 
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_INSTFILES
@@ -7,12 +10,14 @@
 !insertmacro MUI_LANGUAGE "English"
 
 
-!define NAME "SNAFU Python Manager"
+!define NAME 'SNAFU Python Manager'
 
 !define UNINSTALL_REGKEY \
-    "Software\Microsoft\Windows\CurrentVersion\Uninstall\SNAFU"
+    'Software\Microsoft\Windows\CurrentVersion\Uninstall\SNAFU'
 
 !define UNINSTALL_EXE "$INSTDIR\Uninstall.exe"
+
+!define KBCODE 'KB2999226'
 
 !define SNAFU_CMD_STRING "@echo off$\r$\n\
 IF [%SNAFU_JUST_TERMINATE%] == [OKAY] ($\r$\n\
@@ -25,10 +30,42 @@ IF [%SNAFU_JUST_TERMINATE%] == [OKAY] ($\r$\n\
 
 
 ShowInstDetails hide
+ManifestSupportedOS all
 
 Name "${NAME}"
 OutFile "snafu-setup.exe"
 InstallDir "$LOCALAPPDATA\Programs\SNAFU"
+
+
+Function .onInit
+    ${IfNot} ${AtLeastWinVista}
+        MessageBox "SNAFU only supports Windows Vista or above."
+        Quit
+    ${EndIf}
+FunctionEnd
+
+Function InstallMCU
+    ${If} ${AtLeastWin10}
+        Return
+    ${ElseIf} ${IsWin8.1}
+        StrCpy $0 '8.1'
+    ${ElseIf} ${IsWin8}
+        StrCpy $0 '8-RT'
+    ${ElseIf} ${IsWin7}
+        StrCpy $0 '6.1'
+    ${ElseIf} ${IsWinVista}
+        StrCpy $0 '6.0'
+    ${EndIf}
+
+    ${If} ${RunningX64}
+        StrCpy $1 'x64'
+    ${Else}
+        StrCpy $1 'x32'
+    ${EndIf}
+
+    nsExec::ExecToLog "wusa /quiet /norestart \
+        $\"$INSTDIR\lib\snafusetup\mcu\Windows$0-${KBCODE}-$1.msu$\""
+FunctionEnd
 
 Section "SNAFU Python Manager"
     CreateDirectory "$INSTDIR"
@@ -42,6 +79,9 @@ Section "SNAFU Python Manager"
     FileOpen $0 "$INSTDIR\cmd\snafu.cmd" w
     FileWrite $0 "${SNAFU_CMD_STRING}"
     FileClose $0
+
+    # Ensure appropriate CRT is installed.
+    Call InstallMCU
 
     # Setup environment.
     # Do this BEFORE py launcher installation to let it help publish the
@@ -58,8 +98,8 @@ Section "SNAFU Python Manager"
     WriteRegStr HKLM "${UNINSTALL_REGKEY}" "DisplayName" "${NAME}"
     WriteRegStr HKLM "${UNINSTALL_REGKEY}" "Publisher" "Tzu-ping Chung"
     WriteRegStr HKLM "${UNINSTALL_REGKEY}" "UninstallString" "${UNINSTALL_EXE}"
-
 SectionEnd
+
 
 Section "un.Uninstaller"
     nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
