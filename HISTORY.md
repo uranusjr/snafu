@@ -2,6 +2,8 @@
 
 ## Next (not released)
 
+## Version 1.0
+
 ### UI Changes
 
 * New `upgrade` command to install a newer patch version on an installed version.
@@ -16,6 +18,7 @@
 
 ### Installer Changes
 
+* Bundle and trigger Windows update KB2999226 on installation to provide necessary runtime files on Windows Vista to 8.1 so the bundled Python 3.6 can run correctly.
 * Environment variables changes can now propagate correctly without OS restart.
 
 
