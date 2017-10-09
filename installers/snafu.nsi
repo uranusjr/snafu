@@ -69,6 +69,8 @@ Function InstallMSU
 FunctionEnd
 
 Section "SNAFU Python Manager"
+    Rmdir /r "$INSTDIR\lib"
+
     CreateDirectory "$INSTDIR"
     SetOutPath "$INSTDIR"
 
