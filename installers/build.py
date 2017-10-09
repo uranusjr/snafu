@@ -191,7 +191,7 @@ def build_snafusetup(arch, libdir):
 
     # Copy necessary updates.
     click.echo('Copy *.mcu')
-    for winver, winarc in itertools.combination(WINVERS, WINARCS):
+    for winver, winarc in itertools.product(WINVERS, WINARCS):
         mcu_path = get_kb_mcu(arch, winver, winarc)
         shutil.copy2(
             str(mcu_path),
