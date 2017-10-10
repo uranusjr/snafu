@@ -44,16 +44,26 @@ def get_snafu_path_values(instdir):
 
 def install(instdir):
     values, vtype = get_path_values()
+    current_values = list(values)
     for val in get_snafu_path_values(instdir):
         if val not in values:
             values.append(val)
-    set_path_values(values, vtype)
+    if current_values != values:
+        set_path_values(values, vtype)
+        return True
+    return False
 
 
 def uninstall(instdir):
-    values, vtype = get_path_values()
-    values = [v for v in values if v not in get_snafu_path_values(instdir)]
-    set_path_values(values, vtype)
+    current_values, vtype = get_path_values()
+    values = [
+        v for v in current_values
+        if v not in get_snafu_path_values(instdir)
+    ]
+    if current_values != values:
+        set_path_values(values, vtype)
+        return True
+    return False
 
 
 SendMessage = ctypes.windll.user32.SendMessageW
@@ -72,7 +82,8 @@ def publish():
 
 if __name__ == '__main__':
     if len(sys.argv) > 2 and '--uninstall' in sys.argv[2:]:
-        uninstall(pathlib.Path(sys.argv[1]))
+        changed = uninstall(pathlib.Path(sys.argv[1]))
     else:
-        install(pathlib.Path(sys.argv[1]))
-    publish()
+        changed = install(pathlib.Path(sys.argv[1]))
+    if changed:
+        publish()
