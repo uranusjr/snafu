@@ -6,9 +6,15 @@
 
 * Remove confusing `activate` and `deactivate` commands in favour of the `use` command. Hte previous “reactivation” behaviour is now mapped to `link --all`.
 
+### Behavioural Changes
+
+* Command aliases are now provided by “shims”, which are pairs of a proxy executable (written in Rust) and a config file (describing how the executable should proxy the call). Thanks to [Scoop](https://scoop.sh) for the inspiration.
+* The `snafu` entry point command is also a shim now.
+
 ### Installer Changes
 
 * Add an option to install and use a Python version after SNAFU is set up.
+* 64-bit variant does not carry x86 MSU files anymore, reducing installer size.
 
 
 ## Version 1.0
