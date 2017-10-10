@@ -4,7 +4,7 @@
 
 ### UI Changes
 
-* Remove confusing `activate` and `deactivate` commands in favour of the `use` command. Hte previous “reactivation” behaviour is now mapped to `link --all`.
+* Remove confusing `activate` and `deactivate` commands in favour of the `use` command. The previous “reactivation” behaviour is now mapped to `link --all`.
 
 ### Installer Changes
 
