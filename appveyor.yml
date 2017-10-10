@@ -1,17 +1,36 @@
+image: Visual Studio 2015
+
+max_jobs: 2
+
 environment:
   matrix:
     - PYTHON: "C:\\Python36-x64"
-      PYTHON_VERSION: "3.6.x"
-      PYTHON_ARCH: "64"
+      INSTALLER_ARCH: "amd64"
+    - PYTHON: "C:\\Python36"
+      INSTALLER_ARCH: "win32"
+
+platform:
+  - x86
+  - x64
+
+matrix:
+  exclude:
+    - platform: x86
+      PYTHON: "C:\\Python36-x64"
+    - platform: x64
+      PYTHON: "C:\\Python36"
 
 install:
-  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;C:\\Program Files (x86)\\NSIS\\Bin;%PATH%"
-  - "python --version"
-  - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
+  - "SET PATH=%PATH%;C:\\Program Files (x86)\\NSIS\\Bin"
 
+  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   - "python -m pip install --disable-pip-version-check --upgrade pip"
   - "pip install --upgrade pipenv"
   - "pipenv install --system --dev --skip-lock"
+
+  - appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
+  - rustup-init -yv --default-toolchain 1.9.0
+  - "SET PATH=%USERPROFILE%\.cargo\bin;%PATH%"
 
 build: off
 
@@ -21,8 +40,7 @@ test_script:
 
 after_test:
   - "for /f %%i in ('git describe') do @set SNAFU_GIT_VERSION=%%i"
-  - "python .\\installers\\build.py win32 %SNAFU_GIT_VERSION%"
-  - "python .\\installers\\build.py amd64 %SNAFU_GIT_VERSION%"
+  - "python .\\installers\\build.py %SNAFU_GIT_VERSION%"
   - ps: "ls .\\installers\\*.exe"
 
 artifacts:

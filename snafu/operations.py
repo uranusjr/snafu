@@ -67,36 +67,34 @@ def check_installed(version, installed, *, on_exit=None):
     click.get_current_context().exit(1)
 
 
-def publish_python(version, target, *, overwrite, quiet=False):
+def publish_shim(target, content, *, overwrite, quiet=False):
     if not overwrite and target.exists():
         return
     if not quiet:
         click.echo('  {}'.format(target.name))
-    target.write_text('@py -{} %*'.format(version.name))
+    target.with_suffix('.shim').write_text(str(content))
+    shutil.copy2(str(configs.get_generic_shim_path()), str(target))
 
 
-def publish_pip(version, target, *, overwrite, quiet=False):
-    if not overwrite and target.exists():
-        return
-    if not quiet:
-        click.echo('  {}'.format(target.name))
-    target.write_text('@py -{} -m pip %*'.format(version.name))
+def publish_python_command(version, target, *, overwrite, quiet=False):
+    publish_shim(target, version.real_python, overwrite=overwrite, quiet=quiet)
+
+
+def publish_pip_command(version, target, *, overwrite, quiet=False):
+    shim_content = '\n'.join([str(version.real_python), '-m', 'pip'])
+    publish_shim(target, shim_content, overwrite=overwrite, quiet=quiet)
 
 
 def publish_script(source, target, *, quiet, overwrite):
-    if not overwrite and target.exists():
-        return
-    if not quiet:
-        click.echo('  {}'.format(target.name))
-    shutil.copy2(str(source.resolve()), str(target))
+    publish_shim(target, source.resolve(), overwrite=overwrite, quiet=quiet)
 
 
 def publish_version_scripts(version, target_dir, *, quiet, overwrite=False):
     if not quiet:
         click.echo('Publishing {}...'.format(version))
 
-    target = target_dir.joinpath('python{}.cmd'.format(version.major_version))
-    publish_python(version, target, quiet=quiet, overwrite=overwrite)
+    target = target_dir.joinpath('python{}.exe'.format(version.major_version))
+    publish_python_command(version, target, quiet=quiet, overwrite=overwrite)
 
     scripts_dir = version.get_scripts_dir_path()
     if scripts_dir.is_dir():
@@ -125,22 +123,27 @@ def activate(versions, *, quiet=False):
 
 
 def link_commands(version):
-    for path in version.pythons:
+    for path in version.python_commands:
         click.echo('Publishing {}'.format(path.name))
-        publish_python(version, path, overwrite=True, quiet=True)
-    for path in version.pips:
+        publish_python_command(version, path, overwrite=True, quiet=True)
+    for path in version.pip_commands:
         click.echo('Publishing {}'.format(path.name))
-        publish_pip(version, path, overwrite=True, quiet=True)
+        publish_pip_command(version, path, overwrite=True, quiet=True)
+
+
+def safe_unlink(p):
+    if p.exists():
+        try:
+            p.unlink()
+        except OSError as e:
+            click.echo('Failed to remove {} ({})'.format(p, e), err=True)
 
 
 def unlink_commands(version):
-    for p in itertools.chain(version.pythons, version.pips):
+    for p in itertools.chain(version.python_commands, version.pip_commands):
         click.echo('Unlinking {}'.format(p.name))
-        if p.exists():
-            try:
-                p.unlink()
-            except OSError as e:
-                click.echo('Failed to remove {} ({})'.format(p, e), err=True)
+        safe_unlink(p)
+        safe_unlink(p.with_suffix('.shim'))
 
 
 def get_active_names():

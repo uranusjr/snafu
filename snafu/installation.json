@@ -1,4 +1,5 @@
 {
     "cmd_dir": "..\\runenv\\cmd",
-    "scripts_dir": "..\\runenv\\Scripts"
+    "scripts_dir": "..\\runenv\\Scripts",
+    "shim_source_dir": "..\\shims\\target\\debug"
 }

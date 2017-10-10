@@ -24,14 +24,8 @@
 
 !define PYTHONVERSION '3.6'
 
-!define SNAFU_CMD_STRING "@echo off$\r$\n\
-IF [%SNAFU_JUST_TERMINATE%] == [OKAY] ($\r$\n\
-  SET SNAFU_JUST_TERMINATE=$\r$\n\
-  $\"$INSTDIR\lib\python\python.exe$\" -m snafu %*$\r$\n\
-) ELSE ($\r$\n\
-  SET SNAFU_JUST_TERMINATE=OKAY$\r$\n\
-  CALL <NUL %0 %*$\r$\n\
-)"
+!define SNAFU_SHIM_STRING \
+    "$\"$INSTDIR\lib\python\python.exe$\"$\r$\n\-m$\r$\n\snafu"
 
 
 ShowInstDetails hide
@@ -95,28 +89,24 @@ Section "SNAFU Python Manager"
     SetOutPath "$INSTDIR"
 
     File /r 'snafu\*'
-    CreateDirectory "$INSTDIR\cmd"
     CreateDirectory "$INSTDIR\scripts"
 
-    # Write snafu entry point.
-    FileOpen $0 "$INSTDIR\cmd\snafu.cmd" w
-    FileWrite $0 "${SNAFU_CMD_STRING}"
+    # Write snafu shim.
+    FileOpen $0 "$INSTDIR\cmd\snafu.shim" w
+    FileWrite $0 "${SNAFU_SHIM_STRING}"
     FileClose $0
 
     # Ensure appropriate CRT is installed.
     Call InstallMSU
 
-    # Setup environment.
-    # Do this BEFORE py launcher installation to let it help publish the
-    # environ registry. Don't know how they do it, but let's ride their back.
-    # TODO: Add checkbox to disable this.
-    DetailPrint "Configuring environment..."
-    nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
-        $\"$INSTDIR\lib\snafusetup\env.py$\" $\"$INSTDIR$\""
-
     # Install Py launcher.
     DetailPrint "Installing Python Launcher (py.exe)..."
     nsExec::ExecToLog "msiexec /i $\"$INSTDIR\lib\snafusetup\py.msi$\" /quiet"
+
+    # Setup environment.
+    DetailPrint "Configuring environment..."
+    nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
+        $\"$INSTDIR\lib\snafusetup\env.py$\" $\"$INSTDIR$\""
 
     # Run SNAFU to install Python (if told to).
     ${If} $InstallsPython == ${BST_CHECKED}
