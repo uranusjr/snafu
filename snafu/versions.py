@@ -152,10 +152,7 @@ class CPythonMSIVersion(Version):
         )
 
     def _run_installer(self, cmd, target_dirpath):
-        features = [
-            'DefaultFeature', 'PrivateCRT', 'TclTk', 'Documentation',
-            'pip_feature',
-        ]
+        features = ['DefaultFeature', 'PrivateCRT', 'TclTk', 'pip_feature']
         parts = [   # Argument ordering is very important.
             # Options and required parameters.
             'msiexec', '/i', '"{}"'.format(cmd),
@@ -216,8 +213,8 @@ class CPythonVersion(Version):
             cmd, '/passive', 'InstallAllUsers=0',
             'DefaultJustForMeTargetDir={}'.format(dirpath),
             'AssociateFiles=0', 'PrependPath=0', 'Shortcuts=0',
-            'Include_launcher=0', 'Include_test=0', 'Include_tools=0',
-            'InstallLauncherAllUsers=0',
+            'Include_doc=0', 'Include_launcher=0', 'Include_test=0',
+            'Include_tools=0', 'InstallLauncherAllUsers=0',
         ])
         return dirpath
 
