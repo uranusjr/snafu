@@ -35,6 +35,12 @@ impl Shim {
             arguments.push(arg);
         }
 
+        let mut envargs = std::env::args();
+        envargs.next();     // Skip args[0].
+        for arg in envargs {
+            arguments.push(arg);
+        }
+
         Ok(Shim {
             command: command,
             arguments: arguments,
