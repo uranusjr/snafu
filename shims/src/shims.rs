@@ -24,8 +24,7 @@ impl Shim {
     /// are arguments to pass to the command.
     fn load() -> std::io::Result<Shim> {
         let exe = try! { std::env::current_exe() };
-        let p = exe.with_extension("shim");
-        let f = try! { std::fs::File::open(&p) };
+        let f = try! { std::fs::File::open(&exe.with_extension("shim")) };
         let reader = std::io::BufReader::new(&f);
 
         let mut lines = reader.lines();
