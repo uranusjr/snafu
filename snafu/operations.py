@@ -86,7 +86,11 @@ def publish_pip_command(version, target, *, overwrite, quiet=False):
 
 
 def publish_script(source, target, *, quiet, overwrite):
-    publish_shim(target, source.resolve(), overwrite=overwrite, quiet=quiet)
+    if not overwrite and target.exists():
+        return
+    if not quiet:
+        click.echo('  {}'.format(target.name))
+    shutil.copy2(str(source.resolve()), str(target))
 
 
 def publish_version_scripts(version, target_dir, *, quiet, overwrite=False):
