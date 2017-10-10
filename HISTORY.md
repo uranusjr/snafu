@@ -8,7 +8,7 @@
 
 ### Behavioural Changes
 
-* Command aliases are now provided by “shims”, which are pairs of a proxy executable (written in Rust) and a config file (describing how the executable should proxy the call). Thanks to [Scoop](https://scoop.sh) for the inspiration.
+* Command aliases are now provided by “shims”, which are pairs of a proxy executable (written in Rust) and a config file (describing how the executable should proxy the call). Thanks to [Scoop](http://scoop.sh) for the inspiration.
 * The `snafu` entry point command is also a shim now.
 
 ### Installer Changes
