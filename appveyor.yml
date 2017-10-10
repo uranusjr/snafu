@@ -32,6 +32,8 @@ install:
   - rustup-init -y --default-toolchain 1.9.0
   - "SET PATH=%USERPROFILE%\\.cargo\bin;%PATH%"
 
+  - "SET PATH"
+
 build: off
 
 test_script:
