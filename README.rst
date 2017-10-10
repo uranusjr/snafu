@@ -114,6 +114,87 @@ This results in something like this::
 The installation status is detected through the Windows registry.
 
 
+Development Guide
+=================
+
+Requirements
+------------
+
+* Windows
+* Python 3.6
+* Pipenv_
+
+.. _Pipenv: https://pipenv.org
+
+Optional Dependencies
+---------------------
+
+* Rust 1.9.0 for MSVC and Visual Studio 2015 if you want to run commands that
+  link things (e.g. `install`, `activate`, and `link`).
+* NSIS_ 3.x and Rust 1.9.0 if you want to build the installer.
+    * Commands `cargo` and `makensis` need to be available in your shell.
+
+.. _NSIS: http://nsis.sourceforge.net/Download
+
+Project Setup
+-------------
+
+Download and enter the project::
+
+    git clone https://github.com/uranusjr/snafu.git
+    cd snafu
+
+Set up environment::
+
+    pipenv install --dev
+
+Run Tests
+---------
+
+::
+
+    pipenv run -- pytest tests
+
+Unfortunately there are only very limited tests right now.
+
+Run SNAFU
+---------
+
+::
+
+    pipenv run -- python -m snafu [COMMAND] ...
+
+
+This should have the same behaviour as an installed SNAFU command, but run
+inside the Pipenv-managed virtual environment.
+
+Build the Installer
+-------------------
+
+::
+
+    pipenv run -- python installers\build.py
+
+You can only build installers of your host’s architecture. Cross compilation
+is certainly possible (the only slightly tricky part is Rust compilation), but
+I just haven’t found the need to set it up.
+
+After the command finishes you should get an EXE in the `installers` directory.
+There are some other options available in `build.py`; you can check them out
+yourself.
+
+Development Guideline
+---------------------
+
+Try to follow the code style. For Python code, run the linter to check for
+issues before submitting::
+
+    pipenv run -- flake8 .
+
+I’m not that familiar with Rust myself either, so any suggestions are welcome
+at that front! :D
+
+
 Architecture (Implementation Details)
 =====================================
 

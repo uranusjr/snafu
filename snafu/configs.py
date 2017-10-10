@@ -8,11 +8,14 @@ def get_value(key):
     return data[key]
 
 
-def get_scripts_dir_path():
-    value = get_value('scripts_dir')
-    path = pathlib.Path(__file__).parent.joinpath(value)
+def get_directory(key):
+    path = pathlib.Path(__file__).parent.joinpath(get_value(key))
     path.mkdir(parents=True, exist_ok=True)
     return path.resolve()
+
+
+def get_scripts_dir_path():
+    return get_directory('scripts_dir')
 
 
 def get_python_versions_path():
@@ -20,7 +23,8 @@ def get_python_versions_path():
 
 
 def get_cmd_dir_path():
-    value = get_value('cmd_dir')
-    path = pathlib.Path(__file__).parent.joinpath(value)
-    path.mkdir(parents=True, exist_ok=True)
-    return path.resolve()
+    return get_directory('cmd_dir')
+
+
+def get_generic_shim_path():
+    return get_directory('shim_source_dir').joinpath('generic.exe')

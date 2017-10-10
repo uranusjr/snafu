@@ -2,12 +2,14 @@ import itertools
 import json
 import pathlib
 import shutil
+import struct
 import subprocess
 import zipfile
 
 import click
 import pkg_resources
 import requests
+import toml
 
 
 VERSION = '3.6.3'
@@ -23,7 +25,7 @@ WINVERS = [
     '8.1',      # 8.1.
 ]
 
-WINARCS = ['x86', 'x64']
+DLL_NAME = 'vcruntime140.dll'
 
 
 def get_python_embed_url(architecture):
@@ -54,6 +56,13 @@ def get_kb_msu_url(architecture, wver, warc):
         wver=wver,
         warc=warc,
     )
+
+
+def get_snafu_version():
+    with ROOT.parent.joinpath('snafu', '__init__.py').open() as f:
+        for line in f:
+            if line.startswith('__version__'):
+                return eval(line[len('__version__ = '):])
 
 
 ROOT = pathlib.Path(__file__).parent.resolve()
@@ -169,6 +178,7 @@ def build_python(arch, libdir):
         json.dump({
             'cmd_dir': '..\\..\\..\\cmd',
             'scripts_dir': '..\\..\\..\\scripts',
+            'shim_source_dir': '..\\..\\shims',
         }, f)
 
     # Copy dependencies.
@@ -193,7 +203,11 @@ def build_snafusetup(arch, libdir):
     snafusetupdir.mkdir()
 
     # Copy necessary updates.
-    for winver, winarc in itertools.product(WINVERS, WINARCS):
+    winarcs = {
+        'amd64': ['x64'],
+        'win32': ['x86', 'x64'],
+    }[arch]
+    for winver, winarc in itertools.product(WINVERS, winarcs):
         msu_path = get_kb_msu(arch, winver, winarc)
         click.echo('Copy {}'.format(msu_path.name))
         shutil.copy2(
@@ -214,11 +228,61 @@ def build_snafusetup(arch, libdir):
     )
 
 
+def build_shims(arch, libdir):
+    # TODO: Build current arch variant with Cargo, and copy it to lib\shims.
+    # <<<< REMEMBER TO REPLACE VERSION STRING IN CARGO CONFIGS!! >>>>
+    shimsdir = libdir.joinpath('shims')
+    shimsdir.mkdir()
+
+    shimsbasedir = ROOT.parent.joinpath('shims')
+
+    cargo = shimsbasedir.joinpath('Cargo.toml')
+    with cargo.open() as f:
+        data = toml.load(f)
+    version = get_snafu_version()
+    data['package']['version'] = version
+    with cargo.open('w') as f:
+        toml.dump(data, f)
+
+    click.echo('Build shim executables')
+    subprocess.check_call(
+        'cargo +1.9.0 clean',
+        shell=True, cwd=str(shimsbasedir),
+    )
+    subprocess.check_call(
+        'cargo +1.9.0 build --release',
+        shell=True, cwd=str(shimsbasedir),
+    )
+    click.echo('Copy generic.exe')
+    shutil.copy2(
+        str(shimsbasedir.joinpath('target', 'release', 'generic.exe')),
+        str(shimsdir.joinpath('generic.exe')),
+    )
+
+
 def build_lib(arch, container):
     libdir = container.joinpath('lib')
     libdir.mkdir()
     build_python(arch, libdir)
     build_snafusetup(arch, libdir)
+    build_shims(arch, libdir)
+
+
+def build_cmd(container):
+    # TODO: Write snafu.exe from generic.exe and copy vcruntime140.dll.
+    # The shim file will be written on installation.
+    cmddir = container.joinpath('cmd')
+    cmddir.mkdir()
+    click.echo('Copy snafu.exe')
+    shutil.copy2(
+        str(container.joinpath('lib', 'shims', 'generic.exe')),
+        str(cmddir.joinpath('snafu.exe')),
+    )
+
+    where_output = subprocess.check_output(['where', DLL_NAME], shell=True)
+    dll_path_s = where_output.decode('ascii').split('\n', 1)[0].strip()
+    click.echo('Copy {}'.format(dll_path_s))
+    shutil.copy2(dll_path_s, str(cmddir))
 
 
 def build_files(arch):
@@ -227,6 +291,7 @@ def build_files(arch):
         shutil.rmtree(str(container))
     container.mkdir()
     build_lib(arch, container)
+    build_cmd(container)
 
 
 def build_installer(outpath):
@@ -247,9 +312,17 @@ def cleanup():
 
 
 @click.command()
-@click.argument('arch', type=click.Choice(['win32', 'amd64']))
 @click.argument('version', default='dev')
-def build(arch, version):
+@click.option('--clean/--no-clean', is_flag=True, default=True)
+@click.option('--clean-only', is_flag=True)
+def build(version, clean, clean_only):
+    if clean_only:
+        cleanup()
+        return
+    arch = {
+        8: 'amd64',
+        4: 'win32',
+    }[struct.calcsize('P')]
     out = 'snafu-setup-{}-{}.exe'.format(arch, version.strip())
     outpath = pathlib.Path(out)
     if not outpath.is_absolute():
@@ -257,7 +330,8 @@ def build(arch, version):
 
     build_files(arch)
     build_installer(outpath)
-    cleanup()
+    if clean:
+        cleanup()
 
 
 if __name__ == '__main__':

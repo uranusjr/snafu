@@ -66,24 +66,28 @@ class Version:
         return [self.name]
 
     @property
-    def pythons(self):
-        scripts_dir = configs.get_cmd_dir_path()
+    def python_commands(self):
+        dirpath = configs.get_cmd_dir_path()
         return [
-            scripts_dir.joinpath('python{}.cmd'.format(name))
+            dirpath.joinpath('python{}.exe'.format(name))
             for name in self.script_version_names
         ]
 
     @property
-    def pips(self):
-        scripts_dir = configs.get_cmd_dir_path()
+    def pip_commands(self):
+        dirpath = configs.get_cmd_dir_path()
         return [
-            scripts_dir.joinpath('pip{}.cmd'.format(name))
+            dirpath.joinpath('pip{}.exe'.format(name))
             for name in self.script_version_names
         ]
 
     @property
     def installation(self):
         return metadata.get_install_path(self.name)
+
+    @property
+    def real_python(self):
+        return self.installation.joinpath('python.exe')
 
     def is_installed(self):
         try:

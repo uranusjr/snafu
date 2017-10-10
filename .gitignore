@@ -6,4 +6,6 @@ __pycache__
 
 /installers/*.exe
 /installers/assets/
+/installers/snafu/
 /runenv
+/shims/target

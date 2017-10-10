@@ -1,0 +1,8 @@
+[[bin]]
+name = "generic"
+path = "src/generic.rs"
+
+[package]
+name = "snafu-shims"
+version = "1.1.0-alpha"
+authors = [ "Tzu-ping Chung <uranusjr@gmail.com>",]
