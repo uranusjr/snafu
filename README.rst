@@ -50,7 +50,7 @@ Set Default Python Version
 
 Set Python 3.5 as default::
 
-    snafu activate 3.5
+    snafu use 3.5
 
 This does two things:
 
@@ -62,11 +62,25 @@ confusion. Use `python3`, `pip3`, `pip3.5`, etc. instead.
 
 You can activate multiple versions together::
 
-    snafu activate 2.7 3.5
+    snafu use 3.5
+    snafu use 2.7
 
-In such case, the version at the front takes precedence if there are
+The version used first (3.5 in this example) takes precedence if there are
 conflicting commands, e.g. if both 2.7 and 3.5 has `virtualenv` installed,
-the 2.7 version will be linked.
+the 3.5 version will be linked.
+
+Check the current using order::
+
+    > snafu use
+    3.6 3.5 2.7
+
+If you wish to reset the order, or remove version links altogether, use the
+`--reset` option::
+
+    > snafu use --reset 3.6
+    ...
+    > snafu use
+    3.6
 
 Uninstalling
 ------------
