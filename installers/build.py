@@ -280,7 +280,7 @@ def build_cmd(container):
     )
 
     where_output = subprocess.check_output(['where', DLL_NAME], shell=True)
-    dll_path_s = where_output.decode('ascii').strip()
+    dll_path_s = where_output.decode('ascii').split('\n', 1)[0].strip()
     click.echo('Copy {}'.format(dll_path_s))
     shutil.copy2(dll_path_s, str(cmddir))
 
