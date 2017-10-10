@@ -30,7 +30,7 @@ install:
 
   - appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
   - rustup-init -yv --default-toolchain 1.9.0
-  - "SET PATH=%USERPROFILE%\.cargo\bin;%PATH%"
+  - "SET PATH=%USERPROFILE%\\.cargo\bin;%PATH%"
 
 build: off
 
