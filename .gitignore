@@ -7,3 +7,4 @@ __pycache__
 /installers/*.exe
 /installers/assets/
 /runenv
+/shims/target
