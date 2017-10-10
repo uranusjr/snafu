@@ -51,7 +51,7 @@ Function Welcome
     ${EndIf}
 
     ${NSD_CreateCheckbox} 120u -18u 50% 12u \
-        "Install &Python ${PYTHONVERSION} (may require Internet connection)"
+        "Set up Python ${PYTHONVERSION} (may require Internet connection)"
     Pop $InstallsPythonCheckbox
     SetCtlColors $InstallsPythonCheckbox "" ${MUI_BGCOLOR}
     ${NSD_SetState} $InstallsPythonCheckbox $InstallsPython
@@ -123,6 +123,8 @@ Section "SNAFU Python Manager"
         DetailPrint "Installing Python ${PYTHONVERSION}..."
         nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
             -m snafu install ${PYTHONVERSION}"
+        nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
+            -m snafu use ${PYTHONVERSION}"
     ${EndIf}
 
     WriteUninstaller "${UNINSTALL_EXE}"

@@ -2,7 +2,13 @@
 
 ## Next (not released)
 
-(None yet.)
+### UI Changes
+
+* Remove confusing `activate` and `deactivate` commands in favour of the `use` command. Hte previous “reactivation” behaviour is now mapped to `link --all`.
+
+### Installer Changes
+
+* Add an option to install and use a Python version after SNAFU is set up.
 
 
 ## Version 1.0
