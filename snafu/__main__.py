@@ -1,6 +1,5 @@
 import functools
 import pathlib
-import sys
 
 import click
 
@@ -24,6 +23,7 @@ def cli(ctx, version):
             click.echo('SNAFU {}'.format(__version__))
         else:
             click.echo(ctx.get_help(), color=ctx.color)
+            ctx.exit(1)
 
 
 @cli.command(help='Install a Python version.')
@@ -31,7 +31,7 @@ def cli(ctx, version):
 @click.option('--file', 'from_file', type=click.Path(exists=True))
 def install(version, from_file):
     version = operations.get_version(version)
-    operations.check_status(version, False, on_exit=functools.partial(
+    operations.check_installed(version, False, on_exit=functools.partial(
         operations.link_commands, version,
     ))
 
@@ -54,7 +54,7 @@ def install(version, from_file):
 @click.option('--file', 'from_file', type=click.Path(exists=True))
 def uninstall(version, from_file):
     version = operations.get_version(version)
-    operations.check_status(version, True, on_exit=functools.partial(
+    operations.check_installed(version, True, on_exit=functools.partial(
         operations.unlink_commands, version,
     ))
     operations.update_active_versions(remove=[version])
@@ -78,7 +78,7 @@ def uninstall(version, from_file):
 @click.option('--file', 'from_file', type=click.Path(exists=True))
 def upgrade(version, from_file):
     version = operations.get_version(version)
-    operations.check_status(version, True, on_exit=functools.partial(
+    operations.check_installed(version, True, on_exit=functools.partial(
         operations.link_commands, version,
     ))
     installation_vi = version.get_installation_version_info()
@@ -102,31 +102,38 @@ def upgrade(version, from_file):
     ))
 
 
-@cli.command(
-    help='Set pythonX commands to, and link scripts for Python versions.',
-    short_help='Set versions as active.',
-)
+@cli.command(help='Set active Python versions.')
 @click.argument('version', nargs=-1)
-def activate(version):
-    if not version:
-        version = operations.get_active_names()
-    versions = [operations.get_version(v) for v in version]
+@click.option('--reset', is_flag=True)
+@click.pass_context
+def use(ctx, version, reset):
+    if not reset and not version:
+        # Bare "snafu use": Display active versions.
+        click.echo(' '.join(operations.get_active_names()))
+        return
+
+    versions = [operations.get_version(n) for n in version]
     for version in versions:
-        operations.check_status(version, True)
-    if not versions:
-        click.echo('No active versions."', err=True)
-        sys.exit(1)
-    # TODO: Be smarter and calculate diff, instead of rebuilding every time.
-    operations.deactivate()
-    operations.activate(versions)
+        operations.check_installed(version, True)
 
+    active_versions = [
+        operations.get_version(name)
+        for name in operations.get_active_names()
+    ]
+    if not reset:
+        active_names = set(v.name for v in active_versions)
+        new_versions = []
+        for v in versions:
+            if v.name in active_names:
+                click.echo('Already using {}.'.format(v), err=True)
+            else:
+                new_versions.append(v)
+        versions = active_versions + new_versions
 
-@cli.command(
-    help='Remove pythonX and linked Python script commands.',
-    short_help='Deactivate all versions.',
-)
-def deactivate():
-    operations.deactivate()
+    if active_versions != versions:
+        # TODO: Be smarter and calculate diff, not rebuilding every time.
+        operations.deactivate()
+        operations.activate(versions)
 
 
 @cli.command(
@@ -136,7 +143,7 @@ def deactivate():
 @click.argument('version')
 def where(version):
     version = operations.get_version(version)
-    operations.check_status(version, True)
+    operations.check_installed(version, True)
     click.echo(str(version.installation.joinpath('python.exe')))
 
 
@@ -165,12 +172,26 @@ def list_(list_all):
 
 
 @cli.command(help='Make a command from active versions available.')
-@click.argument('command')
+@click.argument('command', required=False)
+@click.option('--all', 'link_all', is_flag=True)
 @click.option('--force', is_flag=True)
-def link(command, force):
-    command_name = command
-    active_names = operations.get_active_names()
+@click.pass_context
+def link(ctx, command, link_all, force):
+    if not link_all and not command:    # This mistake is more common.
+        click.echo(ctx.get_usage(), color=ctx.color)
+        click.echo('\nError: Missing argument "command".', color=ctx.color)
+        ctx.exit(1)
+    if link_all and command:
+        click.echo('--all cannot be used with a command.', err=True)
+        ctx.exit(1)
 
+    active_names = operations.get_active_names()
+    if link_all:
+        operations.deactivate()
+        operations.activate([operations.get_version(n) for n in active_names])
+        return
+
+    command_name = command  # Better variable names.
     command = None
     for version_name in active_names:
         version = operations.get_version(version_name)
@@ -185,7 +206,7 @@ def link(command, force):
             'version' if len(active_names) == 1 else 'versions',
             ', '.join(active_names),
         ), err=True)
-        sys.exit(1)
+        ctx.exit(1)
 
     target_name = command.name
     target = configs.get_scripts_dir_path().joinpath(target_name)
@@ -193,10 +214,10 @@ def link(command, force):
         if target.read_bytes() == command.read_bytes():
             # If the two files are identical, we're good anyway.
             return
-        click.echo('{} already exists. Use --force to overwrite.', err=True)
-        sys.exit(1)
+        click.echo('{} exists. Use --force to overwrite.', err=True)
+        ctx.exit(1)
     operations.publish_script(command, target, overwrite=True, quiet=True)
-    click.echo('Published {} from {}'.format(target_name, version))
+    click.echo('Linked {} from {}'.format(target_name, version))
 
 
 if __name__ == '__main__':

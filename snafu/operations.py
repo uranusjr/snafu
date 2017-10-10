@@ -2,7 +2,6 @@ import atexit
 import itertools
 import pathlib
 import shutil
-import sys
 import tempfile
 
 import click
@@ -47,7 +46,7 @@ def get_version(name):
         version = versions.get_version(name, force_32=force_32)
     except versions.VersionNotFoundError:
         click.echo('No such version: {}'.format(name), err=True)
-        sys.exit(1)
+        click.get_current_context().exit(1)
     if version.name != name:
         click.echo('Note: Selecting {} instead of {}'.format(
             version.name, name,
@@ -55,17 +54,17 @@ def get_version(name):
     return version
 
 
-def check_status(version, expection, *, on_exit=None):
-    if version.is_installed() == expection:
+def check_installed(version, installed, *, on_exit=None):
+    if version.is_installed() == installed:
         return
-    if expection:
+    if installed:
         message = '{} is not installed.'
     else:
         message = '{} is already installed.'
     click.echo(message.format(version), err=True)
     if on_exit:
         on_exit()
-    sys.exit(1)
+    click.get_current_context().exit(1)
 
 
 def publish_python(version, target, *, overwrite, quiet=False):
@@ -99,11 +98,8 @@ def publish_version_scripts(version, target_dir, *, quiet, overwrite=False):
     target = target_dir.joinpath('python{}.cmd'.format(version.major_version))
     publish_python(version, target, quiet=quiet, overwrite=overwrite)
 
-    try:
-        scripts_dir = version.get_scripts_dir_path()
-    except FileNotFoundError:
-        pass
-    else:
+    scripts_dir = version.get_scripts_dir_path()
+    if scripts_dir.is_dir():
         for path in scripts_dir.iterdir():
             if path.stem in ('easy_install', 'pip'):
                 # Don't publish versionless pip and easy_install.
