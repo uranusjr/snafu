@@ -1,5 +1,6 @@
 mod shims;
 
+/// Entry point for a generic executable file's shim.
 fn main() {
     match shims::run() {
         Ok(status) => match status.code() {
@@ -8,7 +9,7 @@ fn main() {
         },
         Err(error) => {
             println!("Command failed: {}", error);
-            std::process::exit(1)
+            std::process::exit(1);
         },
     };
 }
