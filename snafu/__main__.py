@@ -216,7 +216,7 @@ def link(ctx, command, link_all, force):
             return
         click.echo('{} exists. Use --force to overwrite.', err=True)
         ctx.exit(1)
-    operations.publish_script(command, target, overwrite=True, quiet=True)
+    operations.publish_file(command, target, overwrite=True, quiet=True)
     click.echo('Linked {} from {}'.format(target_name, version))
 
 

@@ -67,7 +67,7 @@ def check_installed(version, installed, *, on_exit=None):
     click.get_current_context().exit(1)
 
 
-def publish_shim(target, content, *, overwrite, quiet=False):
+def publish_shim(target, content, *, overwrite, quiet):
     if not overwrite and target.exists():
         return
     if not quiet:
@@ -76,21 +76,21 @@ def publish_shim(target, content, *, overwrite, quiet=False):
     shutil.copy2(str(configs.get_generic_shim_path()), str(target))
 
 
+def publish_file(source, target, *, overwrite, quiet):
+    if not overwrite and target.exists():
+        return
+    if not quiet:
+        click.echo('  {}'.format(target.name))
+    shutil.copy2(str(source), str(target))
+
+
 def publish_python_command(version, target, *, overwrite, quiet=False):
     publish_shim(target, version.real_python, overwrite=overwrite, quiet=quiet)
 
 
 def publish_pip_command(version, target, *, overwrite, quiet=False):
-    shim_content = '\n'.join([str(version.real_python), '-m', 'pip'])
-    publish_shim(target, shim_content, overwrite=overwrite, quiet=quiet)
-
-
-def publish_script(source, target, *, quiet, overwrite):
-    if not overwrite and target.exists():
-        return
-    if not quiet:
-        click.echo('  {}'.format(target.name))
-    shutil.copy2(str(source.resolve()), str(target))
+    pip = version.get_scripts_dir_path().joinpath('pip.exe')
+    publish_file(pip, target, overwrite=overwrite, quiet=quiet)
 
 
 def publish_version_scripts(version, target_dir, *, quiet, overwrite=False):
@@ -107,7 +107,7 @@ def publish_version_scripts(version, target_dir, *, quiet, overwrite=False):
                 # Don't publish versionless pip and easy_install.
                 continue
             target = target_dir.joinpath(path.name)
-            publish_script(path, target, quiet=quiet, overwrite=overwrite)
+            publish_file(path, target, quiet=quiet, overwrite=overwrite)
 
 
 def deactivate(*, quiet=False):
