@@ -192,8 +192,8 @@ issues before submitting::
 
     pipenv run -- flake8 .
 
-I’m not that familiar with Rust myself either, so any suggestions are welcome
-at that front! :D
+I’m not that familiar with Rust myself, so any suggestions are welcome at that
+front! :D
 
 
 Frequently Asked Questions
