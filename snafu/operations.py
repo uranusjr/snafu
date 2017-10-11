@@ -105,19 +105,27 @@ def publish_version_scripts(version, target_dir, *, quiet, overwrite=False):
             if path.stem in ('easy_install', 'pip'):
                 # Don't publish versionless pip and easy_install.
                 continue
+            if not path.is_file():
+                continue
             target = target_dir.joinpath(path.name)
             publish_file(path, target, quiet=quiet, overwrite=overwrite)
 
 
-def deactivate(*, quiet=False):
+def activate(versions, *, allow_empty=False, quiet=False):
+    if not allow_empty and not versions:
+        click.echo('No active versions.', err=True)
+        click.get_current_context().exit(1)
+
+    # TODO: Be smarter and calculate diff, not rebuilding every time.
+    scripts_dir = configs.get_scripts_dir_path()
+
+    # Remove old stuffs.
     if not quiet:
         click.echo('Removing scripts.')
-    for p in configs.get_scripts_dir_path().iterdir():
+    for p in scripts_dir.iterdir():
         p.unlink()
 
-
-def activate(versions, *, quiet=False):
-    scripts_dir = configs.get_scripts_dir_path()
+    # Populate new stuffs.
     for version in versions:
         publish_version_scripts(version, scripts_dir, quiet=quiet)
     configs.get_python_versions_path().write_text(
@@ -184,5 +192,4 @@ def update_active_versions(*, remove=frozenset()):
             continue
         click.echo('Deactivating {}'.format(version))
     if len(current_active_names) != len(active_names):
-        deactivate()
-        activate([get_version(n) for n in active_names])
+        activate([get_version(n) for n in active_names], allow_empty=True)

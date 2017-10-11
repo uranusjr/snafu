@@ -10,6 +10,9 @@
 
 * Command aliases are now provided by “shims”, which are pairs of a proxy executable (written in Rust) and a config file (describing how the executable should proxy the call). Thanks to [Scoop](http://scoop.sh) for the inspiration.
 * The `snafu` entry point command is also a shim now.
+* Upgrade Python 3.4 definition to 3.4.4.
+* Improve behaviour when uninstalling versions not installed by SNAFU.
+* Py Launcher usage is reduced in favour of reading the registry ourselves.
 * Documentation is no longer installed with each Python version.
 
 ### Installer Changes

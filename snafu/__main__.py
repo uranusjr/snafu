@@ -109,7 +109,11 @@ def upgrade(version, from_file):
 def use(ctx, version, reset):
     if not reset and not version:
         # Bare "snafu use": Display active versions.
-        click.echo(' '.join(operations.get_active_names()))
+        names = operations.get_active_names()
+        if names:
+            click.echo(' '.join(names))
+        else:
+            click.echo('Not using any versions.', err=True)
         return
 
     versions = [operations.get_version(n) for n in version]
@@ -131,9 +135,7 @@ def use(ctx, version, reset):
         versions = active_versions + new_versions
 
     if active_versions != versions:
-        # TODO: Be smarter and calculate diff, not rebuilding every time.
-        operations.deactivate()
-        operations.activate(versions)
+        operations.activate(versions, allow_empty=reset)
 
 
 @cli.command(
@@ -187,7 +189,6 @@ def link(ctx, command, link_all, force):
 
     active_names = operations.get_active_names()
     if link_all:
-        operations.deactivate()
         operations.activate([operations.get_version(n) for n in active_names])
         return
 
