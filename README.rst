@@ -16,7 +16,8 @@ Basics
 Distribution
 ------------
 
-Find installers in `Releases <https://github.com/uranusjr/snafu/releases>`__. Install, and restart your shell.
+Find installers in `Releases <https://github.com/uranusjr/snafu/releases>`__.
+Install, and restart your shell.
 
 Installing Pythons
 ------------------
