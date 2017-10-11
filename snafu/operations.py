@@ -89,8 +89,7 @@ def publish_python_command(version, target, *, overwrite, quiet=False):
 
 
 def publish_pip_command(version, target, *, overwrite, quiet=False):
-    pip = version.get_scripts_dir_path().joinpath('pip.exe')
-    publish_file(pip, target, overwrite=overwrite, quiet=quiet)
+    publish_file(version.real_pip, target, overwrite=overwrite, quiet=quiet)
 
 
 def publish_version_scripts(version, target_dir, *, quiet, overwrite=False):

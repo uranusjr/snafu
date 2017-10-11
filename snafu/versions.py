@@ -87,7 +87,11 @@ class Version:
 
     @property
     def real_python(self):
-        return self.installation.joinpath('python.exe')
+        return self.installation.joinpath('python.exe').resolve()
+
+    @property
+    def real_pip(self):
+        return self.get_scripts_dir_path().joinpath('pip.exe').resolve()
 
     def is_installed(self):
         try:
