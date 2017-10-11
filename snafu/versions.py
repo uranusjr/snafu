@@ -49,7 +49,7 @@ class Version:
     url = attr.ib()
     md5_sum = attr.ib()
     version_info = attr.ib(convert=tuple)
-    guid = attr.ib(default=None)
+    product_codes = attr.ib(default=attr.Factory(dict))
     forced_32 = attr.ib(default=False)
 
     def __str__(self):
@@ -152,7 +152,7 @@ class CPythonMSIVersion(Version):
             version_info=data['version_info'],
             url=variant['url'],
             md5_sum=variant['md5_sum'],
-            guid=variant.get('guid'),
+            product_codes=variant.get('product_codes', {}),
         )
 
     def _run_installer(self, cmd, target_dirpath):
@@ -186,9 +186,11 @@ class CPythonMSIVersion(Version):
         self._run_installer(cmd, self.installation)
 
     def get_cached_uninstaller(self):
-        if self.guid:
-            return self.guid
-        return metadata.find_uninstaller_id(self.name)
+        info = self.get_installation_version_info()
+        try:
+            return self.product_codes['{0[0]}.{0[1]}.{0[2]}'.format(info)]
+        except (IndexError, KeyError, TypeError):
+            return metadata.find_uninstaller_id(self.name)
 
     def uninstall(self, cmd):
         subprocess.check_call('msiexec /x "{}" /qb'.format(cmd), shell=True)

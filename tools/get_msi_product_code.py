@@ -1,4 +1,4 @@
-"""Retrieves GUID from the MSI to be vendored in version information.
+"""Retrieves product code from the MSI to be vendored in version information.
 """
 import msilib
 import sys
@@ -23,7 +23,7 @@ def main():
 
     row = v.Fetch()
     guid = row.GetString(col_index)
-    print('GUID:', guid)
+    print('Product code:', guid)
 
     v.Close()
 
