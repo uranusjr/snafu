@@ -102,7 +102,7 @@ class Version:
 
     def get_installation_version_info(self):
         output = subprocess.check_output(
-            'py -{} -V'.format(self.name), shell=True,
+            [self.real_python, '--version'], shell=True,
         ).decode('ascii', 'ignore')
         match = re.match(r'^Python (\d+)\.(\d+)\.(\d+).*$', output.strip())
         if not match:
