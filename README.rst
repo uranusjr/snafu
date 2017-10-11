@@ -131,11 +131,11 @@ Optional Dependencies
 ---------------------
 
 * Rust 1.9.0 for MSVC and Visual Studio 2015 if you want to run commands that
-  link things (e.g. ``install``, ``activate``, and ``link``).
-* NSIS_ 3.x and Rust 1.9.0 if you want to build the installer.
-    * Commands ``cargo`` and ``makensis`` need to be available in your shell.
+  link comamnds and scripts (e.g. ``install``, ``activate``, and ``link``).
+* `NSIS`_ 3.x and Rust 1.9.0 if you want to build the installer. Commands
+  ``cargo`` and ``makensis`` need to be available in your shell.
 
-.. _NSIS: http://nsis.sourceforge.net/Download
+.. _`NSIS`: http://nsis.sourceforge.net/Download
 
 Project Setup
 -------------
@@ -216,6 +216,8 @@ environment variable is also very tedious and delicate to manipulate.
        days don’t recommand installing Python via `python.org`_, but with
        platform-specific tools instead.
 
+.. _`python.org`: https://www.python.org
+
 Wyy Not Use the Py Launcher?
 ----------------------------
 
@@ -228,9 +230,9 @@ example::
 
 to run ``foo.py`` with Python 3.5.
 
-This is such a good idea *SNAFU installs ``py.exe`` for you*, and I encourage
-you to use it. But SNAFU also solves a few additional use cases that ``py.exe``
-can’t:
+This is such a good idea *SNAFU installs the Py Launcher during setup*, and I
+encourage you to use it. But SNAFU also solves a few additional use cases that
+``py.exe`` doesn’t:
 
 * Availability of versioned Python executables, e.g. ``python3.6.exe``.
 * Managing commands other than ``python.exe``.
