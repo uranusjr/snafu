@@ -9,7 +9,6 @@ import zipfile
 import click
 import pkg_resources
 import requests
-import toml
 
 
 VERSION = '3.6.3'
@@ -229,20 +228,9 @@ def build_snafusetup(arch, libdir):
 
 
 def build_shims(arch, libdir):
-    # TODO: Build current arch variant with Cargo, and copy it to lib\shims.
-    # <<<< REMEMBER TO REPLACE VERSION STRING IN CARGO CONFIGS!! >>>>
     shimsdir = libdir.joinpath('shims')
     shimsdir.mkdir()
-
     shimsbasedir = ROOT.parent.joinpath('shims')
-
-    cargo = shimsbasedir.joinpath('Cargo.toml')
-    with cargo.open() as f:
-        data = toml.load(f)
-    version = get_snafu_version()
-    data['package']['version'] = version
-    with cargo.open('w') as f:
-        toml.dump(data, f)
 
     click.echo('Build shim executables')
     subprocess.check_call(
@@ -269,8 +257,6 @@ def build_lib(arch, container):
 
 
 def build_cmd(container):
-    # TODO: Write snafu.exe from generic.exe and copy vcruntime140.dll.
-    # The shim file will be written on installation.
     cmddir = container.joinpath('cmd')
     cmddir.mkdir()
     click.echo('Copy snafu.exe')
@@ -278,6 +264,7 @@ def build_cmd(container):
         str(container.joinpath('lib', 'shims', 'generic.exe')),
         str(cmddir.joinpath('snafu.exe')),
     )
+    # The shim file will be written on installation.
 
     where_output = subprocess.check_output(['where', DLL_NAME], shell=True)
     dll_path_s = where_output.decode('ascii').split('\n', 1)[0].strip()
