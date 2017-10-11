@@ -234,11 +234,11 @@ def build_shims(arch, libdir):
 
     click.echo('Build shim executables')
     subprocess.check_call(
-        'cargo +1.9.0 clean',
+        'cargo clean',
         shell=True, cwd=str(shimsbasedir),
     )
     subprocess.check_call(
-        'cargo +1.9.0 build --release',
+        'cargo build --release',
         shell=True, cwd=str(shimsbasedir),
     )
     click.echo('Copy generic.exe')

@@ -29,7 +29,7 @@ install:
   - "pipenv install --system --dev --skip-lock"
 
   - appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
-  - rustup-init -y --default-toolchain 1.9.0
+  - rustup-init -y --default-toolchain 1.20.0
   - "SET PATH=%USERPROFILE%\\.cargo\\bin;%PATH%"
 
   - "SET PATH"
