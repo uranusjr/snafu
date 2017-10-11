@@ -30,15 +30,15 @@ installing patch versions. This is because there is no good way to deal with
 patch versions on Windows (the py launcher only supports major and minor
 versioning), and you should always use the latest patch anyway.
 
-After installing a version, `pythonX.Y` will be available as a command.
+After installing a version, ``pythonX.Y`` will be available as a command.
 
 If you’re on a 64-bit OS, the 64-bit version is installed by default. To
 install a 32-bit version on a 64-bit machine, use the `-32` suffix::
 
     snafu install 3.6-32
 
-If you install both 32- and 64-bit Pythons, `pythonX.Y` will point to the
-64-bit version, and `pythonX.Y-32` 32-bit.
+If you install both 32- and 64-bit Pythons, ``pythonX.Y`` will point to the
+64-bit version, and ``pythonX.Y-32`` 32-bit.
 
 (Note: Due to restrictions in the standard Python installer, versions up to
 3.4 are available in *either* 64- or 32-bit, not both.)
@@ -57,8 +57,9 @@ This does two things:
 1. `python3` is mapped to Python 3.5.
 2. Scripts in `Python35\\Scripts` are linked into PATH.
 
-Special case: `python`, `pip` and `easy_install` are never linked, to avoid any
-confusion. Use `python3`, `pip3`, `pip3.5`, etc. instead.
+Special case: ``python``, ``pip`` and ``easy_install`` are never linked, to
+avoid ambiguity between Python 2 and 3. Use ``python3``, ``pip3``, ``pip3.5``,
+etc. instead.
 
 You can activate multiple versions together::
 
@@ -66,7 +67,7 @@ You can activate multiple versions together::
     snafu use 2.7
 
 The version used first (3.5 in this example) takes precedence if there are
-conflicting commands, e.g. if both 2.7 and 3.5 has `virtualenv` installed,
+conflicting commands, e.g. if both 2.7 and 3.5 have ``virtualenv`` installed,
 the 3.5 version will be linked.
 
 Check the current using order::
@@ -75,7 +76,7 @@ Check the current using order::
     3.6 3.5 2.7
 
 If you wish to reset the order, or remove version links altogether, use the
-`--reset` option::
+``--reset`` option::
 
     > snafu use --reset 3.6
     ...
@@ -130,9 +131,9 @@ Optional Dependencies
 ---------------------
 
 * Rust 1.9.0 for MSVC and Visual Studio 2015 if you want to run commands that
-  link things (e.g. `install`, `activate`, and `link`).
+  link things (e.g. ``install``, ``activate``, and ``link``).
 * NSIS_ 3.x and Rust 1.9.0 if you want to build the installer.
-    * Commands `cargo` and `makensis` need to be available in your shell.
+    * Commands ``cargo`` and ``makensis`` need to be available in your shell.
 
 .. _NSIS: http://nsis.sourceforge.net/Download
 
@@ -179,9 +180,9 @@ You can only build installers of your host’s architecture. Cross compilation
 is certainly possible (the only slightly tricky part is Rust compilation), but
 I just haven’t found the need to set it up.
 
-After the command finishes you should get an EXE in the `installers` directory.
-There are some other options available in `build.py`; you can check them out
-yourself.
+After the command finishes you should get an EXE in the ``installers``
+directory. There are some other options available in ``build.py`` you can
+check them out yourself.
 
 Development Guideline
 ---------------------
@@ -195,6 +196,52 @@ I’m not that familiar with Rust myself either, so any suggestions are welcome
 at that front! :D
 
 
+Frequently Asked Questions
+==========================
+
+Why Not Just Use the Option “Add Python to PATH”?
+-------------------------------------------------
+
+CPython’s standard Windows build, unlike on UNIX-like systems, does not provide
+the “altinstall” option. This means every Python distribution on Windows only
+has one Python executable called ``python.exe``, without version names such as
+``python3.6.exe``.
+
+Adding Python to PATH stops being a good idea the moment you need a *second*
+installtion. You can only access one Python at a time, and installed scripts
+from different versions start to mix, which is a bad thing.[#]_ The PATH
+environment variable is also very tedious and delicate to manipulate.
+
+.. [#] This is not a Windows-only problem, but also exactly why tutorials these
+       days don’t recommand installing Python via `python.org`_, but with
+       platform-specific tools instead.
+
+Wyy Not Use the Py Launcher?
+----------------------------
+
+Python introduced `PEP 397`_ partly to solve the ``python.exe`` problem (also
+to interpret the shebang_ line on Windows). It installs a ``py.exe`` to your
+PATH, and instead of invoking ``python.exe`` directly, you should use, for
+example::
+
+    py -3.5 foo.py
+
+to run ``foo.py`` with Python 3.5.
+
+This is such a good idea *SNAFU installs ``py.exe`` for you*, and I encourage
+you to use it. But SNAFU also solves a few additional use cases that ``py.exe``
+can’t:
+
+* Availability of versioned Python executables, e.g. ``python3.6.exe``.
+* Managing commands other than ``python.exe``.
+
+SNAFU’s implementation also relies on a lot of the same values read by
+``py.exe``, so you can view SNAFU as an extension to it, not a replacement.
+
+.. _`PEP 397`: https://www.python.org/dev/peps/pep-0397/
+.. _shebang: https://en.wikipedia.org/wiki/Shebang_(Unix)
+
+
 Architecture (Implementation Details)
 =====================================
 
@@ -202,7 +249,7 @@ How are Pythons installed?
 --------------------------
 
 The official CPython installers are downloaded, and executed in a
-non-interactive manner. For more details check out the relevant documentation:
+non-interactive manner. Check out the relevant documentation for more details:
 
 * https://www.python.org/download/releases/2.5/msi/
 * https://docs.python.org/3/using/windows.html#installing-without-ui
