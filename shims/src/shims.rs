@@ -3,7 +3,7 @@ use std::error::Error;
 use std::fmt::{self, Formatter, Display};
 use std::io::ErrorKind;
 use std::io::prelude::*;
-use std::process::{Command, ExitStatus};
+use std::process::Command;
 use std::string::String;
 
 struct Shim {
@@ -62,7 +62,7 @@ impl Display for Shim {
 /// This collects information from the shim file, combines arguments specified
 /// in the shim and arguments passed to this program, invokes the program with
 /// combined arguments, waits for it, and collects the result.
-pub fn run() -> Result<ExitStatus, String> {
+pub fn run() -> Result<i32, String> {
     let shim = match Shim::load() {
         Ok(shim) => shim,
         Err(err) => { return Err(String::from(err.description())); },
@@ -77,12 +77,17 @@ pub fn run() -> Result<ExitStatus, String> {
     }
 
     match Command::new(&cmd).args(&args).status() {
-        Ok(status) => Ok(status),
+        Ok(status) => match status.code() {
+            Some(code) => Ok(code),
+            // Doc seems to suggest this won't happen on Windows.
+            // 137 is a common value seen with SIGKILL terminated programs.
+            None => Ok(137),
+        },
         Err(_) => {
             let mut s = String::from("failed to launch \"");
             s.push_str(&cmd);
             s.push_str("\"");
-            return Err(s);
+            Err(s)
         },
     }
 }

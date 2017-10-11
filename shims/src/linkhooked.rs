@@ -1,6 +1,9 @@
 mod shims;
 
-/// Entry point for a generic executable file's shim.
+/// Entry point for shims of tools that perform setup, e.g. pip, easy_install.
+///
+/// This entry point hooks back to SNAFU to perform necessary script
+/// activation after the installation completes.
 fn main() {
     let code = match shims::run() {
         Ok(code) => code,
@@ -9,5 +12,6 @@ fn main() {
             std::process::abort();
         },
     };
+    // TODO: Hook here.
     std::process::exit(code);
 }
