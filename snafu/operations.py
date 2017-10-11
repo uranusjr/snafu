@@ -165,7 +165,7 @@ def get_active_names():
     return tuple(v for v in content.split() if v)
 
 
-def get_versions(installed_only):
+def get_versions(*, installed_only):
     vers = versions.get_versions()
     names = set(v.name for v in vers)
 
@@ -180,6 +180,17 @@ def get_versions(installed_only):
         return True
 
     return [v for v in vers if should_include(v)]
+
+
+def get_latest_version():
+    # 1. Prefer newer versions.
+    # 2. Prefer shorter names because they look "more default".
+    version = max(
+        get_versions(installed_only=False),
+        key=lambda v: (v.version_info, -len(v.name)),
+    )
+    click.echo("Note: Selecting {} for 'latest'".format(version))
+    return version
 
 
 def update_active_versions(*, remove=frozenset()):

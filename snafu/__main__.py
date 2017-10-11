@@ -30,7 +30,11 @@ def cli(ctx, version):
 @click.argument('version')
 @click.option('--file', 'from_file', type=click.Path(exists=True))
 def install(version, from_file):
-    version = operations.get_version(version)
+    if version == 'latest':
+        # Special case: install whatever the latest CPython version.
+        version = operations.get_latest_version()
+    else:
+        version = operations.get_version(version)
     operations.check_installed(version, False, on_exit=functools.partial(
         operations.link_commands, version,
     ))
@@ -152,7 +156,7 @@ def where(version):
 @cli.command(name='list', help='List Python versions (installed or all).')
 @click.option('--all', 'list_all', is_flag=True)
 def list_(list_all):
-    vers = operations.get_versions(not list_all)
+    vers = operations.get_versions(installed_only=(not list_all))
     active_names = set(operations.get_active_names())
 
     for v in vers:
