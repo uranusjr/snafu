@@ -45,7 +45,7 @@ Function Welcome
     ${EndIf}
 
     ${NSD_CreateCheckbox} 120u -18u 50% 12u \
-        "Set up Python ${PYTHONVERSION} (may require Internet connection)"
+        "Set up Python ${PYTHONVERSION} (needs Internet connection)"
     Pop $InstallsPythonCheckbox
     SetCtlColors $InstallsPythonCheckbox "" ${MUI_BGCOLOR}
     ${NSD_SetState} $InstallsPythonCheckbox $InstallsPython
