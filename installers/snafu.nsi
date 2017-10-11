@@ -24,8 +24,7 @@
 
 !define PYTHONVERSION '3.6'
 
-!define SNAFU_SHIM_STRING \
-    "$\"$INSTDIR\lib\python\python.exe$\"$\r$\n\-m$\r$\n\snafu"
+!define SNAFU_SHIM_STRING "$INSTDIR\lib\python\python.exe$\r$\n-m$\r$\nsnafu"
 
 
 ShowInstDetails hide
