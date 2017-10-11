@@ -268,9 +268,9 @@ to older versions as well for consistency.
 How are Executables linked?
 ---------------------------
 
-Script executables are *copied*. `.py` files works as well because they have
+Script executables are *copied*. ``.py`` files works as well because they have
 appropriate shebang lines, and can be handled by the py launcher, as specified
-in `PEP 397 <https://www.python.org/dev/peps/pep-0397/>`_.
+in `PEP 397`_.
 
 The python launchers (python.exe) cannot be copied as-is because they require
 additional DLL files to work, so they are exposed with one-liner BATCH files
