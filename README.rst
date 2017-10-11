@@ -274,11 +274,10 @@ Script executables are *copied*. ``.py`` files works as well because they have
 appropriate shebang lines, and can be handled by the py launcher, as specified
 in `PEP 397`_.
 
-The python launchers (python.exe) cannot be copied as-is because they require
-additional DLL files to work, so they are exposed with one-liner BATCH files
-like this::
-
-    @%LOCALAPPDATA%\Programs\Python\Python35\python.exe %*
+The ``python.exe`` programs cannot be copied as-is because they require
+additional DLL files, and are shimmed instead. A ``*.shim`` file is created
+to describe how a program should be run, and a small binary is used to proxy
+the invocation.
 
 
 Why the Name?
