@@ -81,7 +81,7 @@ def upgrade(version, from_file):
     operations.check_installed(version, True, on_exit=functools.partial(
         operations.link_commands, version,
     ))
-    installation_vi = version.get_installation_version_info()
+    installation_vi = version.get_installation().get_version_info()
     if installation_vi >= version.version_info:
         click.echo('Python {} is up to date.'.format(
             '.'.join(str(i) for i in installation_vi),
@@ -98,7 +98,7 @@ def upgrade(version, from_file):
 
     operations.link_commands(version)
     click.echo('{} is upgraded succesfully at {}'.format(
-        version, version.installation,
+        version, version.get_installation().path,
     ))
 
 
@@ -146,7 +146,7 @@ def use(ctx, version, reset):
 def where(version):
     version = operations.get_version(version)
     operations.check_installed(version, True)
-    click.echo(str(version.installation.joinpath('python.exe')))
+    click.echo(str(version.get_installation().python))
 
 
 @cli.command(name='list', help='List Python versions (installed or all).')
@@ -197,7 +197,7 @@ def link(ctx, command, link_all, force):
     for version_name in active_names:
         version = operations.get_version(version_name)
         try:
-            command = version.find_script_path(command_name)
+            command = version.get_installation().find_script(command_name)
         except FileNotFoundError:
             continue
         break
