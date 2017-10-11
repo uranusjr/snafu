@@ -130,11 +130,12 @@ Requirements
 Optional Dependencies
 ---------------------
 
-* Rust 1.9.0 for MSVC and Visual Studio 2015 if you want to run commands that
+* Rust_ 1.9.0 for MSVC and Visual Studio 2015 if you want to run commands that
   link comamnds and scripts (e.g. ``install``, ``activate``, and ``link``).
-* `NSIS`_ 3.x and Rust 1.9.0 if you want to build the installer. Commands
+* NSIS_ 3.x and Rust_ 1.9.0 if you want to build the installer. Commands
   ``cargo`` and ``makensis`` need to be available in your shell.
 
+.. _Rust: https://www.rust-lang.org/en-US/
 .. _`NSIS`: http://nsis.sourceforge.net/Download
 
 Project Setup
