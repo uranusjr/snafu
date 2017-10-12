@@ -15,7 +15,7 @@ def download_installer(version):
     response = requests.get(version.url, stream=True)
     response.raise_for_status()
 
-    installer_name = version.url.rsplit('/', 1)[-1]
+    name = version.url.rsplit('/', 1)[-1]
     total = response.headers.get('content-length', '')
     chunks = []
 
@@ -23,7 +23,7 @@ def download_installer(version):
         length = int(total)
     else:
         length = None
-    with click.progressbar(length=length, label=installer_name) as b:
+    with click.progressbar(length=length, label=name, show_eta=False) as b:
         for chunk in response.iter_content(chunk_size=4096):
             chunks.append(chunk)
             if length is not None:
@@ -34,7 +34,7 @@ def download_installer(version):
     tempdir_path = pathlib.Path(tempfile.mkdtemp())
     atexit.register(shutil.rmtree, str(tempdir_path), ignore_errors=True)
 
-    installer_path = tempdir_path.joinpath(installer_name)
+    installer_path = tempdir_path.joinpath(name)
     version.save_installer(data, installer_path)
 
     return installer_path
