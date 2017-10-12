@@ -221,11 +221,9 @@ def build_snafusetup(arch, libdir):
 
     # Copy setup scripts.
     click.echo('Copy setup scripts')
-    for stem in ('build', 'discovery', 'env'):
-        shutil.copy2(
-            str(ROOT.joinpath('env.py')),
-            str(snafusetupdir.joinpath('{}.py'.format(stem))),
-        )
+    for path in ROOT.joinpath('scripts').iterdir():
+        if path.suffix == '.py':
+            shutil.copy2(str(path), str(snafusetupdir.joinpath(path.name)))
 
 
 def build_shims(arch, libdir):

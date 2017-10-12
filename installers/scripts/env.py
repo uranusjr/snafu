@@ -1,3 +1,5 @@
+import click
+
 import contextlib
 import ctypes
 import ctypes.wintypes
@@ -80,10 +82,18 @@ def publish():
     SendMessage(HWND_BROADCAST, WM_SETTINGCHANGE, 0, 'Environment')
 
 
-if __name__ == '__main__':
-    if len(sys.argv) > 2 and '--uninstall' in sys.argv[2:]:
-        changed = uninstall(pathlib.Path(sys.argv[1]))
+@click.command()
+@click.argument('base', type=click.Path(exists=True, file_okay=False))
+@click.option('--uninstall', 'uninstalling', is_flag=True)
+def cli(base, uninstalling):
+    path = pathlib.Path(base)
+    if uninstalling:
+        changed = uninstall(path)
     else:
-        changed = install(pathlib.Path(sys.argv[1]))
+        changed = uninstall(path)
     if changed:
         publish()
+
+
+if __name__ == '__main__':
+    cli()

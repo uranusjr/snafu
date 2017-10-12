@@ -150,8 +150,7 @@ SectionEnd
 
 Section "un.Uninstaller"
     nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
-        $\"$INSTDIR\lib\snafusetup\env.py$\" $\"$INSTDIR$\" \
-        --uninstall"
+        $\"$INSTDIR\lib\snafusetup\env.py$\" --uninstall $\"$INSTDIR$\""
     Rmdir /r "$INSTDIR"
     DeleteRegKey HKLM "${UNINSTALL_REGKEY}"
 SectionEnd
