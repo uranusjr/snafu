@@ -6,7 +6,7 @@ from snafu import operations, versions
 
 
 def get_version_or_none(name):
-    with contextlib.supress(versions.VersionNotFoundError):
+    with contextlib.suppress(versions.VersionNotFoundError):
         return versions.get_version(name)
     return None
 
