@@ -220,10 +220,13 @@ def build_snafusetup(arch, libdir):
     shutil.copy2(str(msi), str(snafusetupdir.joinpath('py.msi')))
 
     # Copy setup scripts.
-    click.echo('Copy setup scripts')
+    click.echo('Copy setup scripts...')
     for path in ROOT.joinpath('scripts').iterdir():
-        if path.suffix == '.py':
-            shutil.copy2(str(path), str(snafusetupdir.joinpath(path.name)))
+        if path.suffix != '.py':
+            continue
+        name = path.name
+        click.echo('  {}'.format(name))
+        shutil.copy2(str(path), str(snafusetupdir.joinpath(name)))
 
 
 def build_shims(arch, libdir):
