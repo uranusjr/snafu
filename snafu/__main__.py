@@ -35,9 +35,10 @@ def install(version, from_file):
         version = operations.get_latest_version()
     else:
         version = operations.get_version(version)
-    operations.check_installed(version, False, on_exit=functools.partial(
-        operations.link_commands, version,
-    ))
+    operations.check_installation(
+        version, installed=False,
+        on_exit=functools.partial(operations.link_commands, version),
+    )
 
     if from_file is None:
         installer_path = operations.download_installer(version)
@@ -58,7 +59,7 @@ def install(version, from_file):
 @click.option('--file', 'from_file', type=click.Path(exists=True))
 def uninstall(version, from_file):
     version = operations.get_version(version)
-    operations.check_installed(version, True, on_exit=functools.partial(
+    operations.check_installation(version, on_exit=functools.partial(
         operations.unlink_commands, version,
     ))
     operations.update_active_versions(remove=[version])
@@ -82,10 +83,9 @@ def uninstall(version, from_file):
 @click.option('--file', 'from_file', type=click.Path(exists=True))
 def upgrade(version, from_file):
     version = operations.get_version(version)
-    operations.check_installed(version, True, on_exit=functools.partial(
-        operations.link_commands, version,
-    ))
-    installation_vi = version.get_installation().get_version_info()
+    installation_vi = operations.check_installation(
+        version, on_exit=functools.partial(operations.link_commands, version),
+    ).get_version_info()
     if installation_vi >= version.version_info:
         click.echo('Python {} is up to date.'.format(
             '.'.join(str(i) for i in installation_vi),
@@ -122,7 +122,7 @@ def use(ctx, version, reset):
 
     versions = [operations.get_version(n) for n in version]
     for version in versions:
-        operations.check_installed(version, True)
+        operations.check_installation(version)
 
     active_versions = [
         operations.get_version(name)
@@ -149,8 +149,8 @@ def use(ctx, version, reset):
 @click.argument('version')
 def where(version):
     version = operations.get_version(version)
-    operations.check_installed(version, True)
-    click.echo(str(version.get_installation().python))
+    installation = operations.check_installation(version)
+    click.echo(str(installation.python))
 
 
 @cli.command(name='list', help='List Python versions (installed or all).')

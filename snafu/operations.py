@@ -54,12 +54,16 @@ def get_version(name):
     return version
 
 
-def check_installed(version, installed, *, on_exit=None):
-    if version.is_installed() == installed:
-        return
-    if installed:
+def check_installation(version, *, installed=True, on_exit=None):
+    try:
+        installation = version.get_installation()
+    except FileNotFoundError:
+        if not installed:   # Expected to be absent. Return None.
+            return None
         message = '{} is not installed.'
     else:
+        if installed:   # Expected to be installed. Return the installation.
+            return installation
         message = '{} is already installed.'
     click.echo(message.format(version), err=True)
     if on_exit:
