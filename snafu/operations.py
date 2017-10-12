@@ -84,22 +84,27 @@ def publish_file(source, target, *, overwrite, quiet):
     shutil.copy2(str(source), str(target))
 
 
-def publish_python_command(version, target, *, overwrite, quiet=False):
-    publish_shim(target, version.real_python, overwrite=overwrite, quiet=quiet)
+def publish_python_command(installation, target, *, overwrite, quiet=False):
+    publish_shim(target, installation.python, overwrite=overwrite, quiet=quiet)
 
 
-def publish_pip_command(version, target, *, overwrite, quiet=False):
-    publish_file(version.real_pip, target, overwrite=overwrite, quiet=quiet)
+def publish_pip_command(installation, target, *, overwrite, quiet=False):
+    publish_file(installation.pip, target, overwrite=overwrite, quiet=quiet)
 
 
 def publish_version_scripts(version, target_dir, *, quiet, overwrite=False):
     if not quiet:
         click.echo('Publishing {}...'.format(version))
 
-    target = target_dir.joinpath('python{}.exe'.format(version.major_version))
-    publish_python_command(version, target, quiet=quiet, overwrite=overwrite)
+    installation = version.get_installation()
+    scripts_dir = installation.scripts_dir
 
-    scripts_dir = version.get_scripts_dir_path()
+    target = target_dir.joinpath('python{}.exe'.format(version.major_version))
+    publish_python_command(
+        installation, target,
+        quiet=quiet, overwrite=overwrite,
+    )
+
     if scripts_dir.is_dir():
         for path in scripts_dir.iterdir():
             if path.stem in ('easy_install', 'pip'):
@@ -134,12 +139,13 @@ def activate(versions, *, allow_empty=False, quiet=False):
 
 
 def link_commands(version):
+    installation = version.get_installation()
     for path in version.python_commands:
         click.echo('Publishing {}'.format(path.name))
-        publish_python_command(version, path, overwrite=True, quiet=True)
+        publish_python_command(installation, path, overwrite=True, quiet=True)
     for path in version.pip_commands:
         click.echo('Publishing {}'.format(path.name))
-        publish_pip_command(version, path, overwrite=True, quiet=True)
+        publish_pip_command(installation, path, overwrite=True, quiet=True)
 
 
 def safe_unlink(p):

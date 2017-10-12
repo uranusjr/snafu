@@ -1,6 +1,5 @@
 import enum
 import hashlib
-import itertools
 import json
 import os
 import pathlib
@@ -9,7 +8,7 @@ import subprocess
 
 import attr
 
-from . import configs, metadata
+from . import configs, installations, metadata
 
 
 class VersionNotFoundError(ValueError):
@@ -81,17 +80,9 @@ class Version:
             for name in self.script_version_names
         ]
 
-    @property
-    def installation(self):
-        return metadata.get_install_path(self.name)
-
-    @property
-    def real_python(self):
-        return self.installation.joinpath('python.exe').resolve()
-
-    @property
-    def real_pip(self):
-        return self.get_scripts_dir_path().joinpath('pip.exe').resolve()
+    def get_installation(self):
+        path = metadata.get_install_path(self.name).resolve()
+        return installations.Installation(path=path)
 
     def is_installed(self):
         try:
@@ -99,17 +90,6 @@ class Version:
         except FileNotFoundError:
             return False
         return exists
-
-    def get_installation_version_info(self):
-        output = subprocess.check_output(
-            [str(self.real_python), '--version'],
-        ).decode('ascii', 'ignore')
-        match = re.match(r'^Python (\d+)\.(\d+)\.(\d+).*$', output.strip())
-        if not match:
-            raise RuntimeError(
-                'Could not read installed version for {}'.format(self),
-            )
-        return tuple(int(g) for g in match.groups())
 
     def save_installer(self, data, into_path):
         checksum = hashlib.md5(data).hexdigest()
@@ -125,21 +105,6 @@ class Version:
             os.environ['LocalAppData'], 'Programs', 'Python',
             'Python{}'.format(self.name.replace('.', '')),
         )
-
-    def get_scripts_dir_path(self):
-        return self.installation.joinpath('Scripts')
-
-    def find_script_path(self, name):
-        extensions = os.environ['PathExt'].split(';')
-        command_filename_iter = itertools.chain(
-            [name], ('{}{}'.format(name, ext) for ext in extensions),
-        )
-        scripts_dir = self.get_scripts_dir_path()
-        for fn in command_filename_iter:
-            path = scripts_dir.joinpath(fn)
-            if path.exists():
-                return path.resolve()
-        raise FileNotFoundError(name)
 
 
 class CPythonMSIVersion(Version):
@@ -183,10 +148,10 @@ class CPythonMSIVersion(Version):
         # There is no way to know what was installed from the previous MSI
         # installer; all we can do is installing what we want to the same
         # location, and leave the rest untouched hoping they won't be needed.
-        self._run_installer(cmd, self.installation)
+        self._run_installer(cmd, self.get_installation().path)
 
     def get_cached_uninstaller(self):
-        info = self.get_installation_version_info()
+        info = self.get_installation().get_version_info()
         try:
             return self.product_codes['{0[0]}.{0[1]}.{0[2]}'.format(info)]
         except (IndexError, KeyError, TypeError):
