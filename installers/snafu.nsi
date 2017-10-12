@@ -36,6 +36,8 @@ InstallDir "$LOCALAPPDATA\Programs\SNAFU"
 
 Var InstallsPythonCheckbox
 Var InstallsPython
+Var PythonVersionsTxt
+Var ActivePythonConfig
 
 Function Welcome
     ${IfNot} ${AtLeastWinVista}
@@ -58,31 +60,39 @@ Function InstallMSU
     ${If} ${AtLeastWin10}
         Return
     ${ElseIf} ${IsWin8.1}
-        StrCpy $0 '8.1'
+        StrCpy $R0 '8.1'
     ${ElseIf} ${IsWin8}
-        StrCpy $0 '8-RT'
+        StrCpy $R0 '8-RT'
     ${ElseIf} ${IsWin7}
-        StrCpy $0 '6.1'
+        StrCpy $R0 '6.1'
     ${ElseIf} ${IsWinVista}
-        StrCpy $0 '6.0'
+        StrCpy $R0 '6.0'
     ${EndIf}
 
     ${If} ${RunningX64}
-        StrCpy $1 'x64'
+        StrCpy $R1 'x64'
     ${Else}
-        StrCpy $1 'x32'
+        StrCpy $R1 'x32'
     ${EndIf}
 
     DetailPrint "Installing Windows update ${KBCODE} for your system..."
     nsExec::ExecToLog "wusa /quiet /norestart \
-        $\"$INSTDIR\lib\snafusetup\Windows$0-${KBCODE}-$1.msu$\""
+        $\"$INSTDIR\lib\snafusetup\Windows$R0-${KBCODE}-$R1.msu$\""
 FunctionEnd
 
 Section "SNAFU Python Manager"
-    # Clean up lib directory from previous installtion to prevent version
-    # confliction. Other directories are not touched because they contain
-    # only shims, and may have user-generated files in them.
-    Rmdir /r "$INSTDIR\lib"
+    StrCpy $PythonVersionsTxt "$INSTDIR\scripts\.python-versions.txt"
+    ${If} ${FileExists} $PythonVersionsTxt
+        FileOpen $R0 $PythonVersionsTxt r
+        FileRead $R0 $ActivePythonConfig
+        FileClose $R0
+    ${Else}
+        StrCpy $ActivePythonConfig ''
+    ${EndIf}
+
+    # Clean up previous installation to prevent script name conflicts (e.g.
+    # old package is used instead of new module), and clean up old files.
+    Rmdir /r "$INSTDIR"
 
     CreateDirectory "$INSTDIR"
     SetOutPath "$INSTDIR"
@@ -91,9 +101,9 @@ Section "SNAFU Python Manager"
     CreateDirectory "$INSTDIR\scripts"
 
     # Write snafu shim.
-    FileOpen $0 "$INSTDIR\cmd\snafu.shim" w
-    FileWrite $0 "${SNAFU_SHIM_STRING}"
-    FileClose $0
+    FileOpen $R0 "$INSTDIR\cmd\snafu.shim" w
+    FileWrite $R0 "${SNAFU_SHIM_STRING}"
+    FileClose $R0
 
     # Ensure appropriate CRT is installed.
     Call InstallMSU
@@ -106,6 +116,21 @@ Section "SNAFU Python Manager"
     DetailPrint "Configuring environment..."
     nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
         $\"$INSTDIR\lib\snafusetup\env.py$\" $\"$INSTDIR$\""
+
+    # Link installed Python versions to \cmd.
+    DetailPrint "Dicovering existing Pythons..."
+    nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
+        $\"$INSTDIR\lib\snafusetup\discovery.py$\""
+
+    # Re-activate versions.
+    ${If} $ActivePythonConfig != ''
+        DetailPrint "Restoring active versions..."
+        FileOpen $R0 $PythonVersionsTxt w
+        FileWrite $R0 $ActivePythonConfig
+        FileClose $R0
+        nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
+            $\"$INSTDIR\lib\snafusetup\activation.py$\""
+    ${Endif}
 
     # Run SNAFU to install Python (if told to).
     ${If} $InstallsPython == ${BST_CHECKED}

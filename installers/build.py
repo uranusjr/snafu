@@ -219,12 +219,13 @@ def build_snafusetup(arch, libdir):
     msi = get_py_launcher(arch)
     shutil.copy2(str(msi), str(snafusetupdir.joinpath('py.msi')))
 
-    # Copy environment setup script.
-    click.echo('Copy env.py')
-    shutil.copy2(
-        str(ROOT.joinpath('env.py')),
-        str(snafusetupdir.joinpath('env.py')),
-    )
+    # Copy setup scripts.
+    click.echo('Copy setup scripts')
+    for stem in ('build', 'discovery', 'env'):
+        shutil.copy2(
+            str(ROOT.joinpath('env.py')),
+            str(snafusetupdir.joinpath('{}.py'.format(stem))),
+        )
 
 
 def build_shims(arch, libdir):
