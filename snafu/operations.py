@@ -110,9 +110,14 @@ def publish_version_scripts(version, target_dir, *, quiet, overwrite=False):
     )
 
     if scripts_dir.is_dir():
+        blacklisted_stems = {
+            # Always use commands like "pip3", never "pip".
+            'easy_install', 'pip',
+            # Fully qualified pip is already populated on installation.
+            'pip{}'.format(version.arch_free_name),
+        }
         for path in scripts_dir.iterdir():
-            if path.stem in ('easy_install', 'pip'):
-                # Don't publish versionless pip and easy_install.
+            if path.stem in blacklisted_stems:
                 continue
             if not path.is_file():
                 continue

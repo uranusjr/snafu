@@ -59,10 +59,15 @@ class Version:
         return str(self.version_info[0])
 
     @property
+    def arch_free_name(self):
+        return self.name.split('-', 1)[0]
+
+    @property
     def script_version_names(self):
-        if self.forced_32 and '-' in self.name:
-            return [self.name, self.name.split('-', 1)[0]]
-        return [self.name]
+        # Use set to avoid duplicates.
+        if self.forced_32:
+            return {self.name, self.arch_free_name}
+        return {self.name}
 
     @property
     def python_commands(self):
