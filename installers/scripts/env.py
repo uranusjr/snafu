@@ -89,7 +89,7 @@ def cli(base, uninstalling):
     if uninstalling:
         changed = uninstall(path)
     else:
-        changed = uninstall(path)
+        changed = install(path)
     if changed:
         publish()
 
