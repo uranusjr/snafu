@@ -4,7 +4,6 @@ import contextlib
 import ctypes
 import ctypes.wintypes
 import pathlib
-import sys
 import winreg
 
 
