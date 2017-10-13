@@ -30,7 +30,10 @@ def cli(ctx, version):
 @click.argument('version')
 @click.option('--use', is_flag=True, help='Use version after installation.')
 @click.option('--add', is_flag=True, help='Add scripts after installation.')
-@click.option('--file', 'from_file', type=click.Path(exists=True))
+@click.option(
+    '--file', 'from_file', type=click.Path(exists=True),
+    help='Specify an installer to not downloading one.',
+)
 def install(version, use, add, from_file):
     operations.check_installation(
         version, installed=False,
@@ -65,7 +68,10 @@ def install(version, use, add, from_file):
 
 @cli.command(help='Uninstall a Python version.')
 @click.argument('version')
-@click.option('--file', 'from_file', type=click.Path(exists=True))
+@click.option(
+    '--file', 'from_file', type=click.Path(exists=True),
+    help='Specify an uninstaller to not relying on auto-discovery.',
+)
 def uninstall(version, from_file):
     version = operations.get_version(version)
     operations.check_installation(version, on_exit=functools.partial(
@@ -87,16 +93,13 @@ def uninstall(version, from_file):
     click.echo('{} is uninstalled succesfully.'.format(version))
 
 
-def is_prerelease():
-    import packaging.version
-    from . import __version__
-    return packaging.version.parse(__version__).is_prerelease
-
-
 @cli.command(help='Upgrade an installed Python version.')
 @click.argument('version')
-@click.option('--pre', is_flag=True, default=is_prerelease)
-@click.option('--file', 'from_file', type=click.Path(exists=True))
+@click.option('--pre', is_flag=True, help='Include pre-releases.')
+@click.option(
+    '--file', 'from_file', type=click.Path(exists=True),
+    help='Specify path to installer to not downloading one.',
+)
 @click.pass_context
 def upgrade(ctx, version, pre, from_file):
     if version == 'self':
@@ -132,8 +135,10 @@ def upgrade(ctx, version, pre, from_file):
 
 
 @cli.command(help='Set active Python versions.')
-@click.argument('version', nargs=-1)
-@click.option('--add', is_flag=True)
+@click.argument('version', nargs=-1, help='Version to use.')
+@click.option(
+    '--add', is_flag=True, help='Add version to use without removing.',
+)
 @click.option(
     '--yes', is_flag=True,
     help='Always answer "yes" when prompted for confirmation.',
@@ -180,15 +185,18 @@ def use(ctx, version, add, yes):
     help='Prints where the executable of Python version is.',
     short_help='Print python.exe location.',
 )
-@click.argument('version')
+@click.argument('version', help='Version of python.exe to locate.')
 def where(version):
     version = operations.get_version(version)
     installation = operations.check_installation(version)
     click.echo(str(installation.python))
 
 
-@cli.command(name='list', help='List Python versions (installed or all).')
-@click.option('--all', 'list_all', is_flag=True)
+@cli.command(name='list', help='List Python versions.')
+@click.option(
+    '--all', 'list_all', is_flag=True,
+    help='List all versions (instead of only installed ones).',
+)
 def list_(list_all):
     vers = operations.get_versions(installed_only=(not list_all))
     active_names = set(operations.get_active_names())
@@ -211,10 +219,17 @@ def list_(list_all):
         )
 
 
-@cli.command(help='Link a command from active versions.')
+@cli.command(
+    short_help='Link a command from active versions.',
+    help=('Link a command, or all commands available based on the currently '
+          'used Python version(s).'),
+)
 @click.argument('command', required=False)
-@click.option('--all', 'link_all', is_flag=True)
-@click.option('--force', is_flag=True)
+@click.option(
+    '--all', 'link_all', is_flag=True,
+    help='Link all available commands.',
+)
+@click.option('--force', is_flag=True, help='Overwrite command if exists.')
 @click.pass_context
 def link(ctx, command, link_all, force):
     if not link_all and not command:    # This mistake is more common.
