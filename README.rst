@@ -269,4 +269,5 @@ Why the Name?
 -------------
 
 Because Python is hard, Windows is harder, and setting up Windows for Python
-development is SNAFU. Or it’s Supernatrual Administration for You.
+development is SNAFU. Or it’s Supernatrual Administration for You. Mosky says
+it sounds kind of like snake, so there’s that.
