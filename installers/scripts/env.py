@@ -3,8 +3,14 @@ import click
 import contextlib
 import ctypes
 import ctypes.wintypes
+import os
 import pathlib
 import winreg
+
+
+def get_parsed_environ(key):
+    value = os.environ[key]
+    return value.split(';')
 
 
 @contextlib.contextmanager
@@ -26,7 +32,7 @@ def get_path_values():
             return [], 1
     if not value:
         return [], 1
-    return value.split(';'), vtype
+    return [v for v in value.split(';') if v], vtype
 
 
 def set_path_values(values, vtype):
@@ -36,15 +42,29 @@ def set_path_values(values, vtype):
     print('Set Path={}'.format(joined_value))
 
 
+def add_snafu_paths(values):
+    paths = set(get_parsed_environ('Path'))
+    values, vtype = get_path_values()
+    current_length = len(values)
+    for value in paths:
+        if value not in paths:
+            values.append(value)
+    if current_length != len(values):
+        set_path_values(values, vtype)
+        return True
+    return False
+
+
 def add_lnk_ext():
+    if 'LNK' in get_parsed_environ('PathExt'):
+        return False
     with open_environment_key(winreg.KEY_READ | winreg.KEY_SET_VALUE) as key:
         try:
             value, vtype = winreg.QueryValueEx(key, 'PathExt')
+            parts = [v for v in value.split(';') if v]
         except FileNotFoundError:
-            value, vtype = '', 1
-        parts = [v for v in value.split(';') if v]
-        if 'LNK' in parts:
-            return False
+            vtype = 1
+            parts = ['%PathExt%']
         parts.append('LNK')
         value = ';'.join(parts)
         winreg.SetValueEx(key, 'PathExt', 0, vtype, value)
@@ -60,16 +80,10 @@ def get_snafu_path_values(instdir):
 
 
 def install(instdir):
-    changed = add_lnk_ext()
-    values, vtype = get_path_values()
-    current_values = list(values)
-    for val in get_snafu_path_values(instdir):
-        if val not in values:
-            values.append(val)
-    if current_values != values:
-        set_path_values(values, vtype)
-        return True
-    return changed
+    changed = []
+    changed.append(add_lnk_ext())
+    changed.append(add_snafu_paths())
+    return any(changed)
 
 
 def uninstall(instdir):
