@@ -27,7 +27,7 @@ def open_environment_key(access=winreg.KEY_READ):
 def get_path_values():
     with open_environment_key() as key:
         try:
-            value, vtype = winreg.QueryValueEx(key, 'Path')
+            value, vtype = winreg.QueryValueEx(key, 'PATH')
         except FileNotFoundError:
             return [], 1
     if not value:
@@ -38,12 +38,12 @@ def get_path_values():
 def set_path_values(values, vtype):
     joined_value = ';'.join(values)
     with open_environment_key(winreg.KEY_SET_VALUE) as key:
-        winreg.SetValueEx(key, 'Path', 0, vtype, joined_value)
-    print('Set Path={}'.format(joined_value))
+        winreg.SetValueEx(key, 'PATH', 0, vtype, joined_value)
+    print('SET PATH={}'.format(joined_value))
 
 
 def add_snafu_paths(values):
-    paths = set(get_parsed_environ('Path'))
+    paths = set(get_parsed_environ('PATH'))
     values, vtype = get_path_values()
     current_length = len(values)
     for value in paths:
@@ -56,19 +56,19 @@ def add_snafu_paths(values):
 
 
 def add_lnk_ext():
-    if 'LNK' in get_parsed_environ('PathExt'):
+    if 'LNK' in get_parsed_environ('PATHEXT'):
         return False
     with open_environment_key(winreg.KEY_READ | winreg.KEY_SET_VALUE) as key:
         try:
-            value, vtype = winreg.QueryValueEx(key, 'PathExt')
+            value, vtype = winreg.QueryValueEx(key, 'PATHEXT')
             parts = [v for v in value.split(';') if v]
         except FileNotFoundError:
             vtype = 1
-            parts = ['%PathExt%']
+            parts = ['%PATHEXT%']
         parts.append('LNK')
         value = ';'.join(parts)
-        winreg.SetValueEx(key, 'PathExt', 0, vtype, value)
-    print('Set PathExt={}'.format(value))
+        winreg.SetValueEx(key, 'PATHEXT', 0, vtype, value)
+    print('SET PATHEXT={}'.format(value))
     return True
 
 
