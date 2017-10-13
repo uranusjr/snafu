@@ -9,8 +9,7 @@
 
 ### Behavioural Changes
 
-* Command aliases are now provided by as Windows shortcuts (`.lnk`). SNAFU adds
-  ``.LNK`` to your ``PathExt`` environment variable so you can call them without the extension..
+* Command aliases are now provided by as Windows shortcuts (`.lnk`). SNAFU adds ``.LNK`` to your ``PathExt`` environment variable so you can call them without the extension..
 * The `snafu` entry point command is also a shortcut now.
 * Upgrade Python 3.4 definition to 3.4.4.
 * Improve behaviour when uninstalling versions not installed by SNAFU.
