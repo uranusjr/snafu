@@ -9,7 +9,7 @@ import winreg
 def open_python_key():
     key = winreg.OpenKey(
         winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER),
-        r'Software\Python\PythonCore',
+        'Software\\Python\\PythonCore',
     )
     yield key
     winreg.CloseKey(key)
@@ -17,7 +17,7 @@ def open_python_key():
 
 def get_install_path(name):
     with open_python_key() as python_key:
-        key = winreg.OpenKey(python_key, r'{}\InstallPath'.format(name))
+        key = winreg.OpenKey(python_key, '{}\\InstallPath'.format(name))
         install_path = winreg.QueryValue(key, None)
         winreg.CloseKey(key)
     return pathlib.Path(install_path).resolve()
@@ -29,7 +29,7 @@ def find_uninstaller_id(name):
     # can think of right now. And it's still faster than downloading the MSI.
     key = winreg.OpenKey(
         winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE),
-        r'Software\Microsoft\Windows\CurrentVersion\Uninstall',
+        'Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall',
     )
 
     match = None
@@ -59,7 +59,7 @@ def find_uninstaller_id(name):
 def get_bundle_cache_path(name):
     key = winreg.OpenKey(
         winreg.ConnectRegistry(None, winreg.HKEY_CLASSES_ROOT),
-        r'Installer\Dependencies\CPython-{}'.format(name),
+        'Installer\\Dependencies\\CPython-{}'.format(name),
     )
     guid = winreg.QueryValue(key, '')
     winreg.CloseKey(key)
