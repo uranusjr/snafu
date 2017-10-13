@@ -64,8 +64,7 @@ etc. instead.
 
 You can activate multiple versions together::
 
-    snafu use 3.5
-    snafu use 2.7
+    snafu use 3.5 2.7
 
 The version used first (3.5 in this example) takes precedence if there are
 conflicting commands, e.g. if both 2.7 and 3.5 have ``virtualenv`` installed,
@@ -74,15 +73,7 @@ the 3.5 version will be linked.
 Check the current using order::
 
     > snafu use
-    3.6 3.5 2.7
-
-If you wish to reset the order, or remove version links altogether, use the
-``--reset`` option::
-
-    > snafu use --reset 3.6
-    ...
-    > snafu use
-    3.6
+    3.5 2.7
 
 Uninstalling
 ------------
