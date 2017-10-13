@@ -8,7 +8,7 @@ import subprocess
 
 import attr
 
-from . import configs, installations, metadata, utils
+from . import configs, installations, metadata
 
 
 class VersionNotFoundError(ValueError):
