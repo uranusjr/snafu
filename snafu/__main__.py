@@ -211,7 +211,7 @@ def list_(list_all):
         )
 
 
-@cli.command(help='Make a command from active versions available.')
+@cli.command(help='Link a command from active versions.')
 @click.argument('command', required=False)
 @click.option('--all', 'link_all', is_flag=True)
 @click.option('--force', is_flag=True)
