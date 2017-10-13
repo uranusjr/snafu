@@ -7,7 +7,7 @@ import tempfile
 import click
 import requests
 
-from . import configs, metadata, versions
+from . import configs, metadata, termui, versions
 
 
 def download_installer(version):
@@ -23,7 +23,7 @@ def download_installer(version):
         length = int(total)
     else:
         length = None
-    with click.progressbar(length=length, label=name, show_eta=False) as b:
+    with termui.progressbar(length=length, label=name, show_eta=False) as b:
         for chunk in response.iter_content(chunk_size=4096):
             chunks.append(chunk)
             if length is not None:
