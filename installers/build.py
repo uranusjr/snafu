@@ -274,7 +274,7 @@ def build_installer(outpath):
     subprocess.check_call([
         'makensis',
         '/DPYTHONVERSION={}'.format(get_latest_python_name()),
-        '"{}"'.format(ROOT.joinpath('snafu.nsi')),
+        str(ROOT.joinpath('snafu.nsi')),
     ], shell=True)
     click.echo('snafu-setup.exe -> {}'.format(outpath))
     shutil.move(str(ROOT.joinpath('snafu-setup.exe')), str(outpath))
