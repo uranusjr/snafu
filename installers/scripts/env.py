@@ -65,7 +65,7 @@ def add_lnk_ext():
         except FileNotFoundError:
             vtype = 1
             parts = ['%PATHEXT%']
-        parts.append('LNK')
+        parts.append('.LNK')
         value = ';'.join(parts)
         winreg.SetValueEx(key, 'PATHEXT', 0, vtype, value)
     print('SET PATHEXT={}'.format(value))
