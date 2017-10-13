@@ -109,7 +109,7 @@ def publish_version_scripts(version, target_dir, *, quiet, overwrite=False):
     installation = version.get_installation()
     scripts_dir = installation.scripts_dir
 
-    target = target_dir.joinpath('python{}.exe'.format(version.major_version))
+    target = target_dir.joinpath('python{}.lnk'.format(version.major_version))
     publish_python_command(
         installation, target,
         quiet=quiet, overwrite=overwrite,

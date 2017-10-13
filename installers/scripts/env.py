@@ -42,11 +42,11 @@ def set_path_values(values, vtype):
     print('SET PATH={}'.format(joined_value))
 
 
-def add_snafu_paths(values):
+def add_snafu_paths(instdir):
     paths = set(get_parsed_environ('PATH'))
     values, vtype = get_path_values()
     current_length = len(values)
-    for value in paths:
+    for value in get_snafu_path_values(instdir):
         if value not in paths:
             values.append(value)
     if current_length != len(values):
@@ -82,7 +82,7 @@ def get_snafu_path_values(instdir):
 def install(instdir):
     changed = []
     changed.append(add_lnk_ext())
-    changed.append(add_snafu_paths())
+    changed.append(add_snafu_paths(instdir))
     return any(changed)
 
 
