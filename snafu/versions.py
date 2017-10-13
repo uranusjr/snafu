@@ -8,14 +8,10 @@ import subprocess
 
 import attr
 
-from . import configs, installations, metadata
+from . import configs, installations, metadata, utils
 
 
 class VersionNotFoundError(ValueError):
-    pass
-
-
-class DownloadIntegrityError(ValueError):
     pass
 
 
@@ -96,14 +92,10 @@ class Version:
             return False
         return exists
 
-    def save_installer(self, data, into_path):
+    def check_installer(self, data, into_path):
         checksum = hashlib.md5(data).hexdigest()
-        if checksum != self.md5_sum:
-            raise DownloadIntegrityError('expect {}, got {}'.format(
-                self.md5_sum, checksum,
-            ))
-        with into_path.open('wb') as f:
-            f.write(data)
+        assert checksum == self.md5_sum, \
+            'expect checksum {}, got {}'.format(self.md5_sum, checksum)
 
     def get_target_for_install(self):
         return pathlib.Path(

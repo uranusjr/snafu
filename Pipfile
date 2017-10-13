@@ -9,6 +9,7 @@ python_version = "3.6"
 [packages]
 attrs = "*"
 click = "*"
+packaging = "*"
 requests = "*"
 
 [dev-packages]

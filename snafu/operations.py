@@ -1,44 +1,20 @@
-import atexit
+import ctypes
 import itertools
 import pathlib
 import shutil
 import subprocess
-import tempfile
+import time
+import warnings
 
 import click
-import requests
 
-from . import configs, metadata, termui, versions
+from . import __version__
+from . import configs, metadata, releases, termui, utils, versions
 
 
 def download_installer(version):
     click.echo('Downloading {}'.format(version.url))
-    response = requests.get(version.url, stream=True)
-    response.raise_for_status()
-
-    name = version.url.rsplit('/', 1)[-1]
-    total = response.headers.get('content-length', '')
-    chunks = []
-
-    if total.isdigit():
-        length = int(total)
-    else:
-        length = None
-    with termui.progressbar(length=length, label=name, show_eta=False) as b:
-        for chunk in response.iter_content(chunk_size=4096):
-            chunks.append(chunk)
-            if length is not None:
-                b.update(len(chunk))
-
-    data = b''.join(chunks)
-
-    tempdir_path = pathlib.Path(tempfile.mkdtemp())
-    atexit.register(shutil.rmtree, str(tempdir_path), ignore_errors=True)
-
-    installer_path = tempdir_path.joinpath(name)
-    version.save_installer(data, installer_path)
-
-    return installer_path
+    return utils.download_file(version.url, check=version.check_installer)
 
 
 def get_version(name):
@@ -213,3 +189,42 @@ def update_active_versions(*, remove=frozenset()):
         click.echo('Deactivating {}'.format(version))
     if len(current_active_names) != len(active_names):
         activate([get_version(n) for n in active_names], allow_empty=True)
+
+
+def install_self_upgrade(path):
+    click.echo('Installing upgrade from {}'.format(path))
+    click.echo('SNAFU will terminate now to let the installer run.')
+    click.echo('Come back after the installation finishes. See ya later!')
+
+    time.sleep(1)   # Let the user read the message.
+    ctypes.windll.shell32.ShellExecuteW(None, 'open', str(path), '', None, 1)
+    # SNAFU's installer requests elevation, so subprocess won't work, and we
+    # need some Win32 API magic here. (Notice we use 'open', not 'runas'. The
+    # installer requests elevation on its own; we don't do that for it.)
+    # The process launched is in a detached state so SNAFU can end here,
+    # releasing files to let the installer override.
+
+
+def self_upgrade(*, installer, pre):
+    if installer:
+        if pre:
+            click.echo('Ignoring --pre flag for pgrading self with --file')
+        install_self_upgrade(pathlib.Path(installer))
+        return
+
+    with warnings.catch_warnings():
+        warnings.showwarning = termui.warn
+        release = releases.get_new_release(__version__, includes_pre=pre)
+    if not release:
+        click.echo('Current verion {} is up to date.'.format(__version__))
+        return
+
+    arch = 'win32' if metadata.is_python_32bit() else 'amd64'
+    asset = release.get_asset(arch)
+    if asset is None:
+        click.echo('No suitable asset to download in {}'.format(release))
+        return
+
+    url = asset.browser_download_url
+    path = utils.download_file(url, check=asset.check_download)
+    install_self_upgrade(path)

@@ -29,10 +29,7 @@ def cli(ctx, version):
 @cli.command(help='Install a Python version.')
 @click.argument('version')
 @click.option('--use', is_flag=True, help='Use version after installation.')
-@click.option(
-    '--add', is_flag=True, short_help='Add scripts after installation.',
-    help='Add scripts after installation. This overrides --use.',
-)
+@click.option('--add', is_flag=True, help='Add scripts after installation.')
 @click.option('--file', 'from_file', type=click.Path(exists=True))
 def install(version, use, add, from_file):
     operations.check_installation(
@@ -90,10 +87,26 @@ def uninstall(version, from_file):
     click.echo('{} is uninstalled succesfully.'.format(version))
 
 
+def is_prerelease():
+    import packaging.version
+    from . import __version__
+    return packaging.version.parse(__version__).is_prerelease
+
+
 @cli.command(help='Upgrade an installed Python version.')
 @click.argument('version')
+@click.option('--pre', is_flag=True, default=is_prerelease)
 @click.option('--file', 'from_file', type=click.Path(exists=True))
-def upgrade(version, from_file):
+@click.pass_context
+def upgrade(ctx, version, pre, from_file):
+    if version == 'self':
+        operations.self_upgrade(installer=from_file, pre=pre)
+        return
+
+    if pre:
+        click.echo('Installing prereleases is not supported yet.', err=True)
+        ctx.exit(1)
+
     version = operations.get_version(version)
     installation_vi = operations.check_installation(
         version, on_exit=functools.partial(operations.link_commands, version),

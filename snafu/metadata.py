@@ -1,7 +1,7 @@
 import contextlib
-import functools
 import pathlib
 import struct
+import sys
 import winreg
 
 
@@ -83,8 +83,16 @@ def get_bundle_cache_path(name):
     raise FileNotFoundError
 
 
-@functools.lru_cache(maxsize=1)
 def can_install_64bit():
     # Check the size of a C pointer to determine architecture.
     # https://github.com/kennethreitz-archive/its.py/blob/master/its.py
     return struct.calcsize('P') * 8 >= 64
+
+
+def is_python_32bit():
+    # Check int size for Python bitness.
+    # Be aware this is different from `can_install_64bit()`, which checks
+    # whether the HOST is 64-bit. If you install a 32-bit Python on a 64-bit
+    # host, this function identifies it as 32-bit, but `can_install_64bit()`
+    # would still return True.
+    return sys.maxsize <= 2 ** 32

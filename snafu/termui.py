@@ -12,6 +12,7 @@ def progressbar(*, length, label, width=36):
     kwargs = {
         'bar_template': '%(label)s  [%(bar)s]  %(info)s',
         'info_sep': '  ',
+        'label': label,
         'length': length,
         'show_eta': True,
         'show_percent': True,
@@ -35,3 +36,7 @@ def progressbar(*, length, label, width=36):
         total -= length
 
     return click.progressbar(**kwargs)
+
+
+def warn(message, category, filename, lineno, file=None, line=None):
+    click.echo('WARNING: {}'.format(message), err=True)
