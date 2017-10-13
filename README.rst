@@ -131,12 +131,9 @@ Requirements
 Optional Dependencies
 ---------------------
 
-* Rust_ 1.20.0 for MSVC and Visual Studio 2015 if you want to run commands that
-  link comamnds and scripts (e.g. ``install``, ``activate``, and ``link``).
-* NSIS_ 3.x and Rust_ 1.20.0 if you want to build the installer. Commands
-  ``cargo`` and ``makensis`` need to be available in your shell.
+* NSIS_ 3.x if you want to build the installer. ``makensis`` needs to be
+  available in your shell.
 
-.. _Rust: https://www.rust-lang.org/en-US/
 .. _`NSIS`: http://nsis.sourceforge.net/Download
 
 Project Setup
@@ -179,8 +176,7 @@ Build the Installer
     pipenv run -- python installers\build.py
 
 You can only build installers of your host’s architecture. Cross compilation
-is certainly possible (the only slightly tricky part is Rust compilation), but
-I just haven’t found the need to set it up.
+is certainly possible, but I haven’t found the need to set it up.
 
 After the command finishes you should get an EXE in the ``installers``
 directory. There are some other options available in ``build.py`` you can
@@ -194,9 +190,6 @@ issues before submitting::
 
     pipenv run -- flake8 .
 
-I’m not that familiar with Rust myself, so any suggestions are welcome at that
-front! :D
-
 
 Frequently Asked Questions
 ==========================
@@ -206,7 +199,7 @@ Why Not Just Use the Option “Add Python to PATH”?
 
 CPython’s standard Windows build, unlike on UNIX-like systems, does not provide
 the “altinstall” option. This means every Python distribution on Windows only
-has one Python executable called ``python.exe``, without version names such as
+has one Python executable called ``python.exe``, not versioned names such as
 ``python3.6.exe``.
 
 Adding Python to PATH stops being a good idea the moment you need a *second*
@@ -276,7 +269,9 @@ in `PEP 397`_.
 
 The ``python.exe`` programs cannot be copied as-is because they require
 additional DLL files. SNAFU creates Windows shortcuts (``.lnk``) and makes them
-executable, so you can run them like recular commands.
+executable, so you can run them like recular commands. So what you get is
+actually ``python3.6.lnk``, not ``.exe``, but that’s good enough most of the
+time.
 
 
 Why the Name?
