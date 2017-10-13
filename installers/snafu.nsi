@@ -22,7 +22,9 @@
 
 !define KBCODE 'KB2999226'
 
-!define PYTHONVERSION '3.6'
+!ifndef PYTHONVERSION
+    !error "PYTHONVERSION definition required."
+!endif
 
 !define SNAFU_SHIM_STRING "$INSTDIR\lib\python\python.exe$\r$\n-m$\r$\nsnafu"
 
@@ -132,9 +134,7 @@ Section "SNAFU Python Manager"
     ${If} $InstallsPython == ${BST_CHECKED}
         DetailPrint "Installing Python ${PYTHONVERSION}..."
         nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
-            -m snafu install ${PYTHONVERSION}"
-        nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
-            -m snafu use ${PYTHONVERSION}"
+            -m snafu install --add ${PYTHONVERSION}"
     ${EndIf}
 
     # Create shortcut to snafu.

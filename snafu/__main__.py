@@ -28,13 +28,13 @@ def cli(ctx, version):
 
 @cli.command(help='Install a Python version.')
 @click.argument('version')
+@click.option('--use', is_flag=True, help='Use version after installation.')
+@click.option(
+    '--add', is_flag=True, short_help='Add scripts after installation.',
+    help='Add scripts after installation. This overrides --use.',
+)
 @click.option('--file', 'from_file', type=click.Path(exists=True))
-def install(version, from_file):
-    if version == 'latest':
-        # Special case: install whatever the latest CPython version.
-        version = operations.get_latest_version()
-    else:
-        version = operations.get_version(version)
+def install(version, use, add, from_file):
     operations.check_installation(
         version, installed=False,
         on_exit=functools.partial(operations.link_commands, version),
@@ -52,6 +52,18 @@ def install(version, from_file):
     click.echo('{} is installed succesfully to {}'.format(
         version, dirpath,
     ))
+
+    if not use and not add:
+        return
+
+    # Auto activation.
+    versions = [version]
+    if not add:
+        versions = [
+            operations.get_version(n)
+            for n in operations.get_active_names()
+        ] + versions
+    operations.activate(versions, allow_empty=False)
 
 
 @cli.command(help='Uninstall a Python version.')
@@ -143,9 +155,8 @@ def use(ctx, version, add, yes):
         versions = active_versions + new_versions
 
     if active_versions == versions:
-        click.echo('No version changes. Exit.', err=True)
+        click.echo('No version changes.', err=True)
         return
-
     if not yes:
         prompt = 'Confirm using {}'.format(', '.join(v.name for v in versions))
         click.confirm(prompt, abort=True, default=add)

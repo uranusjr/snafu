@@ -64,6 +64,27 @@ def get_snafu_version():
                 return eval(line[len('__version__ = '):])
 
 
+def get_latest_python_name():
+
+    def load_json(p):
+        with p.open() as f:
+            return json.load(f)
+
+    definitions = [
+        load_json(p)
+        for p in ROOT.parent.joinpath('snafu', 'versions').iterdir()
+        if p.suffix == '.json'
+    ]
+
+    # 1. Prefer newer versions.
+    # 2. Prefer shorter names because they look "more default".
+    latest_definition = max(
+        definitions,
+        key=lambda d: (d['version_info'], -len(d['name'])),
+    )
+    return latest_definition['name']
+
+
 ROOT = pathlib.Path(__file__).parent.resolve()
 
 ASSETSDIR = ROOT.joinpath('assets')
@@ -248,10 +269,11 @@ def build_installer(outpath):
     if outpath.exists():
         outpath.unlink()
     click.echo('Building installer.')
-    subprocess.check_call(
-        'makensis "{nsi}"'.format(nsi=ROOT.joinpath('snafu.nsi')),
-        shell=True,
-    )
+    subprocess.check_call([
+        'makensis',
+        '/DPYTHONVERSION={}'.format(get_latest_python_name()),
+        '"{}"'.format(ROOT.joinpath('snafu.nsi')),
+    ], shell=True)
     click.echo('snafu-setup.exe -> {}'.format(outpath))
     shutil.move(str(ROOT.joinpath('snafu-setup.exe')), str(outpath))
 
