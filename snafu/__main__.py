@@ -108,10 +108,14 @@ def upgrade(version, from_file):
 
 @cli.command(help='Set active Python versions.')
 @click.argument('version', nargs=-1)
-@click.option('--reset', is_flag=True)
+@click.option('--add', is_flag=True)
+@click.option(
+    '--yes', is_flag=True,
+    help='Always answer "yes" when prompted for confirmation.',
+)
 @click.pass_context
-def use(ctx, version, reset):
-    if not reset and not version:
+def use(ctx, version, add, yes):
+    if not add and not version:
         # Bare "snafu use": Display active versions.
         names = operations.get_active_names()
         if names:
@@ -128,7 +132,7 @@ def use(ctx, version, reset):
         operations.get_version(name)
         for name in operations.get_active_names()
     ]
-    if not reset:
+    if add:
         active_names = set(v.name for v in active_versions)
         new_versions = []
         for v in versions:
@@ -138,8 +142,14 @@ def use(ctx, version, reset):
                 new_versions.append(v)
         versions = active_versions + new_versions
 
-    if active_versions != versions:
-        operations.activate(versions, allow_empty=reset)
+    if active_versions == versions:
+        click.echo('No version changes. Exit.', err=True)
+        return
+
+    if not yes:
+        prompt = 'Confirm using {}'.format(', '.join(v.name for v in versions))
+        click.confirm(prompt, abort=True, default=add)
+    operations.activate(versions, allow_empty=(not add))
 
 
 @cli.command(
