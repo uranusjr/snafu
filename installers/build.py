@@ -66,12 +66,14 @@ def get_snafu_version():
 
 def get_latest_python_name():
 
-    def load_json(p):
+    def load_definition(p):
         with p.open() as f:
-            return json.load(f)
+            data = json.load(f)
+        data['name'] = p.stem
+        return data
 
     definitions = [
-        load_json(p)
+        load_definition(p)
         for p in ROOT.parent.joinpath('snafu', 'versions').iterdir()
         if p.suffix == '.json'
     ]
