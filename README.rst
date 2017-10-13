@@ -275,9 +275,8 @@ appropriate shebang lines, and can be handled by the py launcher, as specified
 in `PEP 397`_.
 
 The ``python.exe`` programs cannot be copied as-is because they require
-additional DLL files, and are shimmed instead. A ``*.shim`` file is created
-to describe how a program should be run, and a small binary is used to proxy
-the invocation.
+additional DLL files. SNAFU creates Windows shortcuts (``.lnk``) and makes them
+executable, so you can run them like recular commands.
 
 
 Why the Name?

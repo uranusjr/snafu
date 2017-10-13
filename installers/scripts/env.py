@@ -36,6 +36,22 @@ def set_path_values(values, vtype):
     print('Set Path={}'.format(joined_value))
 
 
+def add_lnk_ext():
+    with open_environment_key(winreg.KEY_READ | winreg.KEY_SET_VALUE) as key:
+        try:
+            value, vtype = winreg.QueryValueEx(key, 'PathExt')
+        except FileNotFoundError:
+            value, vtype = '', 1
+        parts = [v for v in value.split(';') if v]
+        if 'LNK' in parts:
+            return False
+        parts.append('LNK')
+        value = ';'.join(parts)
+        winreg.SetValueEx(key, 'PathExt', 0, vtype, value)
+    print('Set PathExt={}'.format(value))
+    return True
+
+
 def get_snafu_path_values(instdir):
     return [
         str(instdir.joinpath('cmd')),
@@ -44,6 +60,7 @@ def get_snafu_path_values(instdir):
 
 
 def install(instdir):
+    changed = add_lnk_ext()
     values, vtype = get_path_values()
     current_values = list(values)
     for val in get_snafu_path_values(instdir):
@@ -52,7 +69,7 @@ def install(instdir):
     if current_values != values:
         set_path_values(values, vtype)
         return True
-    return False
+    return changed
 
 
 def uninstall(instdir):

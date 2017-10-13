@@ -2,6 +2,7 @@ import atexit
 import itertools
 import pathlib
 import shutil
+import subprocess
 import tempfile
 
 import click
@@ -71,13 +72,16 @@ def check_installation(version, *, installed=True, on_exit=None):
     click.get_current_context().exit(1)
 
 
-def publish_shim(target, content, *, overwrite, quiet):
+def publish_shortcut(target, command, *args, overwrite, quiet):
     if not overwrite and target.exists():
         return
     if not quiet:
         click.echo('  {}'.format(target.name))
-    target.with_suffix('.shim').write_text(str(content))
-    shutil.copy2(str(configs.get_generic_shim_path()), str(target))
+    args = (
+        'cscript', '//NOLOGO', str(configs.get_linkexe_script_path()),
+        str(command), str(target),
+    ) + args
+    subprocess.check_call(args, shell=True)
 
 
 def publish_file(source, target, *, overwrite, quiet):
@@ -89,7 +93,9 @@ def publish_file(source, target, *, overwrite, quiet):
 
 
 def publish_python_command(installation, target, *, overwrite, quiet=False):
-    publish_shim(target, installation.python, overwrite=overwrite, quiet=quiet)
+    publish_shortcut(
+        target, installation.python, overwrite=overwrite, quiet=quiet,
+    )
 
 
 def publish_pip_command(installation, target, *, overwrite, quiet=False):
@@ -169,7 +175,6 @@ def unlink_commands(version):
     for p in itertools.chain(version.python_commands, version.pip_commands):
         click.echo('Unlinking {}'.format(p.name))
         safe_unlink(p)
-        safe_unlink(p.with_suffix('.shim'))
 
 
 def get_active_names():

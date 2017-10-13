@@ -26,5 +26,5 @@ def get_cmd_dir_path():
     return get_directory('cmd_dir')
 
 
-def get_generic_shim_path():
-    return get_directory('shim_source_dir').joinpath('generic.exe')
+def get_linkexe_script_path():
+    return get_directory('setup_dir').joinpath('linkexe.vbs')

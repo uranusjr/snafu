@@ -77,7 +77,7 @@ Function InstallMSU
 
     DetailPrint "Installing Windows update ${KBCODE} for your system..."
     nsExec::ExecToLog "wusa /quiet /norestart \
-        $\"$INSTDIR\lib\snafusetup\Windows$R0-${KBCODE}-$R1.msu$\""
+        $\"$INSTDIR\lib\setup\Windows$R0-${KBCODE}-$R1.msu$\""
 FunctionEnd
 
 Section "SNAFU Python Manager"
@@ -98,29 +98,25 @@ Section "SNAFU Python Manager"
     SetOutPath "$INSTDIR"
 
     File /r 'snafu\*'
+    CreateDirectory "$INSTDIR\cmd"
     CreateDirectory "$INSTDIR\scripts"
-
-    # Write snafu shim.
-    FileOpen $R0 "$INSTDIR\cmd\snafu.shim" w
-    FileWrite $R0 "${SNAFU_SHIM_STRING}"
-    FileClose $R0
 
     # Ensure appropriate CRT is installed.
     Call InstallMSU
 
     # Install Py launcher.
     DetailPrint "Installing Python Launcher (py.exe)..."
-    nsExec::ExecToLog "msiexec /i $\"$INSTDIR\lib\snafusetup\py.msi$\" /quiet"
+    nsExec::ExecToLog "msiexec /i $\"$INSTDIR\lib\setup\py.msi$\" /quiet"
 
     # Setup environment.
     DetailPrint "Configuring environment..."
     nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
-        $\"$INSTDIR\lib\snafusetup\env.py$\" $\"$INSTDIR$\""
+        $\"$INSTDIR\lib\setup\env.py$\" $\"$INSTDIR$\""
 
     # Link installed Python versions to \cmd.
     DetailPrint "Dicovering existing Pythons..."
     nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
-        $\"$INSTDIR\lib\snafusetup\discovery.py$\""
+        $\"$INSTDIR\lib\setup\discovery.py$\""
 
     # Re-activate versions.
     ${If} $ActivePythonConfig != ''
@@ -129,7 +125,7 @@ Section "SNAFU Python Manager"
         FileWrite $R0 $ActivePythonConfig
         FileClose $R0
         nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
-            $\"$INSTDIR\lib\snafusetup\activation.py$\""
+            $\"$INSTDIR\lib\setup\activation.py$\""
     ${Endif}
 
     # Run SNAFU to install Python (if told to).
@@ -141,6 +137,11 @@ Section "SNAFU Python Manager"
             -m snafu use ${PYTHONVERSION}"
     ${EndIf}
 
+    # Create shortcut to snafu.
+    nsExec::ExecToLog "cscript //NOLOGO $\"$INSTDIR\lib\setup\linkexe.vbs$\" \
+        $\"$INSTDIR\lib\python\python.exe$\" $\"$INSTDIR\cmd\snafu.lnk$\" \
+        -m snafu"
+
     WriteUninstaller "${UNINSTALL_EXE}"
     WriteRegStr HKLM "${UNINSTALL_REGKEY}" "DisplayName" "${NAME}"
     WriteRegStr HKLM "${UNINSTALL_REGKEY}" "Publisher" "Tzu-ping Chung"
@@ -150,7 +151,7 @@ SectionEnd
 
 Section "un.Uninstaller"
     nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
-        $\"$INSTDIR\lib\snafusetup\env.py$\" --uninstall $\"$INSTDIR$\""
+        $\"$INSTDIR\lib\setup\env.py$\" --uninstall $\"$INSTDIR$\""
     Rmdir /r "$INSTDIR"
     DeleteRegKey HKLM "${UNINSTALL_REGKEY}"
 SectionEnd
