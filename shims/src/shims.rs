@@ -6,13 +6,13 @@ use std::io::prelude::*;
 use std::process::Command;
 use std::string::String;
 
-struct ExecInfo {
+struct Shim {
     command: String,
     arguments: Vec<String>,
 }
 
-impl ExecInfo {
-    /// Collect information from the shim file and current invocation.
+impl Shim {
+    /// Collect information from shim file.
     ///
     /// A shim file is a file with .shim extension that has the same stem, and
     /// resides at the same location as the executable. For example, for an
@@ -44,20 +44,14 @@ impl ExecInfo {
             arguments.push(arg);
         }
 
-        let mut envargs = std::env::args();
-        envargs.next();     // Skip args[0].
-        for arg in envargs {
-            arguments.push(arg);
-        }
-
-        Ok(ExecInfo {
+        Ok(Shim {
             command: command,
             arguments: arguments,
         })
     }
 }
 
-impl Display for ExecInfo {
+impl Display for Shim {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(f, "{} {}", self.command, self.arguments.join(" "))
     }
@@ -65,38 +59,35 @@ impl Display for ExecInfo {
 
 /// Run the shim.
 ///
-/// This collects information, invokes the program, waits for it, and
-/// collects the result.
+/// This collects information from the shim file, combines arguments specified
+/// in the shim and arguments passed to this program, invokes the program with
+/// combined arguments, waits for it, and collects the result.
 pub fn run() -> Result<i32, String> {
-    let info = match ExecInfo::load() {
-        Ok(info) => info,
+    let shim = match Shim::load() {
+        Ok(shim) => shim,
         Err(err) => { return Err(String::from(err.description())); },
     };
+    let cmd = shim.command;
+    let mut args = shim.arguments;
 
-    match Command::new(&info.command).args(&info.arguments).status() {
-        // Doc seems to suggest this won't ever fail on Windows.
-        // 137 is a common value seen with SIGKILL terminated programs.
-        Ok(status) => match status.code().unwrap_or(137),
+    let mut envargs = std::env::args();
+    envargs.next();     // Skip args[0].
+    for arg in envargs {
+        args.push(arg);
+    }
+
+    match Command::new(&cmd).args(&args).status() {
+        Ok(status) => match status.code() {
+            Some(code) => Ok(code),
+            // Doc seems to suggest this won't happen on Windows.
+            // 137 is a common value seen with SIGKILL terminated programs.
+            None => Ok(137),
+        },
         Err(_) => {
             let mut s = String::from("failed to launch \"");
             s.push_str(&cmd);
             s.push_str("\"");
             Err(s)
         },
-    }
-}
-
-/// Execute the shim.
-///
-/// his collects information, invokes the program, waits for it, and swaps out
-/// self for the child, never returning (unless there is and error).
-pub fn exec() -> &str {
-    let info = match ExecInfo::load() {
-        Ok(info) => info,
-        Err(err) => { return err.description(); },
-    };
-    match exec::Command::new(&info.command).args(&info.arguments).exec() {
-        BadArgument(_) => "Invalid arguments",
-        Errno(errno) => format!("Command failed with {}", errno),
     }
 }

@@ -9,6 +9,3 @@ path = "src/linkhooked.rs"
 [package]
 name = "snafu-shims"
 version = "0.0.0"
-
-[dependencies]
-exec = "0.3.1"
