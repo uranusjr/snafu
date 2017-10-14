@@ -6,6 +6,7 @@
 
 * Remove confusing `activate` and `deactivate` commands in favour of the `use` command. The previous “reactivation” behaviour is now mapped to `link --all`.
 * `snafu upgrade self` to perform in-place upgrade without manually downloading the installer.
+* More complete help messages are provided to command arguments.
 
 ### Behavioural Changes
 
