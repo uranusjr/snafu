@@ -56,7 +56,7 @@ def add_snafu_paths(instdir):
 
 
 def add_lnk_ext():
-    if 'LNK' in get_parsed_environ('PATHEXT'):
+    if '.LNK' in get_parsed_environ('PATHEXT'):
         return False
     with open_environment_key(winreg.KEY_READ | winreg.KEY_SET_VALUE) as key:
         try:

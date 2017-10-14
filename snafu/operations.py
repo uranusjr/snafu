@@ -204,13 +204,26 @@ def install_self_upgrade(path):
     click.echo('SNAFU will terminate now to let the installer run.')
     click.echo('Come back after the installation finishes. See ya later!')
 
-    time.sleep(1)   # Let the user read the message.
-    ctypes.windll.shell32.ShellExecuteW(None, 'open', str(path), '', None, 1)
     # SNAFU's installer requests elevation, so subprocess won't work, and we
     # need some Win32 API magic here. (Notice we use 'open', not 'runas'. The
     # installer requests elevation on its own; we don't do that for it.)
     # The process launched is in a detached state so SNAFU can end here,
     # releasing files to let the installer override.
+    instance = ctypes.windll.shell32.ShellExecuteW(
+        None, 'open', str(path), '', None, 1,
+    )
+
+    if instance < 32:   # According to MSDN this is an error.
+        message = '\n'.join([
+            'Failed to launcn installer (error code {}).'.format(instance),
+            'Find the downloaded installer and execute yourself at:',
+            '  {}'.format(path),
+        ])
+        click.echo(message, err=True)
+        click.get_current_context().exit(1)
+
+    # Let the user read the message and give the above call some time to run.
+    time.sleep(1)
 
 
 def self_upgrade(*, installer, pre):
