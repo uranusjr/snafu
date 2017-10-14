@@ -35,6 +35,7 @@ def cli(ctx, version):
     help='Specify an installer to not downloading one.',
 )
 def install(version, use, add, from_file):
+    version = operations.get_version(version)
     operations.check_installation(
         version, installed=False,
         on_exit=functools.partial(operations.link_commands, version),
