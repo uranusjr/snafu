@@ -83,8 +83,10 @@ def collect_version_scripts(versions):
     names = set()
     scripts = []
     for version in versions:
-
-        def add_if_missing(path):
+        version_scripts_dir = version.get_installation().scripts_dir
+        if not version_scripts_dir.is_dir():
+            continue
+        for path in version_scripts_dir.iterdir():
             blacklisted_stems = {
                 # Always use commands like "pip3", never "pip".
                 'easy_install', 'pip',
@@ -92,16 +94,9 @@ def collect_version_scripts(versions):
                 'pip{}'.format(version.arch_free_name),
             }
             if path.name in names or path.stem in blacklisted_stems:
-                return
+                continue
             names.add(path.name)
             scripts.append(path)
-
-        add_if_missing(version.python_major_command)    # "pythonX"
-        version_scripts_dir = version.get_installation().scripts_dir
-        if not version_scripts_dir.is_dir():
-            continue
-        for path in version_scripts_dir.iterdir():
-            add_if_missing(path)
     return scripts
 
 
@@ -131,6 +126,16 @@ def activate(versions, *, allow_empty=False, quiet=False):
         '\n'.join(version.name for version in versions),
     )
     using_scripts.add(python_versions_path)
+
+    # TODO: We don't have a good way to read lnk files now, so let's use the
+    # old method and always overwrite.
+    for version in versions:
+        command = version.python_major_command
+        if command in using_scripts:
+            continue
+        using_scripts.add(command)
+        inst = version.get_installation()
+        publish_python_command(inst, command, overwrite=True, quiet=True)
 
     stale_scripts = set(scripts_dir.iterdir()) - using_scripts
     if stale_scripts:
