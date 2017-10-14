@@ -135,7 +135,7 @@ def upgrade(ctx, version, pre, from_file):
 
 
 @cli.command(help='Set active Python versions.')
-@click.argument('version', nargs=-1, help='Version to use.')
+@click.argument('version', nargs=-1)
 @click.option(
     '--add', is_flag=True, help='Add version to use without removing.',
 )
@@ -185,7 +185,7 @@ def use(ctx, version, add, yes):
     help='Prints where the executable of Python version is.',
     short_help='Print python.exe location.',
 )
-@click.argument('version', help='Version of python.exe to locate.')
+@click.argument('version')
 def where(version):
     version = operations.get_version(version)
     installation = operations.check_installation(version)
