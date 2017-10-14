@@ -29,9 +29,9 @@ def get_path_values():
         try:
             value, vtype = winreg.QueryValueEx(key, 'PATH')
         except FileNotFoundError:
-            return [], 1
+            return [], winreg.REG_SZ
     if not value:
-        return [], 1
+        return [], winreg.REG_SZ
     return [v for v in value.split(';') if v], vtype
 
 
@@ -63,7 +63,7 @@ def add_lnk_ext():
             value, vtype = winreg.QueryValueEx(key, 'PATHEXT')
             parts = [v for v in value.split(';') if v]
         except FileNotFoundError:
-            vtype = 1
+            vtype = winreg.REG_EXPAND_SZ
             parts = ['%PATHEXT%']
         parts.append('.LNK')
         value = ';'.join(parts)
