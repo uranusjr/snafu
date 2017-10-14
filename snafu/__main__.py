@@ -137,15 +137,11 @@ def upgrade(ctx, version, pre, from_file):
 @cli.command(help='Set active Python versions.')
 @click.argument('version', nargs=-1)
 @click.option(
-    '--add', is_flag=True, help='Add version to use without removing.',
-)
-@click.option(
-    '--yes', is_flag=True,
-    help='Always answer "yes" when prompted for confirmation.',
+    '--add/--reset', default=None, help='Add version to use without removing.',
 )
 @click.pass_context
-def use(ctx, version, add, yes):
-    if not add and not version:
+def use(ctx, version, add):
+    if add is None and not version:
         # Bare "snafu use": Display active versions.
         names = operations.get_active_names()
         if names:
@@ -175,9 +171,11 @@ def use(ctx, version, add, yes):
     if active_versions == versions:
         click.echo('No version changes.', err=True)
         return
-    if not yes:
-        prompt = 'Confirm using {}'.format(', '.join(v.name for v in versions))
-        click.confirm(prompt, abort=True, default=add)
+
+    if versions:
+        click.echo('Using: {}'.format(', '.join(v.name for v in versions)))
+    else:
+        click.echo('Not using any versions.')
     operations.activate(versions, allow_empty=(not add))
 
 
