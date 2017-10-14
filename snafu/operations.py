@@ -1,4 +1,5 @@
 import ctypes
+import filecmp
 import itertools
 import pathlib
 import shutil
@@ -78,33 +79,25 @@ def publish_pip_command(installation, target, *, overwrite, quiet=False):
     publish_file(installation.pip, target, overwrite=overwrite, quiet=quiet)
 
 
-def publish_version_scripts(version, target_dir, *, quiet, overwrite=False):
-    if not quiet:
-        click.echo('Publishing {}...'.format(version))
-
-    installation = version.get_installation()
-    scripts_dir = installation.scripts_dir
-
-    target = target_dir.joinpath('python{}.lnk'.format(version.major_version))
-    publish_python_command(
-        installation, target,
-        quiet=quiet, overwrite=overwrite,
-    )
-
-    if scripts_dir.is_dir():
+def collect_version_scripts(versions):
+    names = set()
+    scripts = []
+    for version in versions:
+        version_scripts_dir = version.get_installation().scripts_dir
+        if not version_scripts_dir.is_dir():
+            continue
         blacklisted_stems = {
             # Always use commands like "pip3", never "pip".
             'easy_install', 'pip',
             # Fully qualified pip is already populated on installation.
             'pip{}'.format(version.arch_free_name),
         }
-        for path in scripts_dir.iterdir():
-            if path.stem in blacklisted_stems:
+        for path in version_scripts_dir.iterdir():
+            if path.name in names or path.stem in blacklisted_stems:
                 continue
-            if not path.is_file():
-                continue
-            target = target_dir.joinpath(path.name)
-            publish_file(path, target, quiet=quiet, overwrite=overwrite)
+            names.add(path.name)
+            scripts.append(path)
+    return scripts
 
 
 def activate(versions, *, allow_empty=False, quiet=False):
@@ -112,21 +105,36 @@ def activate(versions, *, allow_empty=False, quiet=False):
         click.echo('No active versions.', err=True)
         click.get_current_context().exit(1)
 
-    # TODO: Be smarter and calculate diff, not rebuilding every time.
+    source_scripts = collect_version_scripts(versions)
     scripts_dir = configs.get_scripts_dir_path()
 
-    # Remove old stuffs.
-    if not quiet:
-        click.echo('Removing scripts.')
-    for p in scripts_dir.iterdir():
-        p.unlink()
+    using_scripts = set()
+    if source_scripts:
+        if not quiet:
+            click.echo('Publishing scripts....')
+        for source in source_scripts:
+            target = scripts_dir.joinpath(source.name)
+            using_scripts.add(target)
+            if target.exists() and filecmp.cmp(str(source), str(target)):
+                continue    # Identical files. skip.
+            if not quiet:
+                click.echo('  {}'.format(source.name))
+            shutil.copy2(str(source), str(target))
 
-    # Populate new stuffs.
-    for version in versions:
-        publish_version_scripts(version, scripts_dir, quiet=quiet)
-    configs.get_python_versions_path().write_text(
+    python_versions_path = configs.get_python_versions_path()
+    python_versions_path.write_text(
         '\n'.join(version.name for version in versions),
     )
+    using_scripts.add(python_versions_path)
+
+    stale_scripts = set(scripts_dir.iterdir()) - using_scripts
+    if stale_scripts:
+        if not quiet:
+            click.echo('Cleaning stale scripts...')
+        for script in stale_scripts:
+            if not quiet:
+                click.echo('  {}'.format(script.name))
+            safe_unlink(script)
 
 
 def link_commands(version):

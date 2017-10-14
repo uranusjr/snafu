@@ -12,6 +12,7 @@
 * Command aliases are now provided by as Windows shortcuts (`.lnk`). SNAFU adds ``.LNK`` to your ``PathExt`` environment variable so you can call them without the extension.
 * The `snafu` entry point command is also a shortcut now.
 * Upgrade Python 3.4 definition to 3.4.4.
+* Improve script copy logic in `link` to speed up the process and reduce cluttering output.
 * Improve behaviour when uninstalling versions not installed by SNAFU.
 * Py Launcher usage is reduced in favour of reading the registry ourselves.
 * Documentation is no longer installed with each Python version.
