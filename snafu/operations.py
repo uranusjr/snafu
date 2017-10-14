@@ -96,7 +96,7 @@ def collect_version_scripts(versions):
             names.add(path.name)
             scripts.append(path)
 
-        add_if_missing(version.python_major_command)    // "pythonX"
+        add_if_missing(version.python_major_command)    # "pythonX"
         version_scripts_dir = version.get_installation().scripts_dir
         if not version_scripts_dir.is_dir():
             continue
