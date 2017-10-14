@@ -83,20 +83,25 @@ def collect_version_scripts(versions):
     names = set()
     scripts = []
     for version in versions:
+
+        def add_if_missing(path):
+            blacklisted_stems = {
+                # Always use commands like "pip3", never "pip".
+                'easy_install', 'pip',
+                # Fully qualified pip is already populated on installation.
+                'pip{}'.format(version.arch_free_name),
+            }
+            if path.name in names or path.stem in blacklisted_stems:
+                return
+            names.add(path.name)
+            scripts.append(path)
+
+        add_if_missing(version.python_major_command)    // "pythonX"
         version_scripts_dir = version.get_installation().scripts_dir
         if not version_scripts_dir.is_dir():
             continue
-        blacklisted_stems = {
-            # Always use commands like "pip3", never "pip".
-            'easy_install', 'pip',
-            # Fully qualified pip is already populated on installation.
-            'pip{}'.format(version.arch_free_name),
-        }
         for path in version_scripts_dir.iterdir():
-            if path.name in names or path.stem in blacklisted_stems:
-                continue
-            names.add(path.name)
-            scripts.append(path)
+            add_if_missing(path)
     return scripts
 
 

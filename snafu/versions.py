@@ -51,10 +51,6 @@ class Version:
         return 'Python {}'.format(self.name)
 
     @property
-    def major_version(self):
-        return str(self.version_info[0])
-
-    @property
     def arch_free_name(self):
         return self.name.split('-', 1)[0]
 
@@ -80,6 +76,11 @@ class Version:
             dirpath.joinpath('pip{}.exe'.format(name))
             for name in self.script_version_names
         ]
+
+    @property
+    def python_major_command(self):
+        dirpath = configs.get_scripts_dir_path()
+        return dirpath.joinpath('python{}.lnk'.format(self.version_info[0]))
 
     def get_installation(self):
         path = metadata.get_install_path(self.name).resolve()
