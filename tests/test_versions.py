@@ -1,4 +1,5 @@
 import json
+import pathlib
 import re
 
 import pytest
@@ -82,3 +83,60 @@ def test_get_version_not_found():
     with pytest.raises(snafu.versions.VersionNotFoundError) as ctx:
         snafu.versions.get_version('2.8', force_32=False)
     assert str(ctx.value) == '2.8'
+
+
+@pytest.mark.parametrize('name, force_32, result', [
+    ('3.6', False, 'Python 3.6'),
+    ('3.6', True, 'Python 3.6-32'),
+    ('3.4', False, 'Python 3.4'),
+    ('3.4', True, 'Python 3.4'),
+])
+def test_str(name, force_32, result):
+    version = snafu.versions.get_version(name, force_32=force_32)
+    assert str(version) == result
+
+
+@pytest.mark.parametrize('name, force_32, cmd', [
+    ('3.6', False, 'python3.lnk'),
+    ('3.6', True, 'python3.lnk'),
+    ('2.7', False, 'python2.lnk'),
+    ('2.7', True, 'python2.lnk'),
+])
+def test_python_major_command(mocker, name, force_32, cmd):
+    mocker.patch.object(snafu.versions, 'configs', **{
+        'get_scripts_dir_path.return_value': pathlib.Path(),
+    })
+    version = snafu.versions.get_version(name, force_32=force_32)
+    assert version.python_major_command == pathlib.Path(cmd)
+
+
+@pytest.mark.parametrize('name, force_32, result', [
+    ('3.6', False, '3.6'),
+    ('3.6', True, '3.6'),
+    ('3.4', False, '3.4'),
+    ('3.4', True, '3.4'),
+])
+def test_arch_free_name(name, force_32, result):
+    version = snafu.versions.get_version(name, force_32=force_32)
+    assert version.arch_free_name == result
+
+
+@pytest.mark.parametrize('name, force_32, result', [
+    ('3.6', False, {'3.6'}),
+    ('3.6', True, {'3.6', '3.6-32'}),
+    ('3.6-32', False, {'3.6-32'}),
+    ('3.4', False, {'3.4'}),
+    ('3.4', True, {'3.4'}),
+])
+def test_script_version_names(name, force_32, result):
+    version = snafu.versions.get_version(name, force_32=force_32)
+    assert version.script_version_names == result
+
+
+def test_is_installed(tmpdir, mocker):
+    mock_metadata = mocker.patch.object(snafu.versions, 'metadata', **{
+        'get_install_path.return_value': pathlib.Path(str(tmpdir)),
+    })
+    version = snafu.versions.get_version('3.6', force_32=False)
+    assert version.is_installed()
+    mock_metadata.get_install_path.assert_called_once_with('3.6')

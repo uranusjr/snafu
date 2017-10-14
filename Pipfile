@@ -7,12 +7,15 @@ verify_ssl = true
 python_version = "3.6"
 
 [packages]
+
 attrs = "*"
 click = "*"
 packaging = "*"
 requests = "*"
 
 [dev-packages]
-flake8 = "*"
+
+"flake8" = "*"
 pytest = "*"
-pytest-pythonpath = "*"
+"pytest-pythonpath" = "*"
+"pytest-mock" = "*"
