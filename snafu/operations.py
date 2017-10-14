@@ -216,16 +216,19 @@ def install_self_upgrade(path):
 def self_upgrade(*, installer, pre):
     if installer:
         if pre:
-            click.echo('Ignoring --pre flag for pgrading self with --file')
+            click.echo('Ignoring --pre flag for upgrading self with --file')
         install_self_upgrade(pathlib.Path(installer))
         return
 
     with warnings.catch_warnings():
         warnings.showwarning = termui.warn
-        release = releases.get_new_release(__version__, includes_pre=pre)
-    if not release:
-        click.echo('Current verion {} is up to date.'.format(__version__))
-        return
+        try:
+            release = releases.get_new_release(__version__, includes_pre=pre)
+        except releases.ReleaseUpToDate as e:
+            click.echo('Current verion {} is up to date.'.format(__version__))
+            if e.version.is_prerelease and not pre:
+                click.echo('Maybe try looking for a pre-release with --pre?')
+            return
 
     arch = 'win32' if metadata.is_python_32bit() else 'amd64'
     asset = release.get_asset(arch)

@@ -82,6 +82,12 @@ class Release(Parsable):
         return None
 
 
+class ReleaseUpToDate(ValueError):
+    def __init__(self, current):
+        super().__init__('{} is up to date'.format(current))
+        self.version = current
+
+
 def get_releases():
     response = get('/repos/uranusjr/snafu/releases')
     return [Release.parse(data) for data in response.json()]
@@ -95,4 +101,4 @@ def get_new_release(current, *, includes_pre):
         version = packaging.version.parse(release.tag_name)
         if version > current:
             return release
-    return None
+    raise ReleaseUpToDate(current)
