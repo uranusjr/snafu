@@ -27,4 +27,4 @@ def get_cmd_dir_path():
 
 
 def get_linkexe_script_path():
-    return get_directory('setup_dir').joinpath('linkexe.vbs')
+    return get_directory('utils_dir').joinpath('linkexe.vbs')

@@ -200,7 +200,7 @@ def build_python(arch, libdir):
         json.dump({
             'cmd_dir': '..\\..\\..\\cmd',
             'scripts_dir': '..\\..\\..\\scripts',
-            'setup_dir': '..\\..\\setup',
+            'utils_dir': '..\\..\\utils',
         }, f)
 
     # Copy dependencies.
@@ -218,6 +218,9 @@ def build_python(arch, libdir):
         shutil.rmtree(str(p))
     for p in pythondir.rglob('*.py[co]'):
         shutil.rmtree(str(p))
+
+
+SCRIPT_EXTS = ('.py', '.vbs')
 
 
 def build_setup(arch, libdir):
@@ -244,12 +247,24 @@ def build_setup(arch, libdir):
 
     # Copy setup scripts.
     click.echo('Copy setup scripts...')
-    for path in ROOT.joinpath('scripts').iterdir():
-        if path.suffix not in ('.py', '.vbs'):
+    for path in ROOT.joinpath('lib', 'setup').iterdir():
+        if path.suffix not in SCRIPT_EXTS:
             continue
         name = path.name
         click.echo('  {}'.format(name))
         shutil.copy2(str(path), str(setupdir.joinpath(name)))
+
+
+def build_utils(libdir):
+    utilsdir = libdir.joinpath('utils')
+    utilsdir.mkdir()
+    click.echo('Copy utility scripts...')
+    for path in ROOT.joinpath('lib', 'utils').iterdir():
+        if path.suffix not in SCRIPT_EXTS:
+            continue
+        name = path.name
+        click.echo('  {}'.format(name))
+        shutil.copy2(str(path), str(utilsdir.joinpath(name)))
 
 
 def build_lib(arch, container):
@@ -257,6 +272,7 @@ def build_lib(arch, container):
     libdir.mkdir()
     build_python(arch, libdir)
     build_setup(arch, libdir)
+    build_utils(libdir)
 
 
 def build_files(arch):

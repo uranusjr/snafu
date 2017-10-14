@@ -138,7 +138,7 @@ Section "SNAFU Python Manager"
     ${EndIf}
 
     # Create shortcut to snafu.
-    nsExec::ExecToLog "cscript //NOLOGO $\"$INSTDIR\lib\setup\linkexe.vbs$\" \
+    nsExec::ExecToLog "cscript //NOLOGO $\"$INSTDIR\lib\utils\linkexe.vbs$\" \
         $\"$INSTDIR\lib\python\python.exe$\" $\"$INSTDIR\cmd\snafu.lnk$\" \
         -m snafu"
 

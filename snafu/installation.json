@@ -1,5 +1,5 @@
 {
     "cmd_dir": "..\\runenv\\cmd",
     "scripts_dir": "..\\runenv\\Scripts",
-    "setup_dir": "..\\installers\\scripts"
+    "utils_dir": "..\\installers\\lib\\utils"
 }
