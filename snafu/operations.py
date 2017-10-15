@@ -250,7 +250,10 @@ def self_upgrade(*, installer, pre):
         except releases.ReleaseUpToDate as e:
             click.echo('Current verion {} is up to date.'.format(__version__))
             if e.version.is_prerelease and not pre:
-                click.echo('Maybe try looking for a pre-release with --pre?')
+                click.echo(
+                    "You are on a pre-release. Maybe you want to check for a "
+                    "pre-release update with --pre?",
+                )
             return
 
     arch = 'win32' if metadata.is_python_32bit() else 'amd64'
