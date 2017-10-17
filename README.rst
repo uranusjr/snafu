@@ -204,7 +204,7 @@ environment variable is also very tedious and delicate to manipulate.
 
 .. _`python.org`: https://www.python.org
 
-Wyy Not Use the Py Launcher?
+Why Not Use the Py Launcher?
 ----------------------------
 
 Python introduced `PEP 397`_ partly to solve the ``python.exe`` problem (also
