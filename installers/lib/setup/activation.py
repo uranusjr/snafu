@@ -2,7 +2,9 @@ import contextlib
 
 import click
 
-from snafu import metadata, operations, versions
+from snafu import metadata, versions
+from snafu.operations.common import get_active_names
+from snafu.operations.link import activate
 
 
 def get_version_or_none(name):
@@ -17,10 +19,10 @@ def main():
     versions = [
         v for v in (
             get_version_or_none(name)
-            for name in operations.get_active_names()
+            for name in get_active_names()
         ) if v is not None
     ]
-    operations.activate(versions, allow_empty=True)
+    activate(versions, allow_empty=True)
 
 
 if __name__ == '__main__':
