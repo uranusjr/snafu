@@ -114,12 +114,19 @@ def activate(versions, *, allow_empty=False, quiet=False):
             click.echo('Publishing scripts....')
         for source in source_scripts:
             target = scripts_dir.joinpath(source.name)
+            if not target.is_file():
+                continue
             using_scripts.add(target)
             if target.exists() and filecmp.cmp(str(source), str(target)):
                 continue    # Identical files. skip.
             if not quiet:
                 click.echo('  {}'.format(source.name))
-            shutil.copy2(str(source), str(target))
+            try:
+                shutil.copy2(str(source), str(target))
+            except OSError as e:
+                click.echo('WARNING: Failed to copy {}.\n{}: {}'.format(
+                    source.name, type(e).__name__, e,
+                ), err=True)
 
     python_versions_path = configs.get_python_versions_path()
     python_versions_path.write_text(
@@ -127,7 +134,7 @@ def activate(versions, *, allow_empty=False, quiet=False):
     )
     using_scripts.add(python_versions_path)
 
-    # TODO: We don't have a good way to read lnk files now, so let's use the
+    # TODO: We don't currently have a good way to read lnk files. Use the
     # old method and always overwrite.
     for version in versions:
         command = version.python_major_command
