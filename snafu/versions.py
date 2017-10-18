@@ -93,7 +93,7 @@ class Version:
             return False
         return exists
 
-    def check_installer(self, data, into_path):
+    def check_installer(self, data):
         checksum = hashlib.md5(data).hexdigest()
         assert checksum == self.md5_sum, \
             'expect checksum {}, got {}'.format(self.md5_sum, checksum)
