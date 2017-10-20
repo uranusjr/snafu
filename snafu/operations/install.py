@@ -81,8 +81,8 @@ def upgrade(ctx, version, pre, from_file):
         version, on_exit=functools.partial(link_commands, version),
     ).get_version_info()
     if installation_vi >= version.version_info:
-        click.echo('Python {} is up to date.'.format(
-            '.'.join(str(i) for i in installation_vi),
+        click.echo('{} is up to date ({}).'.format(
+            version, '.'.join(str(i) for i in installation_vi),
         ))
         return
 
