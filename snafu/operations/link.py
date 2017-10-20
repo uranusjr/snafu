@@ -209,6 +209,10 @@ def link(ctx, command, link_all, force):
 
     active_names = get_active_names()
     if link_all:
+        if not active_names:
+            click.echo('Not using any versions.', err=True)
+            click.echo('HINT: Use "snafu use" to use a version.', err=True)
+            ctx.exit(1)
         activate([get_version(n) for n in active_names])
         return
 
