@@ -1,52 +1,15 @@
-import ctypes
 import filecmp
 import itertools
-import pathlib
 import shutil
 import subprocess
-import time
-import warnings
 
 import click
 
-from . import __version__
-from . import configs, metadata, releases, termui, utils, versions
+from snafu import configs
 
-
-def download_installer(version):
-    click.echo('Downloading {}'.format(version.url))
-    return utils.download_file(version.url, check=version.check_installer)
-
-
-def get_version(name):
-    force_32 = not metadata.can_install_64bit()
-    try:
-        version = versions.get_version(name, force_32=force_32)
-    except versions.VersionNotFoundError:
-        click.echo('No such version: {}'.format(name), err=True)
-        click.get_current_context().exit(1)
-    if version.name != name:
-        click.echo('Note: Selecting {} instead of {}'.format(
-            version.name, name,
-        ))
-    return version
-
-
-def check_installation(version, *, installed=True, on_exit=None):
-    try:
-        installation = version.get_installation()
-    except FileNotFoundError:
-        if not installed:   # Expected to be absent. Return None.
-            return None
-        message = '{} is not installed.'
-    else:
-        if installed:   # Expected to be installed. Return the installation.
-            return installation
-        message = '{} is already installed.'
-    click.echo(message.format(version), err=True)
-    if on_exit:
-        on_exit()
-    click.get_current_context().exit(1)
+from .common import (
+    check_installation, get_active_names, get_version, version_command,
+)
 
 
 def publish_shortcut(target, command, *args, overwrite, quiet):
@@ -77,6 +40,14 @@ def publish_python_command(installation, target, *, overwrite, quiet=False):
 
 def publish_pip_command(installation, target, *, overwrite, quiet=False):
     publish_file(installation.pip, target, overwrite=overwrite, quiet=quiet)
+
+
+def safe_unlink(p):
+    if p.exists():
+        try:
+            p.unlink()
+        except OSError as e:
+            click.echo('Failed to remove {} ({})'.format(p, e), err=True)
 
 
 def collect_version_scripts(versions):
@@ -164,43 +135,10 @@ def link_commands(version):
         publish_pip_command(installation, path, overwrite=True, quiet=True)
 
 
-def safe_unlink(p):
-    if p.exists():
-        try:
-            p.unlink()
-        except OSError as e:
-            click.echo('Failed to remove {} ({})'.format(p, e), err=True)
-
-
 def unlink_commands(version):
     for p in itertools.chain(version.python_commands, version.pip_commands):
         click.echo('Unlinking {}'.format(p.name))
         safe_unlink(p)
-
-
-def get_active_names():
-    try:
-        content = configs.get_python_versions_path().read_text()
-    except FileNotFoundError:
-        return ()
-    return tuple(v for v in content.split() if v)
-
-
-def get_versions(*, installed_only):
-    vers = versions.get_versions()
-    names = set(v.name for v in vers)
-
-    def should_include(version):
-        if installed_only and not version.is_installed():
-            return False
-        # On a 32-bit host, hide 64-bit names if there is a 32-bit counterpart.
-        if (not metadata.can_install_64bit() and
-                not version.name.endswith('-32') and
-                '{}-32'.format(version.name) in names):
-            return False
-        return True
-
-    return [v for v in vers if should_include(v)]
 
 
 def update_active_versions(*, remove=frozenset()):
@@ -216,59 +154,83 @@ def update_active_versions(*, remove=frozenset()):
         activate([get_version(n) for n in active_names], allow_empty=True)
 
 
-def install_self_upgrade(path):
-    click.echo('Installing upgrade from {}'.format(path))
-    click.echo('SNAFU will terminate now to let the installer run.')
-    click.echo('Come back after the installation finishes. See ya later!')
-
-    # SNAFU's installer requests elevation, so subprocess won't work, and we
-    # need some Win32 API magic here. (Notice we use 'open', not 'runas'. The
-    # installer requests elevation on its own; we don't do that for it.)
-    # The process launched is in a detached state so SNAFU can end here,
-    # releasing files to let the installer override.
-    instance = ctypes.windll.shell32.ShellExecuteW(
-        None, 'open', str(path), '', None, 1,
-    )
-
-    if instance < 32:   # According to MSDN this is an error.
-        message = '\n'.join([
-            'Failed to launcn installer (error code {}).'.format(instance),
-            'Find the downloaded installer and execute yourself at:',
-            '  {}'.format(path),
-        ])
-        click.echo(message, err=True)
-        click.get_current_context().exit(1)
-
-    # Let the user read the message and give the above call some time to run.
-    time.sleep(1)
-
-
-def self_upgrade(*, installer, pre):
-    if installer:
-        if pre:
-            click.echo('Ignoring --pre flag for upgrading self with --file')
-        install_self_upgrade(pathlib.Path(installer))
+@version_command(plural=True)
+def use(ctx, versions, add):
+    if add is None and not versions:
+        # Bare "snafu use": Display active versions.
+        names = get_active_names()
+        if names:
+            click.echo(' '.join(names))
+        else:
+            click.echo('Not using any versions.', err=True)
         return
 
-    with warnings.catch_warnings():
-        warnings.showwarning = termui.warn
+    for version in versions:
+        check_installation(version)
+
+    active_versions = [
+        get_version(name)
+        for name in get_active_names()
+    ]
+    if add:
+        active_names = set(v.name for v in active_versions)
+        new_versions = []
+        for v in versions:
+            if v.name in active_names:
+                click.echo('Already using {}.'.format(v), err=True)
+            else:
+                new_versions.append(v)
+        versions = active_versions + new_versions
+
+    if active_versions == versions:
+        click.echo('No version changes.', err=True)
+        return
+
+    if versions:
+        click.echo('Using: {}'.format(', '.join(v.name for v in versions)))
+    else:
+        click.echo('Not using any versions.')
+    activate(versions, allow_empty=(not add))
+
+
+def link(ctx, command, link_all, force):
+    if not link_all and not command:    # This mistake is more common.
+        click.echo(ctx.get_usage(), color=ctx.color)
+        click.echo('\nError: Missing argument "command".', color=ctx.color)
+        ctx.exit(1)
+    if link_all and command:
+        click.echo('--all cannot be used with a command.', err=True)
+        ctx.exit(1)
+
+    active_names = get_active_names()
+    if link_all:
+        activate([get_version(n) for n in active_names])
+        return
+
+    command_name = command  # Better variable names.
+    command = None
+    for version_name in active_names:
+        version = get_version(version_name)
         try:
-            release = releases.get_new_release(__version__, includes_pre=pre)
-        except releases.ReleaseUpToDate as e:
-            click.echo('Current verion {} is up to date.'.format(__version__))
-            if e.version.is_prerelease and not pre:
-                click.echo(
-                    "You are on a pre-release. Maybe you want to check for a "
-                    "pre-release update with --pre?",
-                )
+            command = version.get_installation().find_script(command_name)
+        except FileNotFoundError:
+            continue
+        break
+    if command is None:
+        click.echo('Command "{}" not found. Looked in {}: {}'.format(
+            command_name,
+            'version' if len(active_names) == 1 else 'versions',
+            ', '.join(active_names),
+        ), err=True)
+        ctx.exit(1)
+
+    target_name = command.name
+    target = configs.get_scripts_dir_path().joinpath(target_name)
+    if target.exists() and not force:
+        if target.read_bytes() == command.read_bytes():
+            # If the two files are identical, we're good anyway.
             return
-
-    arch = 'win32' if metadata.is_python_32bit() else 'amd64'
-    asset = release.get_asset(arch)
-    if asset is None:
-        click.echo('No suitable asset to download in {}'.format(release))
-        return
-
-    url = asset.browser_download_url
-    path = utils.download_file(url, check=asset.check_download)
-    install_self_upgrade(path)
+        click.echo('{} exists. Use --force to overwrite.', err=True)
+        ctx.exit(1)
+    publish_file(command, target, overwrite=True, quiet=True)
+    click.echo('Linked {} from {}'.format(target_name, version))
