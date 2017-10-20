@@ -30,7 +30,7 @@ class Installation:
             [str(self.python), '--version'], encoding='ascii',
         ).strip()
         match = re.match(r'^Python (\d+)\.(\d+)\.(\d+)$', output)
-        return match.groups()
+        return tuple(int(x) for x in match.groups())
 
     def find_script(self, name):
         names = itertools.chain([name], (
