@@ -21,7 +21,12 @@ def publish_shortcut(target, command, *args, overwrite, quiet):
         'cscript', '//NOLOGO', str(configs.get_linkexe_script_path()),
         str(command), str(target),
     ) + args
-    subprocess.check_call(args, shell=True)
+    try:
+        subprocess.check_call(args, shell=True)
+    except subprocess.CalledProcessError as e:
+        click.echo('WARNING: Failed to link {}.\n{}: {}'.format(
+            command.name, type(e).__name__, e,
+        ), err=True)
 
 
 def publish_file(source, target, *, overwrite, quiet):
@@ -29,7 +34,12 @@ def publish_file(source, target, *, overwrite, quiet):
         return
     if not quiet:
         click.echo('  {}'.format(target.name))
-    shutil.copy2(str(source), str(target))
+    try:
+        shutil.copy2(str(source), str(target))
+    except OSError as e:
+        click.echo('WARNING: Failed to copy {}.\n{}: {}'.format(
+            source.name, type(e).__name__, e,
+        ), err=True)
 
 
 def publish_python_command(installation, target, *, overwrite, quiet=False):
@@ -90,14 +100,7 @@ def activate(versions, *, allow_empty=False, quiet=False):
             using_scripts.add(target)
             if target.exists() and filecmp.cmp(str(source), str(target)):
                 continue    # Identical files. skip.
-            if not quiet:
-                click.echo('  {}'.format(source.name))
-            try:
-                shutil.copy2(str(source), str(target))
-            except OSError as e:
-                click.echo('WARNING: Failed to copy {}.\n{}: {}'.format(
-                    source.name, type(e).__name__, e,
-                ), err=True)
+            publish_file(source, target, overwrite=True, quiet=quiet)
 
     python_versions_path = configs.get_python_versions_path()
     python_versions_path.write_text(
