@@ -97,7 +97,7 @@ def activate(versions, *, allow_empty=False, quiet=False):
             click.echo('Publishing scripts....')
         for source in source_scripts:
             target = scripts_dir.joinpath(source.name)
-            if not target.is_file():
+            if not source.is_file():
                 continue
             using_scripts.add(target)
             if target.exists() and filecmp.cmp(str(source), str(target)):
