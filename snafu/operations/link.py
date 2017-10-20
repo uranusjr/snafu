@@ -49,7 +49,9 @@ def publish_python_command(installation, target, *, overwrite, quiet=False):
 
 
 def publish_pip_command(installation, target, *, overwrite, quiet=False):
-    publish_file(installation.pip, target, overwrite=overwrite, quiet=quiet)
+    publish_shortcut(
+        target, installation.pip, overwrite=overwrite, quiet=quiet,
+    )
 
 
 def safe_unlink(p):

@@ -73,7 +73,7 @@ class Version:
     def pip_commands(self):
         dirpath = configs.get_cmd_dir_path()
         return [
-            dirpath.joinpath('pip{}.exe'.format(name))
+            dirpath.joinpath('pip{}.lnk'.format(name))
             for name in self.script_version_names
         ]
 
