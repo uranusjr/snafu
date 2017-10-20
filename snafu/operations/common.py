@@ -49,16 +49,23 @@ def get_version(name):
     return version
 
 
-def version_command(*, plural=False):
+def version_command(*, plural=False, wild_versions=()):
+    if wild_versions:
+        def _get_version(n):
+            if n in wild_versions:
+                return n
+            return get_version(n)
+    else:
+        _get_version = get_version
 
     def decorator(f):
 
         @functools.wraps(f)
         def wrapped(*args, version, **kw):
             if plural:
-                kw['versions'] = [get_version(n) for n in version]
+                kw['versions'] = [_get_version(n) for n in version]
             else:
-                kw['version'] = get_version(version)
+                kw['version'] = _get_version(version)
             return f(*args, **kw)
 
         return wrapped

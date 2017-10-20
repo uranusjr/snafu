@@ -67,7 +67,7 @@ def uninstall(version, from_file):
     click.echo('{} is uninstalled succesfully.'.format(version))
 
 
-@version_command()
+@version_command(wild_versions=['self'])
 def upgrade(ctx, version, pre, from_file):
     if version == 'self':
         self_upgrade(installer=from_file, pre=pre)
@@ -77,7 +77,6 @@ def upgrade(ctx, version, pre, from_file):
         click.echo('Installing prereleases is not supported yet.', err=True)
         ctx.exit(1)
 
-    version = get_version(version)
     installation_vi = check_installation(
         version, on_exit=functools.partial(link_commands, version),
     ).get_version_info()
