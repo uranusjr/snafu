@@ -14,7 +14,7 @@ from .common import (
 
 def publish_shortcut(target, command, *args, overwrite, quiet):
     if not overwrite and target.exists():
-        return
+        return False
     if not quiet:
         click.echo('  {}'.format(target.name))
     args = (
@@ -27,11 +27,13 @@ def publish_shortcut(target, command, *args, overwrite, quiet):
         click.echo('WARNING: Failed to link {}.\n{}: {}'.format(
             command.name, type(e).__name__, e,
         ), err=True)
+        return False
+    return True
 
 
 def publish_file(source, target, *, overwrite, quiet):
     if not overwrite and target.exists():
-        return
+        return False
     if not quiet:
         click.echo('  {}'.format(target.name))
     try:
@@ -40,6 +42,8 @@ def publish_file(source, target, *, overwrite, quiet):
         click.echo('WARNING: Failed to copy {}.\n{}: {}'.format(
             source.name, type(e).__name__, e,
         ), err=True)
+        return False
+    return True
 
 
 def publish_python_command(installation, target, *, overwrite, quiet=False):
@@ -242,5 +246,6 @@ def link(ctx, command, link_all, force):
             return
         click.echo('{} exists. Use --force to overwrite.', err=True)
         ctx.exit(1)
-    publish_file(command, target, overwrite=True, quiet=True)
-    click.echo('Linked {} from {}'.format(target_name, version))
+    ok = publish_file(command, target, overwrite=True, quiet=True)
+    if ok:
+        click.echo('Linked {} from {}'.format(target_name, version))
