@@ -1,5 +1,5 @@
 {
-    "$schema": "cpython",
+    "type": "cpython",
     "version_info": [3, 5, 4],
     "url": "https://www.python.org/ftp/python/3.5.4/python-3.5.4.exe",
     "md5_sum": "9693575358f41f452d03fd33714f223f"

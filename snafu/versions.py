@@ -200,7 +200,7 @@ class CPythonVersion(Version):
 
 def get_version(name, *, force_32):
     data = load_version_data(name)
-    installer_type = InstallerType(data['$schema'])
+    installer_type = InstallerType(data['type'])
     klass = {
         InstallerType.cpython_msi: CPythonMSIVersion,
         InstallerType.cpython: CPythonVersion,

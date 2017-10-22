@@ -1,5 +1,5 @@
 {
-    "$schema": "cpython_msi",
+    "type": "cpython_msi",
     "version_info": [3, 4, 4],
     "amd64": {
         "url": "https://www.python.org/ftp/python/3.4.4/python-3.4.4.amd64.msi",
