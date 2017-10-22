@@ -10,7 +10,6 @@ from .common import (
 from .link import (
     activate, link_commands, unlink_commands, update_active_versions,
 )
-from .releases import self_upgrade
 
 
 @version_command()
@@ -70,6 +69,7 @@ def uninstall(version, from_file):
 @version_command(wild_versions=['self'])
 def upgrade(ctx, version, pre, from_file):
     if version == 'self':
+        from .releases import self_upgrade
         self_upgrade(installer=from_file, pre=pre)
         return
 
