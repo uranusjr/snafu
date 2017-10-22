@@ -11,7 +11,7 @@ def get_value(key):
 def get_directory(key):
     path = pathlib.Path(__file__).parent.joinpath(get_value(key))
     path.mkdir(parents=True, exist_ok=True)
-    return path.resolve()
+    return path.resolve(strict=True)
 
 
 def get_scripts_dir_path():

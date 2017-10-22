@@ -39,5 +39,5 @@ class Installation:
         ))
         for name in names:
             with contextlib.suppress(FileNotFoundError):
-                return self.scripts_dir.joinpath(name).resolve()
+                return self.scripts_dir.joinpath(name).resolve(strict=True)
         raise FileNotFoundError(name)

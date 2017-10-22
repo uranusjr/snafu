@@ -87,7 +87,7 @@ def get_latest_python_name():
     return latest_definition['name']
 
 
-ROOT = pathlib.Path(__file__).parent.resolve()
+ROOT = pathlib.Path(__file__).parent.resolve(strict=True)
 
 ASSETSDIR = ROOT.joinpath('assets')
 ASSETSDIR.mkdir(exist_ok=True)
