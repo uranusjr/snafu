@@ -33,10 +33,10 @@ class Installation:
         return tuple(int(x) for x in match.groups())
 
     def find_script(self, name):
-        names = itertools.chain([name], (
+        names = itertools.chain([name], [
             '{}{}'.format(name, ext)
             for ext in os.environ['PATHEXT'].split(';')
-        ))
+        ])
         for name in names:
             with contextlib.suppress(FileNotFoundError):
                 return self.scripts_dir.joinpath(name).resolve(strict=True)
