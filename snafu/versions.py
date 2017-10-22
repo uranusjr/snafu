@@ -83,7 +83,7 @@ class Version:
         return dirpath.joinpath('python{}.lnk'.format(self.version_info[0]))
 
     def get_installation(self):
-        path = metadata.get_install_path(self.name).resolve()
+        path = metadata.get_install_path(self.name).resolve(strict=True)
         return installations.Installation(path=path)
 
     def is_installed(self):

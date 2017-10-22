@@ -20,7 +20,7 @@ def get_install_path(name):
         key = winreg.OpenKey(python_key, '{}\\InstallPath'.format(name))
         install_path = winreg.QueryValue(key, None)
         winreg.CloseKey(key)
-    return pathlib.Path(install_path).resolve()
+    return pathlib.Path(install_path).resolve(strict=True)
 
 
 def find_uninstaller_id(name):
@@ -73,7 +73,7 @@ def get_bundle_cache_path(name):
         try:
             key = winreg.OpenKey(registry, '\\'.join(key_parts))
             value, _ = winreg.QueryValueEx(key, 'BundleCachePath')
-            path = pathlib.Path(value).resolve()
+            path = pathlib.Path(value).resolve(strict=True)
         except FileNotFoundError:
             continue
         else:

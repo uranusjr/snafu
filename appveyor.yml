@@ -1,4 +1,4 @@
-image: Visual Studio 2015
+image: Visual Studio 2017
 
 max_jobs: 2
 
@@ -30,16 +30,16 @@ install:
 
   - "SET PATH"
 
-build: off
+build_script:
+  - "for /f %%i in ('git describe') do @set SNAFU_GIT_VERSION=%%i"
+  - "python .\\installers\\build.py %SNAFU_GIT_VERSION%"
+  - "SET SNAFU_SETUP_EXE=snafu-setup-%INSTALLER_ARCH%-%SNAFU_GIT_VERSION%.exe"
 
 test_script:
   - "flake8 ."
   - "pytest tests"
 
-after_test:
-  - "for /f %%i in ('git describe') do @set SNAFU_GIT_VERSION=%%i"
-  - "python .\\installers\\build.py %SNAFU_GIT_VERSION%"
-  - ps: "ls .\\installers\\*.exe"
+  - "docker build --build-arg SNAFU_SETUP_EXE=%SNAFU_SETUP_EXE% .\\installers"
 
 artifacts:
-  - path: ".\\installers\\*.exe"
+  - path: ".\\installers\\%SNAFU_SETUP_EXE%"
