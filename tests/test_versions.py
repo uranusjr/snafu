@@ -20,7 +20,7 @@ def test_version_definitions(path):
     with path.open() as f:
         data = json.load(f)
 
-    schema = data.pop('$schema')
+    schema = data.pop('type')
     possible_types = snafu.versions.InstallerType.__members__
     assert schema in possible_types
 
