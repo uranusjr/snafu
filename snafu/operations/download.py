@@ -12,7 +12,7 @@ def download_installer(version):
     return utils.download_file(version.url, check=version.check_installer)
 
 
-@version_command
+@version_command()
 def download(ctx, version, dest_dir, force):
     installer = download_installer(version)
     target = pathlib.Path(dest_dir).joinpath(installer.name)
