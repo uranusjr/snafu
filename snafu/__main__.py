@@ -58,6 +58,19 @@ def upgrade(ctx, **kwargs):
     upgrade(ctx, **kwargs)
 
 
+@cli.command(help='Download installer of given Python version.')
+@click.argument('version')
+@click.option(
+    '--dest', 'dest_dir', type=click.Path(exists=True, file_okay=False),
+    help='Download installer to this directory.',
+)
+@click.option('--force', is_flag=True, help='Overwrite target if exists.')
+@click.pass_context
+def download(ctx, **kwargs):
+    from .operations.download import download
+    download(ctx, **kwargs)
+
+
 @cli.command(help='Set active Python versions.')
 @click.argument('version', nargs=-1)
 @click.option(

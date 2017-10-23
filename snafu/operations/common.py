@@ -2,7 +2,7 @@ import functools
 
 import click
 
-from snafu import configs, metadata, utils, versions
+from snafu import configs, metadata, versions
 
 
 def check_installation(version, *, installed=True, on_exit=None):
@@ -20,11 +20,6 @@ def check_installation(version, *, installed=True, on_exit=None):
     if on_exit:
         on_exit()
     click.get_current_context().exit(1)
-
-
-def download_installer(version):
-    click.echo('Downloading {}'.format(version.url))
-    return utils.download_file(version.url, check=version.check_installer)
 
 
 def get_active_names():

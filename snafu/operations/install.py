@@ -4,9 +4,10 @@ import pathlib
 import click
 
 from .common import (
-    check_installation, download_installer,
+    check_installation,
     get_active_names, get_version, version_command,
 )
+from .download import download_installer
 from .link import (
     activate, link_commands, unlink_commands, update_active_versions,
 )
@@ -28,7 +29,7 @@ def install(version, use, add, from_file):
     dirpath = version.install(str(installer_path))
 
     link_commands(version)
-    click.echo('{} is installed succesfully to {}'.format(
+    click.echo('{} is installed successfully to {}'.format(
         version, dirpath,
     ))
 
@@ -63,7 +64,7 @@ def uninstall(version, from_file):
     click.echo('Running uninstaller {}'.format(uninstaller_path))
     version.uninstall(str(uninstaller_path))
     unlink_commands(version)
-    click.echo('{} is uninstalled succesfully.'.format(version))
+    click.echo('{} is uninstalled successfully.'.format(version))
 
 
 @version_command(wild_versions=['self'])
@@ -95,6 +96,6 @@ def upgrade(ctx, version, pre, from_file):
     version.upgrade(str(installer_path))
 
     link_commands(version)
-    click.echo('{} is upgraded succesfully at {}'.format(
+    click.echo('{} is upgraded successfully at {}'.format(
         version, version.get_installation().path,
     ))
