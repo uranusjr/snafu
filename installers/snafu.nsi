@@ -116,7 +116,7 @@ Section "SNAFU Python Manager"
         $\"$INSTDIR\lib\setup\env.py$\" $\"$INSTDIR$\""
 
     # Link installed Python versions to \cmd.
-    DetailPrint "Dicovering existing Pythons..."
+    DetailPrint "Discovering existing Pythons..."
     nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
         $\"$INSTDIR\lib\setup\discovery.py$\""
 
