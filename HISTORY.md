@@ -23,6 +23,7 @@
 
 * Add an option to install and use a Python version after SNAFU is set up.
 * 64-bit variant does not carry x86 MSU files anymore, reducing installer size.
+* Correctly install Windows update KB2999226 on 32-bit Windows.
 
 
 ## Version 1.0

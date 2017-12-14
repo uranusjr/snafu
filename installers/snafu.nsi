@@ -74,7 +74,7 @@ Function InstallMSU
     ${If} ${RunningX64}
         StrCpy $R1 'x64'
     ${Else}
-        StrCpy $R1 'x32'
+        StrCpy $R1 'x86'
     ${EndIf}
 
     DetailPrint "Installing Windows update ${KBCODE} for your system..."
