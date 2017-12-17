@@ -110,11 +110,9 @@ Section "SNAFU Python Manager"
         $\"$INSTDIR\lib\setup\discovery.py$\""
 
     # Re-activate versions.
-    ${If} $ActivePythonConfig != ''
-        DetailPrint "Restoring active versions..."
-        nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
-            $\"$INSTDIR\lib\setup\activation.py$\""
-    ${Endif}
+    DetailPrint "Restoring active versions..."
+    nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
+        $\"$INSTDIR\lib\setup\activation.py$\""
 
     # Run SNAFU to install Python (if told to).
     ${If} $InstallsPython == ${BST_CHECKED}
