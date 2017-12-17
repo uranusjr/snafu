@@ -26,8 +26,6 @@
     !error "PYTHONVERSION definition required."
 !endif
 
-!define SNAFU_SHIM_STRING "$INSTDIR\lib\python\python.exe$\r$\n-m$\r$\nsnafu"
-
 
 ShowInstDetails hide
 ManifestSupportedOS all
@@ -139,6 +137,10 @@ Section "SNAFU Python Manager"
     # Copy snafu shim.
     CopyFiles "$INSTDIR\lib\shims\snafu.exe" "$INSTDIR\cmd"
 
+    # Write SNAFU install information.
+    WriteRegStr HKCU "Software\\uranusjr\\SNAFU" "InstallPath" "$INSTDIR"
+
+    # Write uninstaller and register it to Windows.
     WriteUninstaller "${UNINSTALL_EXE}"
     WriteRegStr HKLM "${UNINSTALL_REGKEY}" "DisplayName" "${NAME}"
     WriteRegStr HKLM "${UNINSTALL_REGKEY}" "Publisher" "Tzu-ping Chung"
@@ -150,6 +152,6 @@ Section "un.Uninstaller"
     nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
         $\"$INSTDIR\lib\setup\env.py$\" --uninstall $\"$INSTDIR$\""
     Rmdir /r "$INSTDIR"
-    DeleteRegKey HKLM "Software\\uranusjr\\SNAFU"
+    DeleteRegKey HKCU "Software\\uranusjr\\SNAFU"
     DeleteRegKey HKLM "${UNINSTALL_REGKEY}"
 SectionEnd

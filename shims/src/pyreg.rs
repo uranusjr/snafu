@@ -1,4 +1,3 @@
-extern crate winapi;
 extern crate winreg;
 
 use std::io;
