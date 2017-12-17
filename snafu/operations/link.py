@@ -91,6 +91,7 @@ def activate(versions, *, allow_empty=False, quiet=False):
     scripts_dir = configs.get_scripts_dir_path()
 
     using_scripts = set()
+
     if source_scripts:
         if not quiet:
             click.echo('Publishing scripts....')
@@ -102,21 +103,22 @@ def activate(versions, *, allow_empty=False, quiet=False):
             if target.exists() and filecmp.cmp(str(source), str(target)):
                 continue    # Identical files. skip.
             publish_file(source, target, overwrite=True, quiet=quiet)
+
+    if shims or versions:
+        if not quiet:
+            click.echo('Publishing shims...')
         for shim in shims:
             target = scripts_dir.joinpath(shim)
             using_scripts.add(target)
-            publish_pip_command(target, overwrite=True, quiet=quiet)
+            if not target.exists():
+                publish_pip_command(target, overwrite=True, quiet=quiet)
+        for version in versions:
+            command = version.python_major_command
+            using_scripts.add(command)
+            if not command.exists():
+                publish_python_command(command, overwrite=True, quiet=True)
 
     metadata.set_active_python_versions(version.name for version in versions)
-
-    # TODO: We don't currently have a good way to read lnk files. Use the
-    # old method and always overwrite.
-    for version in versions:
-        command = version.python_major_command
-        if command in using_scripts:
-            continue
-        using_scripts.add(command)
-        publish_python_command(command, overwrite=True, quiet=True)
 
     stale_scripts = set(scripts_dir.iterdir()) - using_scripts
     if stale_scripts:
