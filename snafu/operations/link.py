@@ -106,13 +106,11 @@ def activate(versions, *, allow_empty=False, quiet=False):
         for shim in shims:
             target = scripts_dir.joinpath(shim)
             using_scripts.add(target)
-            if not target.exists():
-                publish_pip_command(target, overwrite=True, quiet=quiet)
+            publish_pip_command(target, overwrite=False, quiet=quiet)
         for version in versions:
             command = version.python_major_command
             using_scripts.add(command)
-            if not command.exists():
-                publish_python_command(command, overwrite=True, quiet=True)
+            publish_python_command(command, overwrite=False, quiet=True)
 
     metadata.set_active_python_versions(version.name for version in versions)
 
