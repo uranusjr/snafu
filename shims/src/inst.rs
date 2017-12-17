@@ -65,7 +65,7 @@ impl cmp::Ord for PythonVersion {
         if self.major != other.major {
             self.major.cmp(&other.major)
         } else if self.minor != other.minor {
-            self.major.cmp(&other.major)
+            self.minor.cmp(&other.minor)
         } else {
             self.bitct.cmp(&other.bitct)
         }
