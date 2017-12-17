@@ -24,7 +24,9 @@ WINVERS = [
     '8.1',      # 8.1.
 ]
 
-DLL_NAME = 'vcruntime140.dll'
+# For the Rust-base shims. Current version: VC140 (2015) Update 3 RC.
+# https://www.microsoft/en-US/download/details.aspx?id=52685
+VC_REDIST_UUID = '6AA4EDFF-645B-48C5-81CC-ED5963AEAD48'
 
 
 def get_python_embed_url(architecture):
@@ -55,6 +57,15 @@ def get_kb_msu_url(architecture, wver, warc):
         wver=wver,
         warc=warc,
     )
+
+
+def get_vc_redist_url(winarc):
+    # URL scheme from this repository. UUID from official download link.
+    # https://github.com/WPN-XM/vcredist
+    return (
+        'https://download.microsoft.com/download/'
+        '{uuid[0]}/{uuid[1]}/{uuid[2]}/{uuid}/vc_redist.{warc}.exe'
+    ).format(uuid=VC_REDIST_UUID, warc=winarc)
 
 
 def get_snafu_version():
@@ -139,6 +150,14 @@ def get_kb_msu(arch, winver, winarc):
     if not msu_path.exists():
         download_file(url, msu_path)
     return msu_path
+
+
+def get_vc_redist(winarc):
+    url = get_vc_redist_url(winarc)
+    installer_path = ASSETSDIR.joinpath(url.rsplit('/', 1)[-1])
+    if not installer_path.exists():
+        download_file(url, installer_path)
+    return installer_path
 
 
 def get_dependency_names():
@@ -240,6 +259,18 @@ def build_setup(arch, libdir):
             setupdir.joinpath(msu_path.name),
         )
 
+    # Copy VC redistributable installer.
+    winarc = {
+        'amd64': 'x64',
+        'win32': 'x86',
+    }[arch]
+    installer = get_vc_redist(winarc)
+    click.echo('Copy {}'.format(installer))
+    shutil.copy2(
+        str(installer),
+        setupdir.joinpath(installer.name),
+    )
+
     # Copy Py launcher MSI.
     click.echo('Copy py.msi')
     msi = get_py_launcher(arch)
@@ -259,10 +290,6 @@ def build_shims(libdir):
     rust_project_root = ROOT.parent.joinpath('shims')
 
     click.echo('Build shims...')
-    subprocess.check_call(
-        'cargo clean',
-        shell=True, cwd=str(rust_project_root),
-    )
     subprocess.check_call(
         'cargo build --release',
         shell=True, cwd=str(rust_project_root),
@@ -311,6 +338,10 @@ def build_installer(outpath):
 def cleanup():
     container = ROOT.joinpath('snafu')
     shutil.rmtree(str(container))
+    subprocess.check_call(
+        'cargo clean',
+        shell=True, cwd=str(ROOT.parent.joinpath('shims')),
+    )
 
 
 @click.command()
