@@ -92,7 +92,7 @@ def activate(versions, *, allow_empty=False, quiet=False):
 
     using_scripts = set()
 
-    if source_scripts:
+    if source_scripts or shims or versions:
         if not quiet:
             click.echo('Publishing scripts....')
         for source in source_scripts:
@@ -103,10 +103,6 @@ def activate(versions, *, allow_empty=False, quiet=False):
             if target.exists() and filecmp.cmp(str(source), str(target)):
                 continue    # Identical files. skip.
             publish_file(source, target, overwrite=True, quiet=quiet)
-
-    if shims or versions:
-        if not quiet:
-            click.echo('Publishing shims...')
         for shim in shims:
             target = scripts_dir.joinpath(shim)
             using_scripts.add(target)
