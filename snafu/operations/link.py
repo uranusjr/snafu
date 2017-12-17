@@ -1,7 +1,6 @@
 import filecmp
 import itertools
 import shutil
-import subprocess
 
 import click
 
@@ -12,22 +11,12 @@ from .common import (
 )
 
 
-def publish_shortcut(target, command, *args, overwrite, quiet):
+def publish_shim(name, target, *args, overwrite, quiet):
     if not overwrite and target.exists():
         return False
     if not quiet:
         click.echo('  {}'.format(target.name))
-    args = (
-        'cscript', '//NOLOGO', str(configs.get_linkexe_script_path()),
-        str(command), str(target),
-    ) + args
-    try:
-        subprocess.check_call(args, shell=True)
-    except subprocess.CalledProcessError as e:
-        click.echo('WARNING: Failed to link {}.\n{}: {}'.format(
-            command.name, type(e).__name__, e,
-        ), err=True)
-        return False
+    shutil.copy2(str(configs.get_shim_path(name)), str(target))
     return True
 
 
@@ -47,15 +36,11 @@ def publish_file(source, target, *, overwrite, quiet):
 
 
 def publish_python_command(installation, target, *, overwrite, quiet=False):
-    publish_shortcut(
-        target, installation.python, overwrite=overwrite, quiet=quiet,
-    )
+    publish_shim('python', target, overwrite=overwrite, quiet=quiet)
 
 
 def publish_pip_command(installation, target, *, overwrite, quiet=False):
-    publish_shortcut(
-        target, installation.pip, overwrite=overwrite, quiet=quiet,
-    )
+    publish_shim('pip', target, overwrite=overwrite, quiet=quiet)
 
 
 def safe_unlink(p):

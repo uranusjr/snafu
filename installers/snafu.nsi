@@ -137,10 +137,8 @@ Section "SNAFU Python Manager"
             -m snafu install --add ${PYTHONVERSION}"
     ${EndIf}
 
-    # Create shortcut to snafu.
-    nsExec::ExecToLog "cscript //NOLOGO $\"$INSTDIR\lib\utils\linkexe.vbs$\" \
-        $\"$INSTDIR\lib\python\python.exe$\" $\"$INSTDIR\cmd\snafu.lnk$\" \
-        -m snafu"
+    # Copy snafu shim.
+    CopyFiles "$INSTDIR\lib\shims\snafu.exe" "$INSTDIR\cmd"
 
     WriteUninstaller "${UNINSTALL_EXE}"
     WriteRegStr HKLM "${UNINSTALL_REGKEY}" "DisplayName" "${NAME}"

@@ -28,3 +28,9 @@ def get_cmd_dir_path():
 
 def get_linkexe_script_path():
     return get_directory('utils_dir').joinpath('linkexe.vbs')
+
+
+def get_shim_path(name):
+    if not name.endswith('.exe'):
+        name = '{}.exe'.format(name)
+    return get_directory('shims').joinpath(name)

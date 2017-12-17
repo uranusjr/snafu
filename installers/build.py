@@ -200,7 +200,7 @@ def build_python(arch, libdir):
         json.dump({
             'cmd_dir': '..\\..\\..\\cmd',
             'scripts_dir': '..\\..\\..\\scripts',
-            'utils_dir': '..\\..\\utils',
+            'shims_dir': '..\\..\\shims',
         }, f)
 
     # Copy dependencies.
@@ -255,16 +255,28 @@ def build_setup(arch, libdir):
         shutil.copy2(str(path), str(setupdir.joinpath(name)))
 
 
-def build_utils(libdir):
-    utilsdir = libdir.joinpath('utils')
-    utilsdir.mkdir()
-    click.echo('Copy utility scripts...')
-    for path in ROOT.joinpath('lib', 'utils').iterdir():
-        if path.suffix not in SCRIPT_EXTS:
+def build_shims(libdir):
+    rust_project_root = ROOT.joinpath('shims')
+
+    click.echo('Build shims...')
+    subprocess.check_call(
+        'cargo clean',
+        shell=True, cwd=str(rust_project_root),
+    )
+    subprocess.check_call(
+        'cargo build --release',
+        shell=True, cwd=str(rust_project_root),
+    )
+
+    shimsdir = libdir.joinpath('shims')
+    shimsdir.mkdir()
+    click.echo('Copy shims...')
+    for path in rust_project_root.join('target', 'release').iterdir():
+        if path.suffix != '.exe':
             continue
         name = path.name
         click.echo('  {}'.format(name))
-        shutil.copy2(str(path), str(utilsdir.joinpath(name)))
+        shutil.copy2(str(path), str(shimsdir.joinpath(name)))
 
 
 def build_lib(arch, container):
@@ -272,7 +284,7 @@ def build_lib(arch, container):
     libdir.mkdir()
     build_python(arch, libdir)
     build_setup(arch, libdir)
-    build_utils(libdir)
+    build_shims(libdir)
 
 
 def build_files(arch):
