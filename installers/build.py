@@ -256,7 +256,7 @@ def build_setup(arch, libdir):
 
 
 def build_shims(libdir):
-    rust_project_root = ROOT.joinpath('shims')
+    rust_project_root = ROOT.parent.joinpath('shims')
 
     click.echo('Build shims...')
     subprocess.check_call(
