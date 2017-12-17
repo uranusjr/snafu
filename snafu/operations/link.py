@@ -110,7 +110,7 @@ def activate(versions, *, allow_empty=False, quiet=False):
         for version in versions:
             command = version.python_major_command
             using_scripts.add(command)
-            publish_python_command(command, overwrite=False, quiet=True)
+            publish_python_command(command, overwrite=False, quiet=quiet)
 
     metadata.set_active_python_versions(version.name for version in versions)
 
