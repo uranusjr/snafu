@@ -6,8 +6,10 @@ environment:
   matrix:
     - PYTHON: "C:\\Python36-x64"
       INSTALLER_ARCH: "amd64"
+      RUST: x86_64-pc-windows-msvc
     - PYTHON: "C:\\Python36"
       INSTALLER_ARCH: "win32"
+      RUST: i686-pc-windows-msvc
 
 platform:
   - x86
@@ -22,6 +24,10 @@ matrix:
 
 install:
   - "SET PATH=%PATH%;C:\\Program Files (x86)\\NSIS\\Bin"
+
+  - curl -sSf -o rustup-init.exe https://win.rustup.rs
+  - .\rustup-init.exe --default-host %RUST% --default-toolchain stable -y
+  - set PATH=%PATH%;C:\Users\appveyor\.cargo\bin
 
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   - "python -m pip install --disable-pip-version-check --upgrade pip"
