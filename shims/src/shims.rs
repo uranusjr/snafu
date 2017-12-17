@@ -40,10 +40,10 @@ impl ShimVersion {
     pub fn match_name(&self, value: &str) -> bool {
         let parts: Vec<&str> = value.rsplitn(2, '-').collect();
         if self.bitness == Bitness::Win32 &&
-                (parts.len() < 2 || parts[1] != "32") {
+                (parts.len() < 2 || parts[0] != "32") {
             return false;
         }
-        let mut part_iter = parts[0].split('.');
+        let mut part_iter = parts[parts.len() - 1].split('.');
         if part_iter.next().unwrap() != &self.major {
             return false;
         }
@@ -56,9 +56,13 @@ impl ShimVersion {
 
 impl Display for ShimVersion {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        match self.minor.as_ref() {
-            Some(mi) => write!(f, "{}.{}", self.major, mi),
-            None => write!(f, "{}", self.major),
+        let ver = match self.minor.as_ref() {
+            Some(mi) => format!("{}.{}", self.major, mi),
+            None => format!("{}", self.major),
+        };
+        match self.bitness {
+            Bitness::Any => write!(f, "{}", ver),
+            Bitness::Win32 => write!(f, "{}-32", ver),
         }
     }
 }

@@ -1,11 +1,12 @@
+mod inst;
 mod procs;
+mod pyreg;
 mod shims;
-mod vers;
 
 /// Entry point for a python.exe shim.
 fn main() {
     let shim = shims::ShimInfo::from_current_name(true).unwrap();
-    let python = match vers::best_python(shim.version) {
+    let python = match inst::best_python(shim.version) {
         Ok(pb) => pb,
         Err(error) => {
             eprintln!("lookup failed: {}", error);

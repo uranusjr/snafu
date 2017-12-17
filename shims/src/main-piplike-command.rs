@@ -1,16 +1,17 @@
 use std::process::{abort, exit};
 
+mod inst;
 mod procs;
+mod pyreg;
 mod shims;
-mod snafulib;
-mod vers;
+mod snafu;
 
 /// Entry point for a shim of hookable tools such as pip and easy_install.
 /// Theses are launched as "python -m <module>" instead, and hooks back to
 /// SNAFU after completion to perform rehashing.
 fn main() {
     let shim = shims::ShimInfo::from_current_name(true).unwrap();
-    let python = match vers::best_python(shim.version) {
+    let python = match inst::best_python(shim.version) {
         Ok(pb) => pb,
         Err(error) => {
             eprintln!("lookup failed: {}", error);
@@ -30,7 +31,7 @@ fn main() {
         exit(code);
     }
 
-    let snafu_python = match snafulib::find_python() {
+    let snafu_python = match snafu::find_python() {
         Ok(pb) => pb,
         Err(error) => {
             eprintln!("lookup failed: {}", error);

@@ -1,14 +1,22 @@
 [[bin]]
-name = "python"
-path = "src/python.rs"
+name = "python-command"
+path = "src/main-python-command.rs"
 
 [[bin]]
-name = "pip"
-path = "src/pip.rs"
+name = "python-script"
+path = "src/main-python-script.rs"
+
+[[bin]]
+name = "piplike-command"
+path = "src/main-piplike-command.rs"
+
+[[bin]]
+name = "piplike-script"
+path = "src/main-piplike-script.rs"
 
 [[bin]]
 name = "snafu"
-path = "src/snafu.rs"
+path = "src/main-snafu.rs"
 
 [package]
 name = "snafu-shims"

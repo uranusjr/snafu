@@ -1,15 +1,12 @@
-mod procs;
-mod snafulib;
+use std::env;
+use std::io::Result;
+use std::path::PathBuf;
 
-/// Entry point for snafu.exe's shim.
-fn main() {
-    let python = match snafulib::find_python() {
-        Ok(pb) => pb,
-        Err(error) => {
-            eprintln!("lookup failed: {}", error);
-            std::process::abort();
-        },
-    };
-    procs::setup();
-    procs::run_and_end(python, vec!["-m", "snafu"], true);
+pub fn find_python() -> Result<PathBuf> {
+    let python = try! { env::current_exe() }
+        .parent().unwrap_or(&PathBuf::new())
+        .parent().unwrap_or(&PathBuf::new())
+        .join("lib\\python\\python.exe");
+
+    Ok(python)
 }

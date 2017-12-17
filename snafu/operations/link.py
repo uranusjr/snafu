@@ -1,4 +1,4 @@
-import filecmp
+import collections
 import itertools
 import shutil
 
@@ -33,14 +33,6 @@ def publish_file(source, target, *, overwrite, quiet):
         ), err=True)
         return False
     return True
-
-
-def publish_python_command(target, *, overwrite, quiet=False):
-    publish_shim('python', target, overwrite=overwrite, quiet=quiet)
-
-
-def publish_pip_command(target, *, overwrite, quiet=False):
-    publish_shim('pip', target, overwrite=overwrite, quiet=quiet)
 
 
 def safe_unlink(p):
@@ -100,17 +92,23 @@ def activate(versions, *, allow_empty=False, quiet=False):
             if not source.is_file():
                 continue
             using_scripts.add(target)
-            if target.exists() and filecmp.cmp(str(source), str(target)):
-                continue    # Identical files. skip.
             publish_file(source, target, overwrite=True, quiet=quiet)
         for shim in shims:
             target = scripts_dir.joinpath(shim)
+            if target in using_scripts:
+                continue
             using_scripts.add(target)
-            publish_pip_command(target, overwrite=False, quiet=quiet)
+            publish_shim(
+                'piplike-script', target, overwrite=True, quiet=quiet,
+            )
         for version in versions:
-            command = version.python_major_command
-            using_scripts.add(command)
-            publish_python_command(command, overwrite=False, quiet=quiet)
+            target = version.python_major_command
+            if target in using_scripts:
+                continue
+            using_scripts.add(target)
+            publish_shim(
+                'python-script', target, overwrite=True, quiet=quiet,
+            )
 
     metadata.set_active_python_versions(version.name for version in versions)
 
@@ -127,10 +125,10 @@ def activate(versions, *, allow_empty=False, quiet=False):
 def link_commands(version):
     for path in version.python_commands:
         click.echo('Publishing {}'.format(path.name))
-        publish_python_command(path, overwrite=True, quiet=True)
+        publish_shim('python-command', path, overwrite=True, quiet=True)
     for path in version.pip_commands:
         click.echo('Publishing {}'.format(path.name))
-        publish_pip_command(path, overwrite=True, quiet=True)
+        publish_shim('piplike-command', path, overwrite=True, quiet=True)
 
 
 def unlink_commands(version):
@@ -179,6 +177,11 @@ def use(ctx, versions, add):
             else:
                 new_versions.append(v)
         versions = active_versions + new_versions
+
+    # Remove duplicate inputs (keep first apperance).
+    versions = list(collections.OrderedDict(
+        (version.name, version) for version in versions
+    ).values())
 
     if active_versions == versions:
         click.echo('No version changes.', err=True)
