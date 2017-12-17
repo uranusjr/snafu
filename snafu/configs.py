@@ -33,4 +33,4 @@ def get_linkexe_script_path():
 def get_shim_path(name):
     if not name.endswith('.exe'):
         name = '{}.exe'.format(name)
-    return get_directory('shims').joinpath(name)
+    return get_directory('shims_dir').joinpath(name)
