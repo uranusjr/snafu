@@ -51,14 +51,18 @@ unsafe fn setup_child(child: &mut Child) {
     AssignProcessToJobObject(job, child.as_raw_handle());
 }
 
-pub fn run(exe: PathBuf, args: Vec<&str>) -> Result<i32> {
-    // Hand over arguments passed to the shim.
-    let mut envargs = env::args();
-    envargs.next();     // Skip args[0].
+pub fn run(exe: PathBuf, args: Vec<&str>, own_args: bool) -> Result<i32> {
+    let mut cmd = Command::new(exe);
+    cmd.args(&args);
 
-    let mut child = try! {
-        Command::new(exe).args(&args).args(envargs).spawn()
-    };
+    // Hand over arguments passed to the shim.
+    if own_args {
+        let mut envargs = env::args();
+        envargs.next();     // Skip args[0].
+        cmd.args(envargs);
+    }
+
+    let mut child = try! { cmd.spawn() };
     unsafe { setup_child(&mut child) };
 
     match try! { child.wait() }.code() {
@@ -69,8 +73,8 @@ pub fn run(exe: PathBuf, args: Vec<&str>) -> Result<i32> {
     }
 }
 
-pub fn run_and_end(exe: PathBuf, args: Vec<&str>) {
-    let code = match run(exe, args) {
+pub fn run_and_end(exe: PathBuf, args: Vec<&str>, own_args: bool) {
+    let code = match run(exe, args, own_args) {
         Ok(code) => code,
         Err(error) => {
             eprintln!("launch failed: {}", error);

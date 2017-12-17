@@ -11,5 +11,5 @@ fn main() {
         },
     };
     procs::setup();
-    procs::run_and_end(python, vec!["-m", "snafu"]);
+    procs::run_and_end(python, vec!["-m", "snafu"], true);
 }

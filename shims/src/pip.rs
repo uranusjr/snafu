@@ -19,7 +19,7 @@ fn main() {
     };
 
     procs::setup();
-    let code = match procs::run(python, vec!["-m", &shim.name]) {
+    let code = match procs::run(python, vec!["-m", &shim.name], true) {
         Ok(code) => code,
         Err(error) => {
             eprintln!("launch failed: {}", error);
@@ -38,5 +38,8 @@ fn main() {
         },
     };
 
-    procs::run_and_end(snafu_python, vec!["-m", "snafu", "link", "--all"]);
+    procs::run_and_end(
+        snafu_python, vec!["-m", "snafu", "link", "--all"],
+        false,
+    );
 }

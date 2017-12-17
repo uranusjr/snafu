@@ -13,5 +13,5 @@ fn main() {
         },
     };
     procs::setup();
-    procs::run_and_end(python, vec![]);
+    procs::run_and_end(python, vec![], true);
 }
