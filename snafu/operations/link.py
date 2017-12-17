@@ -35,11 +35,11 @@ def publish_file(source, target, *, overwrite, quiet):
     return True
 
 
-def publish_python_command(installation, target, *, overwrite, quiet=False):
+def publish_python_command(target, *, overwrite, quiet=False):
     publish_shim('python', target, overwrite=overwrite, quiet=quiet)
 
 
-def publish_pip_command(installation, target, *, overwrite, quiet=False):
+def publish_pip_command(target, *, overwrite, quiet=False):
     publish_shim('pip', target, overwrite=overwrite, quiet=quiet)
 
 
@@ -54,22 +54,32 @@ def safe_unlink(p):
 def collect_version_scripts(versions):
     names = set()
     scripts = []
+    shims = []
     for version in versions:
         version_scripts_dir = version.get_installation().scripts_dir
         if not version_scripts_dir.is_dir():
             continue
         for path in version_scripts_dir.iterdir():
             blacklisted_stems = {
-                # Always use commands like "pip3", never "pip".
+                # Encourage people to always use qualified commands.
                 'easy_install', 'pip',
                 # Fully qualified pip is already populated on installation.
                 'pip{}'.format(version.arch_free_name),
             }
+            shimmed_stems = {
+                # Major version names, e.g. "pip3".
+                'pip{}'.format(version.version_info[0]),
+                # Fully-qualified easy_install.
+                'easy_install-{}'.format(version.arch_free_name),
+            }
             if path.name in names or path.stem in blacklisted_stems:
                 continue
             names.add(path.name)
-            scripts.append(path)
-    return scripts
+            if path.stem in shimmed_stems:
+                shims.append(path.name)
+            else:
+                scripts.append(path)
+    return scripts, shims
 
 
 def activate(versions, *, allow_empty=False, quiet=False):
@@ -77,7 +87,7 @@ def activate(versions, *, allow_empty=False, quiet=False):
         click.echo('No active versions.', err=True)
         click.get_current_context().exit(1)
 
-    source_scripts = collect_version_scripts(versions)
+    source_scripts, shims = collect_version_scripts(versions)
     scripts_dir = configs.get_scripts_dir_path()
 
     using_scripts = set()
@@ -92,6 +102,10 @@ def activate(versions, *, allow_empty=False, quiet=False):
             if target.exists() and filecmp.cmp(str(source), str(target)):
                 continue    # Identical files. skip.
             publish_file(source, target, overwrite=True, quiet=quiet)
+        for shim in shims:
+            target = scripts_dir.joinpath(shim)
+            using_scripts.add(target)
+            publish_pip_command(target, overwrite=True, quiet=quiet)
 
     metadata.set_active_python_versions(version.name for version in versions)
 
@@ -102,8 +116,7 @@ def activate(versions, *, allow_empty=False, quiet=False):
         if command in using_scripts:
             continue
         using_scripts.add(command)
-        inst = version.get_installation()
-        publish_python_command(inst, command, overwrite=True, quiet=True)
+        publish_python_command(command, overwrite=True, quiet=True)
 
     stale_scripts = set(scripts_dir.iterdir()) - using_scripts
     if stale_scripts:
@@ -116,13 +129,12 @@ def activate(versions, *, allow_empty=False, quiet=False):
 
 
 def link_commands(version):
-    installation = version.get_installation()
     for path in version.python_commands:
         click.echo('Publishing {}'.format(path.name))
-        publish_python_command(installation, path, overwrite=True, quiet=True)
+        publish_python_command(path, overwrite=True, quiet=True)
     for path in version.pip_commands:
         click.echo('Publishing {}'.format(path.name))
-        publish_pip_command(installation, path, overwrite=True, quiet=True)
+        publish_pip_command(path, overwrite=True, quiet=True)
 
 
 def unlink_commands(version):
