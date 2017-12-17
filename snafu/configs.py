@@ -18,13 +18,15 @@ def get_scripts_dir_path():
     return get_directory('scripts_dir')
 
 
-def get_python_versions_path():
-    return get_scripts_dir_path().joinpath('.python-versions.txt')
-
-
 def get_cmd_dir_path():
     return get_directory('cmd_dir')
 
 
 def get_linkexe_script_path():
     return get_directory('utils_dir').joinpath('linkexe.vbs')
+
+
+def get_shim_path(name):
+    if not name.endswith('.exe'):
+        name = '{}.exe'.format(name)
+    return get_directory('shims_dir').joinpath(name)

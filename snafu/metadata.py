@@ -8,7 +8,7 @@ import winreg
 @contextlib.contextmanager
 def open_python_key():
     key = winreg.OpenKey(
-        winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER),
+        winreg.HKEY_CURRENT_USER,
         'Software\\Python\\PythonCore',
     )
     yield key
@@ -28,7 +28,7 @@ def find_uninstaller_id(name):
     # the matching version's uninstaller. This is crazy, but the best way I
     # can think of right now. And it's still faster than downloading the MSI.
     key = winreg.OpenKey(
-        winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE),
+        winreg.HKEY_LOCAL_MACHINE,
         'Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall',
     )
 
@@ -58,20 +58,19 @@ def find_uninstaller_id(name):
 
 def get_bundle_cache_path(name):
     key = winreg.OpenKey(
-        winreg.ConnectRegistry(None, winreg.HKEY_CLASSES_ROOT),
+        winreg.HKEY_CLASSES_ROOT,
         'Installer\\Dependencies\\CPython-{}'.format(name),
     )
     guid = winreg.QueryValue(key, '')
     winreg.CloseKey(key)
 
-    for reg in (winreg.HKEY_CURRENT_USER, winreg.HKEY_LOCAL_MACHINE):
-        registry = winreg.ConnectRegistry(None, reg)
+    for top_key in (winreg.HKEY_CURRENT_USER, winreg.HKEY_LOCAL_MACHINE):
         key_parts = [
             'Software', 'Microsoft', 'Windows',
             'CurrentVersion', 'Uninstall', guid,
         ]
         try:
-            key = winreg.OpenKey(registry, '\\'.join(key_parts))
+            key = winreg.OpenKey(top_key, '\\'.join(key_parts))
             value, _ = winreg.QueryValueEx(key, 'BundleCachePath')
             path = pathlib.Path(value).resolve(strict=True)
         except FileNotFoundError:
@@ -81,6 +80,23 @@ def get_bundle_cache_path(name):
         finally:
             winreg.CloseKey(key)
     raise FileNotFoundError
+
+
+def get_active_python_versions():
+    key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, 'Software\\uranusjr\\SNAFU')
+    value, _ = winreg.QueryValueEx(key, 'ActivePythonVersions')
+    winreg.CloseKey(key)
+
+    return value.split(';') if value else []
+
+
+def set_active_python_versions(names):
+    value = ';'.join(names)
+    key = winreg.CreateKey(
+        winreg.HKEY_CURRENT_USER, 'Software\\uranusjr\\SNAFU',
+    )
+    winreg.SetValueEx(key, 'ActivePythonVersions', 0, winreg.REG_SZ, value)
+    winreg.CloseKey(key)
 
 
 def can_install_64bit():

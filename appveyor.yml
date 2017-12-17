@@ -6,8 +6,10 @@ environment:
   matrix:
     - PYTHON: "C:\\Python36-x64"
       INSTALLER_ARCH: "amd64"
+      RUST: stable-x86_64-pc-windows-msvc
     - PYTHON: "C:\\Python36"
       INSTALLER_ARCH: "win32"
+      RUST: stable-i686-pc-windows-msvc
 
 platform:
   - x86
@@ -23,6 +25,10 @@ matrix:
 install:
   - "SET PATH=%PATH%;C:\\Program Files (x86)\\NSIS\\Bin"
 
+  - curl -sSf -o rustup-init.exe https://win.rustup.rs
+  - .\rustup-init.exe --default-host %RUST% --default-toolchain stable -y
+  - SET PATH=%PATH%;C:\Users\appveyor\.cargo\bin
+
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   - "python -m pip install --disable-pip-version-check --upgrade pip"
   - "pip install --upgrade pipenv"
@@ -35,11 +41,11 @@ build_script:
   - "python .\\installers\\build.py %SNAFU_GIT_VERSION%"
   - "SET SNAFU_SETUP_EXE=snafu-setup-%INSTALLER_ARCH%-%SNAFU_GIT_VERSION%.exe"
 
+after_build:
+  - appveyor PushArtifact .\\installers\\%SNAFU_SETUP_EXE%
+
 test_script:
   - "flake8 ."
   - "pytest tests"
 
   - "docker build --build-arg SNAFU_SETUP_EXE=%SNAFU_SETUP_EXE% .\\installers"
-
-artifacts:
-  - path: ".\\installers\\%SNAFU_SETUP_EXE%"

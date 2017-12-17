@@ -24,8 +24,6 @@ WINVERS = [
     '8.1',      # 8.1.
 ]
 
-DLL_NAME = 'vcruntime140.dll'
-
 
 def get_python_embed_url(architecture):
     return '{pref}/{vers}/python-{vers}-embed-{arch}.zip'.format(
@@ -200,7 +198,7 @@ def build_python(arch, libdir):
         json.dump({
             'cmd_dir': '..\\..\\..\\cmd',
             'scripts_dir': '..\\..\\..\\scripts',
-            'utils_dir': '..\\..\\utils',
+            'shims_dir': '..\\..\\shims',
         }, f)
 
     # Copy dependencies.
@@ -227,11 +225,12 @@ def build_setup(arch, libdir):
     setupdir = libdir.joinpath('setup')
     setupdir.mkdir()
 
-    # Copy necessary updates.
     winarcs = {
         'amd64': ['x64'],
         'win32': ['x86', 'x64'],
     }[arch]
+
+    # Copy necessary updates.
     for winver, winarc in itertools.product(WINVERS, winarcs):
         msu_path = get_kb_msu(arch, winver, winarc)
         click.echo('Copy {}'.format(msu_path.name))
@@ -255,16 +254,24 @@ def build_setup(arch, libdir):
         shutil.copy2(str(path), str(setupdir.joinpath(name)))
 
 
-def build_utils(libdir):
-    utilsdir = libdir.joinpath('utils')
-    utilsdir.mkdir()
-    click.echo('Copy utility scripts...')
-    for path in ROOT.joinpath('lib', 'utils').iterdir():
-        if path.suffix not in SCRIPT_EXTS:
+def build_shims(libdir):
+    rust_project_root = ROOT.parent.joinpath('shims')
+
+    click.echo('Build shims...')
+    subprocess.check_call(
+        'cargo build --release',
+        shell=True, cwd=str(rust_project_root),
+    )
+
+    shimsdir = libdir.joinpath('shims')
+    shimsdir.mkdir()
+    click.echo('Copy shims...')
+    for path in rust_project_root.joinpath('target', 'release').iterdir():
+        if path.suffix != '.exe':
             continue
         name = path.name
         click.echo('  {}'.format(name))
-        shutil.copy2(str(path), str(utilsdir.joinpath(name)))
+        shutil.copy2(str(path), str(shimsdir.joinpath(name)))
 
 
 def build_lib(arch, container):
@@ -272,7 +279,7 @@ def build_lib(arch, container):
     libdir.mkdir()
     build_python(arch, libdir)
     build_setup(arch, libdir)
-    build_utils(libdir)
+    build_shims(libdir)
 
 
 def build_files(arch):
@@ -299,6 +306,10 @@ def build_installer(outpath):
 def cleanup():
     container = ROOT.joinpath('snafu')
     shutil.rmtree(str(container))
+    subprocess.check_call(
+        'cargo clean',
+        shell=True, cwd=str(ROOT.parent.joinpath('shims')),
+    )
 
 
 @click.command()

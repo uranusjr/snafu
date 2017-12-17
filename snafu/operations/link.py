@@ -1,34 +1,14 @@
-import filecmp
+import collections
 import itertools
 import shutil
-import subprocess
 
 import click
 
-from snafu import configs
+from snafu import configs, metadata
 
 from .common import (
     check_installation, get_active_names, get_version, version_command,
 )
-
-
-def publish_shortcut(target, command, *args, overwrite, quiet):
-    if not overwrite and target.exists():
-        return False
-    if not quiet:
-        click.echo('  {}'.format(target.name))
-    args = (
-        'cscript', '//NOLOGO', str(configs.get_linkexe_script_path()),
-        str(command), str(target),
-    ) + args
-    try:
-        subprocess.check_call(args, shell=True)
-    except subprocess.CalledProcessError as e:
-        click.echo('WARNING: Failed to link {}.\n{}: {}'.format(
-            command.name, type(e).__name__, e,
-        ), err=True)
-        return False
-    return True
 
 
 def publish_file(source, target, *, overwrite, quiet):
@@ -46,15 +26,10 @@ def publish_file(source, target, *, overwrite, quiet):
     return True
 
 
-def publish_python_command(installation, target, *, overwrite, quiet=False):
-    publish_shortcut(
-        target, installation.python, overwrite=overwrite, quiet=quiet,
-    )
-
-
-def publish_pip_command(installation, target, *, overwrite, quiet=False):
-    publish_shortcut(
-        target, installation.pip, overwrite=overwrite, quiet=quiet,
+def publish_shim(name, target, *, overwrite, quiet):
+    return publish_file(
+        configs.get_shim_path(name), target,
+        overwrite=overwrite, quiet=quiet,
     )
 
 
@@ -69,22 +44,32 @@ def safe_unlink(p):
 def collect_version_scripts(versions):
     names = set()
     scripts = []
+    shims = []
     for version in versions:
         version_scripts_dir = version.get_installation().scripts_dir
         if not version_scripts_dir.is_dir():
             continue
         for path in version_scripts_dir.iterdir():
             blacklisted_stems = {
-                # Always use commands like "pip3", never "pip".
+                # Encourage people to always use qualified commands.
                 'easy_install', 'pip',
                 # Fully qualified pip is already populated on installation.
                 'pip{}'.format(version.arch_free_name),
             }
+            shimmed_stems = {
+                # Major version names, e.g. "pip3".
+                'pip{}'.format(version.version_info[0]),
+                # Fully-qualified easy_install.
+                'easy_install-{}'.format(version.arch_free_name),
+            }
             if path.name in names or path.stem in blacklisted_stems:
                 continue
             names.add(path.name)
-            scripts.append(path)
-    return scripts
+            if path.stem in shimmed_stems:
+                shims.append(path.name)
+            else:
+                scripts.append(path)
+    return scripts, shims
 
 
 def activate(versions, *, allow_empty=False, quiet=False):
@@ -92,11 +77,15 @@ def activate(versions, *, allow_empty=False, quiet=False):
         click.echo('No active versions.', err=True)
         click.get_current_context().exit(1)
 
-    source_scripts = collect_version_scripts(versions)
+    source_scripts, shims = collect_version_scripts(versions)
     scripts_dir = configs.get_scripts_dir_path()
 
     using_scripts = set()
-    if source_scripts:
+
+    # TODO: Distinguish between `snafu use` and automatic hook after shimmed
+    # pip execution. The latter should only write scripts that actually chaged,
+    # or at least should only log those writes (and overwrite others silently).
+    if source_scripts or shims or versions:
         if not quiet:
             click.echo('Publishing scripts....')
         for source in source_scripts:
@@ -104,25 +93,25 @@ def activate(versions, *, allow_empty=False, quiet=False):
             if not source.is_file():
                 continue
             using_scripts.add(target)
-            if target.exists() and filecmp.cmp(str(source), str(target)):
-                continue    # Identical files. skip.
             publish_file(source, target, overwrite=True, quiet=quiet)
+        for shim in shims:
+            target = scripts_dir.joinpath(shim)
+            if target in using_scripts:
+                continue
+            using_scripts.add(target)
+            publish_shim(
+                'piplike-script', target, overwrite=True, quiet=quiet,
+            )
+        for version in versions:
+            target = version.python_major_command
+            if target in using_scripts:
+                continue
+            using_scripts.add(target)
+            publish_shim(
+                'python-script', target, overwrite=True, quiet=quiet,
+            )
 
-    python_versions_path = configs.get_python_versions_path()
-    python_versions_path.write_text(
-        '\n'.join(version.name for version in versions),
-    )
-    using_scripts.add(python_versions_path)
-
-    # TODO: We don't currently have a good way to read lnk files. Use the
-    # old method and always overwrite.
-    for version in versions:
-        command = version.python_major_command
-        if command in using_scripts:
-            continue
-        using_scripts.add(command)
-        inst = version.get_installation()
-        publish_python_command(inst, command, overwrite=True, quiet=True)
+    metadata.set_active_python_versions(version.name for version in versions)
 
     stale_scripts = set(scripts_dir.iterdir()) - using_scripts
     if stale_scripts:
@@ -135,13 +124,12 @@ def activate(versions, *, allow_empty=False, quiet=False):
 
 
 def link_commands(version):
-    installation = version.get_installation()
     for path in version.python_commands:
         click.echo('Publishing {}'.format(path.name))
-        publish_python_command(installation, path, overwrite=True, quiet=True)
+        publish_shim('python-command', path, overwrite=True, quiet=True)
     for path in version.pip_commands:
         click.echo('Publishing {}'.format(path.name))
-        publish_pip_command(installation, path, overwrite=True, quiet=True)
+        publish_shim('piplike-command', path, overwrite=True, quiet=True)
 
 
 def unlink_commands(version):
@@ -190,6 +178,11 @@ def use(ctx, versions, add):
             else:
                 new_versions.append(v)
         versions = active_versions + new_versions
+
+    # Remove duplicate inputs (keep first apperance).
+    versions = list(collections.OrderedDict(
+        (version.name, version) for version in versions
+    ).values())
 
     if active_versions == versions:
         click.echo('No version changes.', err=True)

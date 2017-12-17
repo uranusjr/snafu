@@ -22,11 +22,11 @@
 
 !define KBCODE 'KB2999226'
 
+!define VCRUNTIME 'vcruntime140.dll'
+
 !ifndef PYTHONVERSION
     !error "PYTHONVERSION definition required."
 !endif
-
-!define SNAFU_SHIM_STRING "$INSTDIR\lib\python\python.exe$\r$\n-m$\r$\nsnafu"
 
 
 ShowInstDetails hide
@@ -38,8 +38,6 @@ InstallDir "$LOCALAPPDATA\Programs\SNAFU"
 
 Var InstallsPythonCheckbox
 Var InstallsPython
-Var PythonVersionsTxt
-Var ActivePythonConfig
 
 Function Welcome
     ${IfNot} ${AtLeastWinVista}
@@ -58,7 +56,7 @@ Function WelcomeLeave
     ${NSD_GetState} $InstallsPythonCheckbox $InstallsPython
 FunctionEnd
 
-Function InstallMSU
+Function InstallCRTUpdate
     ${If} ${AtLeastWin10}
         Return
     ${ElseIf} ${IsWin8.1}
@@ -77,21 +75,12 @@ Function InstallMSU
         StrCpy $R1 'x86'
     ${EndIf}
 
-    DetailPrint "Installing Windows update ${KBCODE} for your system..."
+    DetailPrint "Installing Windows update ${KBCODE}..."
     nsExec::ExecToLog "wusa /quiet /norestart \
         $\"$INSTDIR\lib\setup\Windows$R0-${KBCODE}-$R1.msu$\""
 FunctionEnd
 
 Section "SNAFU Python Manager"
-    StrCpy $PythonVersionsTxt "$INSTDIR\scripts\.python-versions.txt"
-    ${If} ${FileExists} $PythonVersionsTxt
-        FileOpen $R0 $PythonVersionsTxt r
-        FileRead $R0 $ActivePythonConfig
-        FileClose $R0
-    ${Else}
-        StrCpy $ActivePythonConfig ''
-    ${EndIf}
-
     # Clean up previous installation to prevent script name conflicts (e.g.
     # old package is used instead of new module), and clean up old files.
     Rmdir /r "$INSTDIR"
@@ -103,8 +92,8 @@ Section "SNAFU Python Manager"
     CreateDirectory "$INSTDIR\cmd"
     CreateDirectory "$INSTDIR\scripts"
 
-    # Ensure appropriate CRT is installed.
-    Call InstallMSU
+    # Ensure appropriate Windows Update for CRT is installed.
+    Call InstallCRTUpdate
 
     # Install Py launcher.
     DetailPrint "Installing Python Launcher (py.exe)..."
@@ -121,14 +110,9 @@ Section "SNAFU Python Manager"
         $\"$INSTDIR\lib\setup\discovery.py$\""
 
     # Re-activate versions.
-    ${If} $ActivePythonConfig != ''
-        DetailPrint "Restoring active versions..."
-        FileOpen $R0 $PythonVersionsTxt w
-        FileWrite $R0 $ActivePythonConfig
-        FileClose $R0
-        nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
-            $\"$INSTDIR\lib\setup\activation.py$\""
-    ${Endif}
+    DetailPrint "Restoring active versions..."
+    nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
+        $\"$INSTDIR\lib\setup\activation.py$\""
 
     # Run SNAFU to install Python (if told to).
     ${If} $InstallsPython == ${BST_CHECKED}
@@ -137,11 +121,15 @@ Section "SNAFU Python Manager"
             -m snafu install --add ${PYTHONVERSION}"
     ${EndIf}
 
-    # Create shortcut to snafu.
-    nsExec::ExecToLog "cscript //NOLOGO $\"$INSTDIR\lib\utils\linkexe.vbs$\" \
-        $\"$INSTDIR\lib\python\python.exe$\" $\"$INSTDIR\cmd\snafu.lnk$\" \
-        -m snafu"
+    # Copy snafu shim and required DLL.
+    # We just use whatever Python provides, for convinience's sake.
+    CopyFiles "$INSTDIR\lib\shims\snafu.exe" "$INSTDIR\cmd"
+    CopyFiles "$INSTDIR\lib\python\${VCRUNTIME}" "$INSTDIR\cmd"
 
+    # Write SNAFU install information.
+    WriteRegStr HKCU "Software\\uranusjr\\SNAFU" "InstallPath" "$INSTDIR"
+
+    # Write uninstaller and register it to Windows.
     WriteUninstaller "${UNINSTALL_EXE}"
     WriteRegStr HKLM "${UNINSTALL_REGKEY}" "DisplayName" "${NAME}"
     WriteRegStr HKLM "${UNINSTALL_REGKEY}" "Publisher" "Tzu-ping Chung"
@@ -153,5 +141,6 @@ Section "un.Uninstaller"
     nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
         $\"$INSTDIR\lib\setup\env.py$\" --uninstall $\"$INSTDIR$\""
     Rmdir /r "$INSTDIR"
+    DeleteRegKey HKCU "Software\\uranusjr\\SNAFU"
     DeleteRegKey HKLM "${UNINSTALL_REGKEY}"
 SectionEnd

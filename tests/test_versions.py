@@ -97,10 +97,10 @@ def test_str(name, force_32, result):
 
 
 @pytest.mark.parametrize('name, force_32, cmd', [
-    ('3.6', False, 'python3.lnk'),
-    ('3.6', True, 'python3.lnk'),
-    ('2.7', False, 'python2.lnk'),
-    ('2.7', True, 'python2.lnk'),
+    ('3.6', False, 'python3.exe'),
+    ('3.6', True, 'python3.exe'),
+    ('2.7', False, 'python2.exe'),
+    ('2.7', True, 'python2.exe'),
 ])
 def test_python_major_command(mocker, name, force_32, cmd):
     mocker.patch.object(snafu.versions, 'configs', **{

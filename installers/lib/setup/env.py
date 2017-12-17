@@ -55,23 +55,6 @@ def add_snafu_paths(instdir):
     return False
 
 
-def add_lnk_ext():
-    if '.LNK' in get_parsed_environ('PATHEXT'):
-        return False
-    with open_environment_key(winreg.KEY_READ | winreg.KEY_SET_VALUE) as key:
-        try:
-            value, vtype = winreg.QueryValueEx(key, 'PATHEXT')
-            parts = [v for v in value.split(';') if v]
-        except FileNotFoundError:
-            vtype = winreg.REG_EXPAND_SZ
-            parts = ['%PATHEXT%']
-        parts.append('.LNK')
-        value = ';'.join(parts)
-        winreg.SetValueEx(key, 'PATHEXT', 0, vtype, value)
-    print('SET PATHEXT={}'.format(value))
-    return True
-
-
 def get_snafu_path_values(instdir):
     return [
         str(instdir.joinpath('cmd')),
@@ -80,10 +63,9 @@ def get_snafu_path_values(instdir):
 
 
 def install(instdir):
-    changed = []
-    changed.append(add_lnk_ext())
-    changed.append(add_snafu_paths(instdir))
-    return any(changed)
+    return any([
+        add_snafu_paths(instdir),
+    ])
 
 
 def uninstall(instdir):

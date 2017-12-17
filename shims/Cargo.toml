@@ -1,0 +1,28 @@
+[[bin]]
+name = "python-command"
+path = "src/main-python-command.rs"
+
+[[bin]]
+name = "python-script"
+path = "src/main-python-script.rs"
+
+[[bin]]
+name = "piplike-command"
+path = "src/main-piplike-command.rs"
+
+[[bin]]
+name = "piplike-script"
+path = "src/main-piplike-script.rs"
+
+[[bin]]
+name = "snafu"
+path = "src/main-snafu.rs"
+
+[package]
+name = "snafu-shims"
+version = "0.0.0"
+
+[dependencies]
+kernel32-sys = "0.2.2"
+winapi = "0.2.8"
+winreg = "0.4"

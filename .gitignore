@@ -9,3 +9,4 @@ __pycache__
 /installers/assets/
 /installers/snafu/
 /runenv
+/shims/target
