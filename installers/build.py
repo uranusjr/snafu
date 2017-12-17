@@ -246,11 +246,12 @@ def build_setup(arch, libdir):
     setupdir = libdir.joinpath('setup')
     setupdir.mkdir()
 
-    # Copy necessary updates.
     winarcs = {
         'amd64': ['x64'],
         'win32': ['x86', 'x64'],
     }[arch]
+
+    # Copy necessary updates.
     for winver, winarc in itertools.product(WINVERS, winarcs):
         msu_path = get_kb_msu(arch, winver, winarc)
         click.echo('Copy {}'.format(msu_path.name))
@@ -260,16 +261,13 @@ def build_setup(arch, libdir):
         )
 
     # Copy VC redistributable installer.
-    winarc = {
-        'amd64': 'x64',
-        'win32': 'x86',
-    }[arch]
-    installer = get_vc_redist(winarc)
-    click.echo('Copy {}'.format(installer.name))
-    shutil.copy2(
-        str(installer),
-        setupdir.joinpath(installer.name),
-    )
+    for winarc in winarcs:
+        installer = get_vc_redist(winarc)
+        click.echo('Copy {}'.format(installer.name))
+        shutil.copy2(
+            str(installer),
+            setupdir.joinpath(installer.name),
+        )
 
     # Copy Py launcher MSI.
     click.echo('Copy py.msi')
