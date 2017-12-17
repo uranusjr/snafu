@@ -4,7 +4,7 @@ import shutil
 
 import click
 
-from snafu import configs
+from snafu import configs, metadata
 
 from .common import (
     check_installation, get_active_names, get_version, version_command,
@@ -93,11 +93,7 @@ def activate(versions, *, allow_empty=False, quiet=False):
                 continue    # Identical files. skip.
             publish_file(source, target, overwrite=True, quiet=quiet)
 
-    python_versions_path = configs.get_python_versions_path()
-    python_versions_path.write_text(
-        '\n'.join(version.name for version in versions),
-    )
-    using_scripts.add(python_versions_path)
+    metadata.set_active_python_versions(version.name for version in versions)
 
     # TODO: We don't currently have a good way to read lnk files. Use the
     # old method and always overwrite.

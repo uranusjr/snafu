@@ -18,10 +18,6 @@ def get_scripts_dir_path():
     return get_directory('scripts_dir')
 
 
-def get_python_versions_path():
-    return get_scripts_dir_path().joinpath('.python-versions.txt')
-
-
 def get_cmd_dir_path():
     return get_directory('cmd_dir')
 

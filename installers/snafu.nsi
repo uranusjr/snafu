@@ -38,8 +38,6 @@ InstallDir "$LOCALAPPDATA\Programs\SNAFU"
 
 Var InstallsPythonCheckbox
 Var InstallsPython
-Var PythonVersionsTxt
-Var ActivePythonConfig
 
 Function Welcome
     ${IfNot} ${AtLeastWinVista}
@@ -83,15 +81,6 @@ Function InstallMSU
 FunctionEnd
 
 Section "SNAFU Python Manager"
-    StrCpy $PythonVersionsTxt "$INSTDIR\scripts\.python-versions.txt"
-    ${If} ${FileExists} $PythonVersionsTxt
-        FileOpen $R0 $PythonVersionsTxt r
-        FileRead $R0 $ActivePythonConfig
-        FileClose $R0
-    ${Else}
-        StrCpy $ActivePythonConfig ''
-    ${EndIf}
-
     # Clean up previous installation to prevent script name conflicts (e.g.
     # old package is used instead of new module), and clean up old files.
     Rmdir /r "$INSTDIR"
@@ -123,9 +112,6 @@ Section "SNAFU Python Manager"
     # Re-activate versions.
     ${If} $ActivePythonConfig != ''
         DetailPrint "Restoring active versions..."
-        FileOpen $R0 $PythonVersionsTxt w
-        FileWrite $R0 $ActivePythonConfig
-        FileClose $R0
         nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
             $\"$INSTDIR\lib\setup\activation.py$\""
     ${Endif}
@@ -151,5 +137,6 @@ Section "un.Uninstaller"
     nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
         $\"$INSTDIR\lib\setup\env.py$\" --uninstall $\"$INSTDIR$\""
     Rmdir /r "$INSTDIR"
+    DeleteRegKey HKLM "Software\\uranusjr\\SNAFU"
     DeleteRegKey HKLM "${UNINSTALL_REGKEY}"
 SectionEnd

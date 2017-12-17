@@ -1,9 +1,7 @@
 extern crate winapi;
 extern crate winreg;
 
-use std::{env, fs};
-use std::io::{BufReader, Error, ErrorKind, Result};
-use std::io::prelude::BufRead;
+use std::io::{Error, ErrorKind, Result};
 use std::path::{Path, PathBuf};
 
 use self::winreg::RegKey;
@@ -24,22 +22,21 @@ fn find_python_install(name: &str) -> Result<PathBuf> {
 }
 
 fn best_python_version_match(shimver: Option<ShimVersion>) -> Result<String> {
-    let exe = try! { env::current_exe() };
-    let f = try! {
-        fs::File::open(exe.with_file_name(".python-versions.txt"))
+    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+    let key = try! {
+        hkcu.open_subkey_with_flags("Software\\uranusjr\\SNAFU", KEY_READ)
     };
-    let reader = BufReader::new(&f);
+    let value: String = try! { key.get_value("ActivePythonVersions") };
 
-    for line_result in reader.lines() {
-        let line = try! { line_result };
+    for name in value.split(';') {
         match shimver {
             Some(ref v) => {
-                if v.match_name(&line) {
-                    return Ok(line);
+                if v.match_name(name) {
+                    return Ok(String::from(name));
                 }
             },
             None => {
-                return Ok(line);
+                return Ok(String::from(name));
             },
         }
     }

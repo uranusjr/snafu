@@ -24,10 +24,9 @@ def check_installation(version, *, installed=True, on_exit=None):
 
 def get_active_names():
     try:
-        content = configs.get_python_versions_path().read_text()
+        return metadata.get_active_python_versions()
     except FileNotFoundError:
-        return ()
-    return tuple(v for v in content.split() if v)
+        return []
 
 
 def get_version(name):
