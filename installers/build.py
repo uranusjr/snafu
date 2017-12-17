@@ -271,7 +271,7 @@ def build_shims(libdir):
     shimsdir = libdir.joinpath('shims')
     shimsdir.mkdir()
     click.echo('Copy shims...')
-    for path in rust_project_root.join('target', 'release').iterdir():
+    for path in rust_project_root.joinpath('target', 'release').iterdir():
         if path.suffix != '.exe':
             continue
         name = path.name
