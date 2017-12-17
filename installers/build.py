@@ -265,7 +265,7 @@ def build_setup(arch, libdir):
         'win32': 'x86',
     }[arch]
     installer = get_vc_redist(winarc)
-    click.echo('Copy {}'.format(installer))
+    click.echo('Copy {}'.format(installer.name))
     shutil.copy2(
         str(installer),
         setupdir.joinpath(installer.name),
