@@ -112,11 +112,15 @@ def list_(**kwargs):
     '--all', 'link_all', is_flag=True,
     help='Link all available operations.',
 )
-@click.option('--force', is_flag=True, help='Overwrite command if exists.')
+@click.option(
+    '--overwrite',
+    type=click.Choice(['auto', 'yes', 'no']), default='auto',
+    help='What to do when the target exists.',
+)
 @click.pass_context
-def link(ctx, **kwrgs):
-    from .operations.link import link
-    link(ctx, **kwrgs)
+def link(ctx, overwrite, **kwargs):
+    from .operations.link import link, Overwrite
+    link(ctx, Overwrite[overwrite], **kwargs)
 
 
 if __name__ == '__main__':

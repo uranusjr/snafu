@@ -1,4 +1,6 @@
 import collections
+import enum
+import filecmp
 import itertools
 import shutil
 
@@ -11,9 +13,18 @@ from .common import (
 )
 
 
+class Overwrite(enum.Enum):
+    auto = 'auto'
+    yes = 'yes'
+    no = 'no'
+
+
 def publish_file(source, target, *, overwrite, quiet):
-    if not overwrite and target.exists():
-        return False
+    if target.exists():
+        if overwrite == Overwrite.no or (
+                overwrite == Overwrite.auto and
+                filecmp.cmp(str(source), str(target))):
+            return False
     if not quiet:
         click.echo('  {}'.format(target.name))
     try:
@@ -72,7 +83,8 @@ def collect_version_scripts(versions):
     return scripts, shims
 
 
-def activate(versions, *, allow_empty=False, quiet=False):
+def activate(versions, *, overwrite=Overwrite.yes,
+             allow_empty=False, quiet=False):
     if not allow_empty and not versions:
         click.echo('No active versions.', err=True)
         click.get_current_context().exit(1)
@@ -93,14 +105,14 @@ def activate(versions, *, allow_empty=False, quiet=False):
             if not source.is_file():
                 continue
             using_scripts.add(target)
-            publish_file(source, target, overwrite=True, quiet=quiet)
+            publish_file(source, target, overwrite=overwrite, quiet=quiet)
         for shim in shims:
             target = scripts_dir.joinpath(shim)
             if target in using_scripts:
                 continue
             using_scripts.add(target)
             publish_shim(
-                'piplike-script', target, overwrite=True, quiet=quiet,
+                'piplike-script', target, overwrite=overwrite, quiet=quiet,
             )
         for version in versions:
             target = version.python_major_command
@@ -108,7 +120,7 @@ def activate(versions, *, allow_empty=False, quiet=False):
                 continue
             using_scripts.add(target)
             publish_shim(
-                'python-script', target, overwrite=True, quiet=quiet,
+                'python-script', target, overwrite=overwrite, quiet=quiet,
             )
 
     metadata.set_active_python_versions(version.name for version in versions)
@@ -126,10 +138,14 @@ def activate(versions, *, allow_empty=False, quiet=False):
 def link_commands(version):
     for path in version.python_commands:
         click.echo('Publishing {}'.format(path.name))
-        publish_shim('python-command', path, overwrite=True, quiet=True)
+        publish_shim(
+            'python-command', path, overwrite=Overwrite.yes, quiet=True,
+        )
     for path in version.pip_commands:
         click.echo('Publishing {}'.format(path.name))
-        publish_shim('piplike-command', path, overwrite=True, quiet=True)
+        publish_shim(
+            'piplike-command', path, overwrite=Overwrite.yes, quiet=True,
+        )
 
 
 def unlink_commands(version):
@@ -195,7 +211,7 @@ def use(ctx, versions, add):
     activate(versions, allow_empty=(not add))
 
 
-def link(ctx, command, link_all, force):
+def link(ctx, command, link_all, overwrite):
     if not link_all and not command:    # This mistake is more common.
         click.echo(ctx.get_usage(), color=ctx.color)
         click.echo('\nError: Missing argument "command".', color=ctx.color)
@@ -211,7 +227,7 @@ def link(ctx, command, link_all, force):
         ctx.exit(1)
 
     if link_all:
-        activate([get_version(n) for n in active_names])
+        activate([get_version(n) for n in active_names], overwrite=overwrite)
         return
 
     command_name = command  # Better variable names.
@@ -233,12 +249,14 @@ def link(ctx, command, link_all, force):
 
     target_name = command.name
     target = configs.get_scripts_dir_path().joinpath(target_name)
-    if target.exists() and not force:
-        if target.read_bytes() == command.read_bytes():
-            # If the two files are identical, we're good anyway.
-            return
-        click.echo('{} exists. Use --force to overwrite.', err=True)
+
+    # This can be done in publish_file, but we provide a better error message.
+    if overwrite != Overwrite.yes and target.exists():
+        if filecmp.cmp(str(command), str(target)):
+            return  # If the two files are identical, we're good anyway.
+        click.echo('{} exists. Use --overwrite=yes to overwrite.', err=True)
         ctx.exit(1)
-    ok = publish_file(command, target, overwrite=True, quiet=True)
+
+    ok = publish_file(command, target, overwrite=Overwrite.yes, quiet=True)
     if ok:
         click.echo('Linked {} from {}'.format(target_name, version))
