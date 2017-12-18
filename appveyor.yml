@@ -41,11 +41,11 @@ build_script:
   - "python .\\installers\\build.py %SNAFU_GIT_VERSION%"
   - "SET SNAFU_SETUP_EXE=snafu-setup-%INSTALLER_ARCH%-%SNAFU_GIT_VERSION%.exe"
 
+after_build:
+  - appveyor PushArtifact .\\installers\\%SNAFU_SETUP_EXE%
+
 test_script:
   - "flake8 ."
   - "pytest tests"
 
   - "docker build --build-arg SNAFU_SETUP_EXE=%SNAFU_SETUP_EXE% .\\installers"
-
-artifacts:
-  - path: ".\\installers\\%SNAFU_SETUP_EXE%"
