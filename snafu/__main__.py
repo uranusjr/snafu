@@ -120,7 +120,7 @@ def list_(**kwargs):
 @click.pass_context
 def link(ctx, overwrite, **kwargs):
     from .operations.link import link, Overwrite
-    link(ctx, Overwrite[overwrite], **kwargs)
+    link(ctx, overwrite=Overwrite[overwrite], **kwargs)
 
 
 if __name__ == '__main__':

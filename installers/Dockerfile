@@ -16,8 +16,7 @@ RUN snafu list --all
 
 RUN pip3.6 install django
 
-RUN snafu link django-admin
-RUN snafu link --all
+RUN where django-admin
 
 RUN snafu use --reset
 RUN snafu list --all
