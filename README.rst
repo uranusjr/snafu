@@ -117,12 +117,9 @@ Requirements
 * Python 3.6
 * Pipenv_
 * Rust_
-* Visual C++ (if your Rust targets MSVC). If you have no idea what this means,
-  just install `Build Tools for Visual Studio 2017`_.
 
 .. _Pipenv: https://pipenv.org
 .. _Rust: https://www.rust-lang.org/en-US/install.html
-.. _`Build Tools for Visual Studio 2017`: https://www.visualstudio.com/downloads/
 
 Optional Dependencies
 ---------------------
