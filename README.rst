@@ -273,15 +273,18 @@ appropriate shebang lines, and can be handled by the py launcher, as specified
 in `PEP 397`_.
 
 A few wrapper executables (shims_) are distributed with SNAFU, and are
-published into ``%PATH%`` instead of a few real ones, including ``python.exe``
-and ``pip.exe``. When invoked, these shims rely on the registry to find their
-real conterparts to launch, and bridge all user interaction to them. This way
-we can do away with exposing the least internals of the executable (requiring
-only the Visual C++ Redistributable DLL to be published with the commands),
-and, in the case of ``pip.exe``, ``easy_install.exe``, etc., also provides a
-way to hook into extra machinery when you alter your Python installations.
+published into ``%PATH%`` to stub a few special executables, such as
+``python.exe`` and ``pip.exe``. When invoked, these shims rely on the registry
+to launch their real conterparts, and bridge all user interaction to them.
+
+The shims minimise the need to expose internal DLLs, and, in the case of
+``pip.exe`` etc., provide a chance to hook into extra machinery when you alter
+Python installations. This is inspired by pyenv_ and Chocolatey_, and provides
+a more seamless experience.
 
 .. _shims: https://en.wikipedia.org/wiki/Shim_(computing)
+.. _pyenv: https://github.com/pyenv/pyenv
+.. _Chocolatey: https://chocolatey.org
 
 
 Why the Name?
