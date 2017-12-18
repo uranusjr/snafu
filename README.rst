@@ -122,10 +122,13 @@ Requirements
 Optional Dependencies
 ---------------------
 
-* NSIS_ 3.x if you want to build the installer. ``makensis`` needs to be
-  available in your shell.
+* Rust_ Stable and NSIS_ 3.x if you want to build the installer. ``makensis``
+  and ``cargo`` need to be available in your shell.
 
-.. _`NSIS`: http://nsis.sourceforge.net/Download
+.. _Rust: https://www.rust-lang.org/en-US/install.html
+.. _NSIS: http://nsis.sourceforge.net/Download
+
+
 
 Project Setup
 -------------
