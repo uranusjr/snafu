@@ -258,11 +258,16 @@ Script executables are *copied*. ``.py`` files works as well because they have
 appropriate shebang lines, and can be handled by the py launcher, as specified
 in `PEP 397`_.
 
-The ``python.exe`` programs cannot be copied as-is because they require
-additional DLL files. SNAFU creates Windows shortcuts (``.lnk``) and makes them
-executable, so you can run them like recular commands. So what you get is
-actually ``python3.6.lnk``, not ``.exe``, but that’s good enough most of the
-time.
+A few wrapper executables (shims_) are distributed with SNAFU, and are
+published into ``%PATH%`` instead of a few real ones, including ``python.exe``
+and ``pip.exe``. When invoked, these shims rely on the registry to find their
+real conterparts to launch, and bridge all user interaction to them. This way
+we can do away with exposing the least internals of the executable (requiring
+only the Visual C++ Redistributable DLL to be published with the commands),
+and, in the case of ``pip.exe``, ``easy_install.exe``, etc., also provides a
+way to hook into extra machinery when you alter your Python installations.
+
+.. _shims: https://en.wikipedia.org/wiki/Shim_(computing)
 
 
 Why the Name?
