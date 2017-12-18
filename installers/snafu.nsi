@@ -22,6 +22,8 @@
 
 !define KBCODE 'KB2999226'
 
+!define VCRUNTIME 'vcruntime140.dll'
+
 !ifndef PYTHONVERSION
     !error "PYTHONVERSION definition required."
 !endif
@@ -78,18 +80,6 @@ Function InstallCRTUpdate
         $\"$INSTDIR\lib\setup\Windows$R0-${KBCODE}-$R1.msu$\""
 FunctionEnd
 
-Function InstallVCRedist
-    ${If} ${RunningX64}
-        StrCpy $R1 'x64'
-    ${Else}
-        StrCpy $R1 'x86'
-    ${EndIf}
-
-    DetailPrint "Installing Visual C++ Redistributable..."
-    nsExec::ExecToLog "$\"$INSTDIR\lib\setup\vc_redist.$R1.exe$\" \
-        /install /passive /norestart"
-FunctionEnd
-
 Section "SNAFU Python Manager"
     # Clean up previous installation to prevent script name conflicts (e.g.
     # old package is used instead of new module), and clean up old files.
@@ -104,9 +94,6 @@ Section "SNAFU Python Manager"
 
     # Ensure appropriate Windows Update for CRT is installed.
     Call InstallCRTUpdate
-
-    # Install VC++ redistributable.
-    Call InstallVCRedist
 
     # Install Py launcher.
     DetailPrint "Installing Python Launcher (py.exe)..."
@@ -134,8 +121,10 @@ Section "SNAFU Python Manager"
             -m snafu install --add ${PYTHONVERSION}"
     ${EndIf}
 
-    # Copy snafu shim.
+    # Copy snafu shim and required DLL.
+    # We just use whatever Python provides, for convinience's sake.
     CopyFiles "$INSTDIR\lib\shims\snafu.exe" "$INSTDIR\cmd"
+    CopyFiles "$INSTDIR\lib\python\${VCRUNTIME}" "$INSTDIR\cmd"
 
     # Write SNAFU install information.
     WriteRegStr HKCU "Software\\uranusjr\\SNAFU" "InstallPath" "$INSTDIR"
