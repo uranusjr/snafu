@@ -198,12 +198,13 @@ has one Python executable called ``python.exe``, not versioned names such as
 
 Adding Python to PATH stops being a good idea the moment you need a *second*
 installtion. You can only access one Python at a time, and installed scripts
-from different versions start to mix, which is a bad thing.[#]_ The PATH
+from different versions start to mix, which is a bad thing. [#]_ The PATH
 environment variable is also very tedious and delicate to manipulate.
 
 .. [#] This is not a Windows-only problem, but also exactly why tutorials these
        days don’t recommand installing Python via `python.org`_, but with
-       platform-specific tools instead.
+       platform-specific tools instead. Windows is the only mainstream
+       operation system without a good Python verions management tool.
 
 .. _`python.org`: https://www.python.org
 
