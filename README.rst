@@ -116,18 +116,21 @@ Requirements
 * Windows
 * Python 3.6
 * Pipenv_
+* Rust_
+* Visual C++ (if your Rust targets MSVC). If you have no idea what this means,
+  just install `Build Tools for Visual Studio 2017`_.
 
 .. _Pipenv: https://pipenv.org
+.. _Rust: https://www.rust-lang.org/en-US/install.html
+.. _`Build Tools for Visual Studio 2017`: https://www.visualstudio.com/downloads/
 
 Optional Dependencies
 ---------------------
 
-* Rust_ Stable and NSIS_ 3.x if you want to build the installer. ``makensis``
-  and ``cargo`` need to be available in your shell.
+* NSIS_ 3.x if you want to build shims and the installer. ``makensis``
+  need to be available in your shell.
 
-.. _Rust: https://www.rust-lang.org/en-US/install.html
 .. _NSIS: http://nsis.sourceforge.net/Download
-
 
 
 Project Setup
@@ -141,6 +144,13 @@ Download and enter the project::
 Set up environment::
 
     pipenv install --dev
+
+Build the shims:: [#]_
+
+    cargo build --manifest-path=.\shims\Cargo.toml
+
+.. [#] Run ``rustup update`` if your Cargo is too old to recognise
+       ``--manifest-path``.
 
 Run Tests
 ---------
@@ -156,7 +166,7 @@ Run SNAFU
 
 ::
 
-    pipenv run -- python -m snafu [COMMAND] ...
+    pipenv run python -m snafu [COMMAND] ...
 
 
 This should have the same behaviour as an installed SNAFU command, but run
@@ -167,7 +177,7 @@ Build the Installer
 
 ::
 
-    pipenv run -- python installers\build.py
+    pipenv run python installers\build.py
 
 You can only build installers of your host’s architecture. Cross compilation
 is certainly possible, but I haven’t found the need to set it up.
@@ -182,7 +192,7 @@ Development Guideline
 Try to follow the code style. For Python code, run the linter to check for
 issues before submitting::
 
-    pipenv run -- flake8 .
+    pipenv run flake8 .
 
 
 Frequently Asked Questions
