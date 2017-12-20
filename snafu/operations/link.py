@@ -21,8 +21,10 @@ class Overwrite(enum.Enum):
 
     def should(self, source, target):
         return (
-            self == self.yes or
-            (self == self.smart and not filecmp(str(source), str(target)))
+            self == self.yes or (
+                self == self.smart and
+                not filecmp.cmp(str(source), str(target))
+            )
         )
 
 
