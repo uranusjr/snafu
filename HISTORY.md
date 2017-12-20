@@ -14,7 +14,6 @@
 * Call `snafu link --all` automatically after installing with a shimmed pip command.
 * Upgrade Python 3.4 definition to 3.4.4.
 * Upgrade Python 3.6 definition to 3.6.4.
-* Improve script copy logic in `link` to speed up the process and reduce cluttering output.
 * Improve behaviour when uninstalling versions not installed by SNAFU.
 * Py Launcher usage is reduced in favour of reading the registry ourselves.
 * Documentation is no longer installed with each Python version.

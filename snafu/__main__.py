@@ -114,7 +114,7 @@ def list_(**kwargs):
 )
 @click.option(
     '--overwrite',
-    type=click.Choice(['auto', 'yes', 'no']), default='auto',
+    type=click.Choice(['yes', 'no', 'smart']), default='yes',
     help='What to do when the target exists.',
 )
 @click.pass_context

@@ -14,16 +14,21 @@ from .common import (
 
 
 class Overwrite(enum.Enum):
-    auto = 'auto'
+
     yes = 'yes'
     no = 'no'
+    smart = 'smart'
+
+    def should(self, source, target):
+        return (
+            self == self.yes or
+            (self == self.smart and not filecmp(str(source), str(target)))
+        )
 
 
 def publish_file(source, target, *, overwrite, quiet):
     if target.exists():
-        if overwrite == Overwrite.no or (
-                overwrite == Overwrite.auto and
-                filecmp.cmp(str(source), str(target))):
+        if not overwrite.should(source, target):
             return False
     if not quiet:
         click.echo('  {}'.format(target.name))

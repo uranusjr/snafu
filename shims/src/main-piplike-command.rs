@@ -40,7 +40,8 @@ fn main() {
     };
 
     procs::run_and_end(
-        snafu_python, vec!["-m", "snafu", "link", "--all"],
+        snafu_python,
+        vec!["-m", "snafu", "link", "--all", "--overwrite=smart"],
         false,
     );
 }
