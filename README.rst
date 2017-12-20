@@ -142,9 +142,9 @@ Set up environment::
 
     pipenv install --dev
 
-Build the shims:: [#]_
+Build the shims [#]_::
 
-    cargo build --manifest-path=.\shims\Cargo.toml
+    pipenv run invoke shims.build
 
 .. [#] Run ``rustup update`` if your Cargo is too old to recognise
        ``--manifest-path``.
@@ -154,7 +154,7 @@ Run Tests
 
 ::
 
-    pipenv run -- pytest tests
+    pipenv run pytest tests
 
 Unfortunately there are only very limited tests right now.
 

@@ -47,5 +47,6 @@ after_build:
 test_script:
   - "flake8 ."
   - "pytest tests"
+  - "invoke shims.test"
 
   - "docker build --build-arg SNAFU_SETUP_EXE=%SNAFU_SETUP_EXE% .\\installers"

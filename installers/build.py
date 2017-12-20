@@ -4,6 +4,7 @@ import pathlib
 import shutil
 import struct
 import subprocess
+import sys
 import zipfile
 
 import click
@@ -89,6 +90,8 @@ ROOT = pathlib.Path(__file__).parent.resolve(strict=True)
 
 ASSETSDIR = ROOT.joinpath('assets')
 ASSETSDIR.mkdir(exist_ok=True)
+
+SHIMSDIR = ROOT.parent.joinpath('shims')
 
 
 def download_file(url, path):
@@ -177,7 +180,7 @@ def get_package_paths():
     return paths
 
 
-def build_python(arch, libdir):
+def build_lib_python(libdir, arch):
     pythondir = libdir.joinpath('python')
     pythondir.mkdir()
 
@@ -221,7 +224,7 @@ def build_python(arch, libdir):
 SCRIPT_EXTS = ('.py', '.vbs')
 
 
-def build_setup(arch, libdir):
+def build_lib_setup(libdir, arch):
     setupdir = libdir.joinpath('setup')
     setupdir.mkdir()
 
@@ -254,19 +257,11 @@ def build_setup(arch, libdir):
         shutil.copy2(str(path), str(setupdir.joinpath(name)))
 
 
-def build_shims(libdir):
-    rust_project_root = ROOT.parent.joinpath('shims')
-
-    click.echo('Build shims...')
-    subprocess.check_call(
-        'cargo build --release',
-        shell=True, cwd=str(rust_project_root),
-    )
-
+def build_lib_shims(libdir):
     shimsdir = libdir.joinpath('shims')
     shimsdir.mkdir()
     click.echo('Copy shims...')
-    for path in rust_project_root.joinpath('target', 'release').iterdir():
+    for path in SHIMSDIR.joinpath('shim', 'target', 'release').iterdir():
         if path.suffix != '.exe':
             continue
         name = path.name
@@ -274,12 +269,29 @@ def build_shims(libdir):
         shutil.copy2(str(path), str(shimsdir.joinpath(name)))
 
 
-def build_lib(arch, container):
+def build_lib(container, arch):
     libdir = container.joinpath('lib')
     libdir.mkdir()
-    build_python(arch, libdir)
-    build_setup(arch, libdir)
-    build_shims(libdir)
+    build_lib_python(libdir, arch)
+    build_lib_setup(libdir, arch)
+    build_lib_shims(libdir)
+
+
+def build_cmd(container):
+    cmddir = container.joinpath('cmd')
+    cmddir.mkdir()
+    click.echo('Copying snafu shim.')
+    shutil.copy2(
+        str(SHIMSDIR.joinpath('snafu', 'target', 'release', 'snafu.exe')),
+        str(cmddir.joinpath('snafu.exe')),
+    )
+
+
+def build_shims():
+    click.echo('Building shims.')
+    subprocess.check_call([
+        sys.executable, '-m', 'invoke', 'shims.build', '--release',
+    ])
 
 
 def build_files(arch):
@@ -287,7 +299,8 @@ def build_files(arch):
     if container.exists():
         shutil.rmtree(str(container))
     container.mkdir()
-    build_lib(arch, container)
+    build_lib(container, arch)
+    build_cmd(container)
 
 
 def build_installer(outpath):
@@ -306,10 +319,7 @@ def build_installer(outpath):
 def cleanup():
     container = ROOT.joinpath('snafu')
     shutil.rmtree(str(container))
-    subprocess.check_call(
-        'cargo clean',
-        shell=True, cwd=str(ROOT.parent.joinpath('shims')),
-    )
+    subprocess.check_call([sys.executable, '-m', 'invoke', 'shims.clean'])
 
 
 @click.command()
@@ -329,6 +339,7 @@ def build(version, clean, clean_only):
     if not outpath.is_absolute():
         outpath = ROOT.joinpath(outpath)
 
+    build_shims()
     build_files(arch)
     build_installer(outpath)
     if clean:
