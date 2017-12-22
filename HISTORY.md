@@ -15,6 +15,7 @@
 * Upgrade Python 3.4 definition to 3.4.4.
 * Upgrade Python 3.6 definition to 3.6.4.
 * Improve behaviour when uninstalling versions not installed by SNAFU.
+* `snafu link --all` without active versions does not fail anymore. The warning message is still printed, but the exit code is now 0.
 * Py Launcher usage is reduced in favour of reading the registry ourselves.
 * Documentation is no longer installed with each Python version.
 
