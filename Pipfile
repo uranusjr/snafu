@@ -16,13 +16,12 @@ attrs = "*"
 click = "*"
 packaging = "*"
 requests = "*"
-invoke = "*"
 
 
 [dev-packages]
 
 "flake8" = "*"
+invoke = "*"
 pytest = "*"
 pytest-pythonpath = "*"
 pytest-mock = "*"
-invoke = "*"

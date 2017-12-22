@@ -1,20 +1,20 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "618e194a757326d30f3d15f0d823a3ce4e60c2a522a17983a39d122c77824ef9"
+            "sha256": "235c98b39bdf688034df9ec3726f6b04388fdefda854dd47a91b8b9a3276df3a"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
-            "implementation_version": "3.6.1",
-            "os_name": "posix",
-            "platform_machine": "x86_64",
+            "implementation_version": "3.6.3",
+            "os_name": "nt",
+            "platform_machine": "AMD64",
             "platform_python_implementation": "CPython",
-            "platform_release": "17.3.0",
-            "platform_system": "Darwin",
-            "platform_version": "Darwin Kernel Version 17.3.0: Thu Nov  9 18:09:22 PST 2017; root:xnu-4570.31.3~1/RELEASE_X86_64",
-            "python_full_version": "3.6.1",
+            "platform_release": "7",
+            "platform_system": "Windows",
+            "platform_version": "6.1.7601",
+            "python_full_version": "3.6.3",
             "python_version": "3.6",
-            "sys_platform": "darwin"
+            "sys_platform": "win32"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -64,14 +64,6 @@
             ],
             "version": "==2.6"
         },
-        "invoke": {
-            "hashes": [
-                "sha256:a90acf9fd9d863dba4545b369c4ca547de4ca76228ca52c78cf224e7eecce0e9",
-                "sha256:66434bf48dcffea232e8ada3a7e252cc10928871c46f39ece123c6a5753c0d0c",
-                "sha256:6c572a09849e1452ff65c674d4531a940366278194af86315e458f8457192274"
-            ],
-            "version": "==0.22.0"
-        },
         "packaging": {
             "hashes": [
                 "sha256:99276dc6e3a7851f32027a68f1095cd3f77c148091b092ea867a351811cfe388",
@@ -120,6 +112,14 @@
                 "sha256:c78f53e32d7cf36d8597c8a2c7e3c0ad210f97b9509e152e4c37fa80869f823c"
             ],
             "version": "==17.3.0"
+        },
+        "colorama": {
+            "hashes": [
+                "sha256:463f8483208e921368c9f306094eb6f725c6ca42b0f97e313cb5d5512459feda",
+                "sha256:48eb22f4f8461b1df5734a074b57042430fb06e1d61bd1e11b078c0fe6d7a1f1"
+            ],
+            "markers": "sys_platform == 'win32'",
+            "version": "==0.3.9"
         },
         "flake8": {
             "hashes": [
