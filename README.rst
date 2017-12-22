@@ -266,7 +266,7 @@ appropriate shebang lines, and can be handled by the py launcher, as specified
 in `PEP 397`_.
 
 A few wrapper executables (shims_) are distributed with SNAFU, and are
-published into ``%PATH%`` to stub a few special executables, such as
+published into ``%PATH%`` to stub certain special executables, such as
 ``python.exe`` and ``pip.exe``. When invoked, these shims rely on the registry
 to launch their real conterparts, and bridge all user interaction to them.
 
