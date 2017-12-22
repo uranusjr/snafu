@@ -8,6 +8,7 @@ import sys
 import zipfile
 
 import click
+import packaging.version
 import pkg_resources
 import requests
 
@@ -322,8 +323,20 @@ def cleanup():
     subprocess.check_call([sys.executable, '-m', 'invoke', 'shims.clean'])
 
 
+def check_version(v):
+    version = packaging.version.parse(v)
+    # Not really a version...Likely a Git hash.
+    if not isinstance(version, packaging.version.Version):
+        return
+    mod_v = get_snafu_version()
+    if mod_v != v:
+        raise AssertionError(
+            'module version {} != installer version {}'.format(mod_v, v),
+        )
+
+
 @click.command()
-@click.argument('version', default='dev')
+@click.argument('version', default=None)
 @click.option('--clean/--no-clean', is_flag=True, default=True)
 @click.option('--clean-only', is_flag=True)
 def build(version, clean, clean_only):
@@ -334,6 +347,12 @@ def build(version, clean, clean_only):
         8: 'amd64',
         4: 'win32',
     }[struct.calcsize('P')]
+
+    if version is None:
+        version = 'dev'
+    else:
+        check_version(version)
+
     out = 'snafu-setup-{}-{}.exe'.format(arch, version.strip())
     outpath = pathlib.Path(out)
     if not outpath.is_absolute():
