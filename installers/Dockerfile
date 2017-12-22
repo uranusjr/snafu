@@ -12,8 +12,6 @@ RUN snafu install 3.6
 RUN python3.6 --version
 
 RUN pip3.6 install python-dotenv
-
-RUN snafu use 3.6
 RUN where dotenv
 
 RUN snafu list
@@ -24,6 +22,7 @@ RUN python3 --version
 RUN pip3 install pytest
 RUN where pytest
 
+RUN snafu use 3.6
 RUN snafu use --reset
 RUN snafu list --all
 

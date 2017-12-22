@@ -37,7 +37,9 @@ def install(version, use, from_file):
 
     if not use and not other_pythons_exist:
         use = True
-        click.echo('No Pythons detected, will use {} automatically')
+        click.echo(
+            'No Pythons detected, will use {} automatically'.format(version),
+        )
 
     if use:
         versions = [
