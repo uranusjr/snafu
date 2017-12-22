@@ -174,7 +174,7 @@ Build the Installer
 
 ::
 
-    pipenv run python installers\build.py
+    pipenv run invoke installers.build
 
 You can only build installers of your host’s architecture. Cross compilation
 is certainly possible, but I haven’t found the need to set it up.

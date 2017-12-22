@@ -38,7 +38,7 @@ install:
 
 build_script:
   - "for /f %%i in ('git describe') do @set SNAFU_GIT_VERSION=%%i"
-  - "python .\\installers\\build.py %SNAFU_GIT_VERSION%"
+  - "invoke installers.build --version=%SNAFU_GIT_VERSION% --no-clean"
   - "SET SNAFU_SETUP_EXE=snafu-setup-%INSTALLER_ARCH%-%SNAFU_GIT_VERSION%.exe"
 
 after_build:

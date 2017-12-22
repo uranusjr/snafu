@@ -1,5 +1,6 @@
 import itertools
 import json
+import os
 import pathlib
 import shutil
 import struct
@@ -8,9 +9,12 @@ import sys
 import zipfile
 
 import click
+import invoke
 import packaging.version
 import pkg_resources
 import requests
+
+import shims
 
 
 VERSION = '3.6.3'
@@ -87,7 +91,7 @@ def get_latest_python_name():
     return latest_definition['name']
 
 
-ROOT = pathlib.Path(__file__).parent.resolve(strict=True)
+ROOT = pathlib.Path(os.path.abspath(__file__)).parent
 
 ASSETSDIR = ROOT.joinpath('assets')
 ASSETSDIR.mkdir(exist_ok=True)
@@ -96,7 +100,7 @@ SHIMSDIR = ROOT.parent.joinpath('shims')
 
 
 def download_file(url, path):
-    click.echo('Downloading {}'.format(url))
+    print('Downloading {}'.format(url))
     response = requests.get(url, stream=True)
     response.raise_for_status()
 
@@ -186,12 +190,12 @@ def build_lib_python(libdir, arch):
     pythondir.mkdir()
 
     # Extract Python distribution.
-    click.echo('Populating Embeddable Python.')
+    print('Populating Embeddable Python.')
     with zipfile.ZipFile(str(get_embed_bundle(arch))) as f:
         f.extractall(str(pythondir))
 
     # Copy SNAFU.
-    click.echo('Populate SNAFU.')
+    print('Populate SNAFU.')
     shutil.copytree(
         str(ROOT.parent.joinpath('snafu')),
         str(pythondir.joinpath('snafu')),
@@ -206,16 +210,16 @@ def build_lib_python(libdir, arch):
         }, f)
 
     # Copy dependencies.
-    click.echo('Populate dependencies...')
+    print('Populate dependencies...')
     for path in get_package_paths():
-        click.echo('  {}'.format(path.stem))
+        print('  {}'.format(path.stem))
         if path.is_dir():
             shutil.copytree(str(path), str(pythondir.joinpath(path.name)))
         else:
             shutil.copy2(str(path), str(pythondir.joinpath(path.name)))
 
     # Cleanup.
-    click.echo('Remove junks...')
+    print('Remove junks...')
     for p in pythondir.rglob('__pycache__'):
         shutil.rmtree(str(p))
     for p in pythondir.rglob('*.py[co]'):
@@ -237,36 +241,36 @@ def build_lib_setup(libdir, arch):
     # Copy necessary updates.
     for winver, winarc in itertools.product(WINVERS, winarcs):
         msu_path = get_kb_msu(arch, winver, winarc)
-        click.echo('Copy {}'.format(msu_path.name))
+        print('Copy {}'.format(msu_path.name))
         shutil.copy2(
             str(msu_path),
             setupdir.joinpath(msu_path.name),
         )
 
     # Copy Py launcher MSI.
-    click.echo('Copy py.msi')
+    print('Copy py.msi')
     msi = get_py_launcher(arch)
     shutil.copy2(str(msi), str(setupdir.joinpath('py.msi')))
 
     # Copy setup scripts.
-    click.echo('Copy setup scripts...')
+    print('Copy setup scripts...')
     for path in ROOT.joinpath('lib', 'setup').iterdir():
         if path.suffix not in SCRIPT_EXTS:
             continue
         name = path.name
-        click.echo('  {}'.format(name))
+        print('  {}'.format(name))
         shutil.copy2(str(path), str(setupdir.joinpath(name)))
 
 
 def build_lib_shims(libdir):
     shimsdir = libdir.joinpath('shims')
     shimsdir.mkdir()
-    click.echo('Copy shims...')
+    print('Copy shims...')
     for path in SHIMSDIR.joinpath('shim', 'target', 'release').iterdir():
         if path.suffix != '.exe':
             continue
         name = path.name
-        click.echo('  {}'.format(name))
+        print('  {}'.format(name))
         shutil.copy2(str(path), str(shimsdir.joinpath(name)))
 
 
@@ -281,18 +285,11 @@ def build_lib(container, arch):
 def build_cmd(container):
     cmddir = container.joinpath('cmd')
     cmddir.mkdir()
-    click.echo('Copying snafu shim.')
+    print('Copying snafu shim.')
     shutil.copy2(
         str(SHIMSDIR.joinpath('snafu', 'target', 'release', 'snafu.exe')),
         str(cmddir.joinpath('snafu.exe')),
     )
-
-
-def build_shims():
-    click.echo('Building shims.')
-    subprocess.check_call([
-        sys.executable, '-m', 'invoke', 'shims.build', '--release',
-    ])
 
 
 def build_files(arch):
@@ -307,19 +304,20 @@ def build_files(arch):
 def build_installer(outpath):
     if outpath.exists():
         outpath.unlink()
-    click.echo('Building installer.')
+    print('Building installer.')
     subprocess.check_call([
         'makensis',
         '/DPYTHONVERSION={}'.format(get_latest_python_name()),
         str(ROOT.joinpath('snafu.nsi')),
     ], shell=True)
-    click.echo('snafu-setup.exe -> {}'.format(outpath))
+    print('snafu-setup.exe -> {}'.format(outpath))
     shutil.move(str(ROOT.joinpath('snafu-setup.exe')), str(outpath))
 
 
 def cleanup():
     container = ROOT.joinpath('snafu')
-    shutil.rmtree(str(container))
+    if container.exists():
+        shutil.rmtree(str(container))
     subprocess.check_call([sys.executable, '-m', 'invoke', 'shims.clean'])
 
 
@@ -335,14 +333,8 @@ def check_version(v):
         )
 
 
-@click.command()
-@click.argument('version', default=None)
-@click.option('--clean/--no-clean', is_flag=True, default=True)
-@click.option('--clean-only', is_flag=True)
-def build(version, clean, clean_only):
-    if clean_only:
-        cleanup()
-        return
+@invoke.task(pre=[invoke.call(shims.build, release=True)])
+def build(ctx, version=None, clean=True):
     arch = {
         8: 'amd64',
         4: 'win32',
@@ -358,12 +350,12 @@ def build(version, clean, clean_only):
     if not outpath.is_absolute():
         outpath = ROOT.joinpath(outpath)
 
-    build_shims()
     build_files(arch)
     build_installer(outpath)
     if clean:
         cleanup()
 
 
-if __name__ == '__main__':
-    build()
+@invoke.task()
+def clean(ctx):
+    cleanup()
