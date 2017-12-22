@@ -8,7 +8,6 @@ import subprocess
 import sys
 import zipfile
 
-import click
 import invoke
 import packaging.version
 import pkg_resources
@@ -103,22 +102,7 @@ def download_file(url, path):
     print('Downloading {}'.format(url))
     response = requests.get(url, stream=True)
     response.raise_for_status()
-
-    installer_name = url.rsplit('/', 1)[-1]
-    total = response.headers.get('content-length', '')
-    chunks = []
-
-    if total.isdigit():
-        length = int(total)
-    else:
-        length = None
-    with click.progressbar(length=length, label=installer_name) as b:
-        for chunk in response.iter_content(chunk_size=4096):
-            chunks.append(chunk)
-            if length is not None:
-                b.update(len(chunk))
-
-    path.write_bytes(b''.join(chunks))
+    path.write_bytes(response.content)
 
 
 def get_py_launcher(arch):
