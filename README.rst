@@ -180,8 +180,7 @@ You can only build installers of your host’s architecture. Cross compilation
 is certainly possible, but I haven’t found the need to set it up.
 
 After the command finishes you should get an EXE in the ``installers``
-directory. There are some other options available in ``build.py`` you can
-check them out yourself.
+directory.
 
 Development Guideline
 ---------------------
