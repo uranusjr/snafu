@@ -34,7 +34,7 @@ versioning), and you should always use the latest patch anyway.
 After installing a version, ``pythonX.Y`` will be available as a command.
 
 If you’re on a 64-bit OS, the 64-bit version is installed by default. To
-install a 32-bit version on a 64-bit machine, use the `-32` suffix::
+install a 32-bit version on a 64-bit machine, use the ``-32`` suffix::
 
     snafu install 3.6-32
 
@@ -49,14 +49,17 @@ On 32-bit hosts, only 32-bit Pythons are available. Not suffixes are needed.
 Set Default Python Version
 --------------------------
 
-Set Python 3.5 as default::
+Set Python 3.5 as default (provided it is already installed)::
 
     snafu use 3.5
 
 This does two things:
 
-1. `python3` is mapped to Python 3.5.
-2. Scripts in `Python35\\Scripts` are linked into PATH.
+1. ``python3`` is mapped to Python 3.5.
+2. Scripts in ``Python35\\Scripts`` are linked [#]_ into PATH.
+
+.. [#]: Not really since symbolic linking isn’t very useful. See the below
+        section `How are Executables linked?`_.
 
 Special case: ``python``, ``pip`` and ``easy_install`` are never linked, to
 avoid ambiguity between Python 2 and 3. Use ``python3``, ``pip3``, ``pip3.5``,
@@ -266,7 +269,7 @@ appropriate shebang lines, and can be handled by the py launcher, as specified
 in `PEP 397`_.
 
 A few wrapper executables (shims_) are distributed with SNAFU, and are
-published into ``%PATH%`` to stub certain special executables, such as
+published into ``%PATH%`` to stub a few special executables, such as
 ``python.exe`` and ``pip.exe``. When invoked, these shims rely on the registry
 to launch their real conterparts, and bridge all user interaction to them.
 

@@ -1,25 +1,8 @@
 import click
 
-from snafu import metadata, versions
-
-from .common import check_installation, get_active_names, version_command
-
-
-def get_versions(*, installed_only):
-    vers = versions.get_versions()
-    names = set(v.name for v in vers)
-
-    def should_include(version):
-        if installed_only and not version.is_installed():
-            return False
-        # On a 32-bit host, hide 64-bit names if there is a 32-bit counterpart.
-        if (not metadata.can_install_64bit() and
-                not version.name.endswith('-32') and
-                '{}-32'.format(version.name) in names):
-            return False
-        return True
-
-    return [v for v in vers if should_include(v)]
+from .common import (
+    check_installation, get_active_names, get_versions, version_command,
+)
 
 
 @version_command()
