@@ -16,7 +16,7 @@ def get_parsed_environ(key):
 @contextlib.contextmanager
 def open_environment_key(access=winreg.KEY_READ):
     key = winreg.OpenKey(
-        winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER),
+        winreg.HKEY_CURRENT_USER,
         'Environment',
         access=access,
     )
