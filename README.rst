@@ -125,7 +125,7 @@ Optional Dependencies
 ---------------------
 
 * NSIS_ 3.x if you want to build shims and the installer. ``makensis``
-  need to be available in your shell.
+  needs to be available in your shell.
 
 .. _NSIS: http://nsis.sourceforge.net/Download
 
@@ -142,12 +142,9 @@ Set up environment::
 
     pipenv install --dev
 
-Build the shims [#]_::
+Build the shims::
 
     pipenv run invoke shims.build
-
-.. [#] Run ``rustup update`` if your Cargo is too old to recognise
-       ``--manifest-path``.
 
 Run Tests
 ---------
