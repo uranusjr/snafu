@@ -58,8 +58,9 @@ This does two things:
 1. ``python3`` is mapped to Python 3.5.
 2. Scripts in ``Python35\\Scripts`` are linked [#]_ into PATH.
 
-.. [#] Not really since symbolic linking isn’t very useful. See the below
-       section `How are Executables linked?`_.
+.. [#] Not really since symbolic linking
+       `isn’t very useful <https://security.stackexchange.com/q/10194>`__
+       on Windows. See below discussion `How are Executables linked?`_
 
 Special case: ``python``, ``pip`` and ``easy_install`` are never linked, to
 avoid ambiguity between Python 2 and 3. Use ``python3``, ``pip3``, ``pip3.5``,
