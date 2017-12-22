@@ -230,11 +230,17 @@ def link(ctx, command, link_all, overwrite):
     active_names = get_active_names()
     if not active_names:
         click.echo('Not using any versions.', err=True)
-        click.echo('HINT: Use "snafu use" to use a version first.', err=True)
-        ctx.exit(1)
+        if not link_all:
+            click.echo(
+                'HINT: Use "snafu use" to use a version first.', err=True,
+            )
+            ctx.exit(1)
 
     if link_all:
-        activate([get_version(n) for n in active_names], overwrite=overwrite)
+        activate(
+            [get_version(n) for n in active_names],
+            overwrite=overwrite, allow_empty=True,
+        )
         return
 
     command_name = command  # Better variable names.

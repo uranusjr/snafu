@@ -5,8 +5,11 @@
 *.py[co]
 __pycache__
 
+/shims/**/target/
+**/*.rs.bk
+
 /installers/*.exe
 /installers/assets/
 /installers/snafu/
+
 /runenv
-/shims/target

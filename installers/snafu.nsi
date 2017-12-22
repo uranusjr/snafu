@@ -89,7 +89,6 @@ Section "SNAFU Python Manager"
     SetOutPath "$INSTDIR"
 
     File /r 'snafu\*'
-    CreateDirectory "$INSTDIR\cmd"
     CreateDirectory "$INSTDIR\scripts"
 
     # Ensure appropriate Windows Update for CRT is installed.
@@ -121,9 +120,8 @@ Section "SNAFU Python Manager"
             -m snafu install --add ${PYTHONVERSION}"
     ${EndIf}
 
-    # Copy snafu shim and required DLL.
+    # Copy DLL required by Rust executables.
     # We just use whatever Python provides, for convinience's sake.
-    CopyFiles "$INSTDIR\lib\shims\snafu.exe" "$INSTDIR\cmd"
     CopyFiles "$INSTDIR\lib\python\${VCRUNTIME}" "$INSTDIR\cmd"
 
     # Write SNAFU install information.

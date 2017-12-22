@@ -9,14 +9,20 @@ COPY $SNAFU_SETUP_EXE snafu-setup.exe
 RUN snafu-setup.exe /S
 
 RUN snafu install 3.6
+RUN python3.6 --version
+
+RUN pip3.6 install python-dotenv
+
 RUN snafu use 3.6
+RUN where dotenv
 
 RUN snafu list
 RUN snafu list --all
 
-RUN pip3.6 install django
+RUN python3 --version
 
-RUN where django-admin
+RUN pip3 install pytest
+RUN where pytest
 
 RUN snafu use --reset
 RUN snafu list --all

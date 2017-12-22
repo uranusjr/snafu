@@ -1,0 +1,23 @@
+[package]
+name = "snafu-shims"
+version = "0.1.0"
+authors = ["Tzu-ping Chung <uranusjr@gmail.com>"]
+
+[dependencies]
+snafu = { path = "../snafu" }
+
+[[bin]]
+name = "python-command"
+path = "src/python/command.rs"
+
+[[bin]]
+name = "python-script"
+path = "src/python/script.rs"
+
+[[bin]]
+name = "piplike-command"
+path = "src/piplike/command.rs"
+
+[[bin]]
+name = "piplike-script"
+path = "src/piplike/script.rs"
