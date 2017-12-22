@@ -29,6 +29,14 @@ def get_active_names():
         return []
 
 
+def has_installed_pythons():
+    try:
+        next(metadata.iter_installed_python_versions())
+    except StopIteration:
+        return False
+    return True
+
+
 def get_version(name):
     force_32 = not metadata.can_install_64bit()
     try:

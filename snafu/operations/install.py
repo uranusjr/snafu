@@ -4,7 +4,7 @@ import pathlib
 import click
 
 from .common import (
-    check_installation,
+    check_installation, has_installed_pythons,
     get_active_names, get_version, version_command,
 )
 from .download import download_installer
@@ -14,7 +14,7 @@ from .link import (
 
 
 @version_command()
-def install(version, use, add, from_file):
+def install(version, use, from_file):
     check_installation(
         version, installed=False,
         on_exit=functools.partial(link_commands, version),
@@ -25,6 +25,8 @@ def install(version, use, add, from_file):
     else:
         installer_path = pathlib.Path(from_file)
 
+    other_pythons_exist = has_installed_pythons()
+
     click.echo('Running installer {}'.format(installer_path))
     dirpath = version.install(str(installer_path))
 
@@ -33,17 +35,16 @@ def install(version, use, add, from_file):
         version, dirpath,
     ))
 
-    if not use and not add:
-        return
+    if not use and not other_pythons_exist:
+        use = True
+        click.echo('No Pythons detected, will use {} automatically')
 
-    # Auto activation.
-    versions = [version]
-    if not add:
+    if use:
         versions = [
             get_version(n)
             for n in get_active_names()
-        ] + versions
-    activate(versions, allow_empty=False)
+        ] + [version]
+        activate(versions, allow_empty=True)
 
 
 @version_command()

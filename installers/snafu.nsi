@@ -117,7 +117,7 @@ Section "SNAFU Python Manager"
     ${If} $InstallsPython == ${BST_CHECKED}
         DetailPrint "Installing Python ${PYTHONVERSION}..."
         nsExec::ExecToLog "$\"$INSTDIR\lib\python\python.exe$\" \
-            -m snafu install --add ${PYTHONVERSION}"
+            -m snafu install ${PYTHONVERSION}"
     ${EndIf}
 
     # Copy DLL required by Rust executables.

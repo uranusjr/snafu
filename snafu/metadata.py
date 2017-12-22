@@ -1,8 +1,12 @@
 import contextlib
 import pathlib
+import re
 import struct
 import sys
 import winreg
+
+
+VERSION_PATTERN = re.compile(r'^\d+\.\d+(?:\-32)$')
 
 
 @contextlib.contextmanager
@@ -13,6 +17,24 @@ def open_python_key():
     )
     yield key
     winreg.CloseKey(key)
+
+
+def iter_installed_python_versions():
+    with contextlib.ExitStack() as stack:
+        try:
+            python_key = stack.enter_context(open_python_key())
+        except FileNotFoundError:
+            return
+        subkey_count, _, _ = winreg.QueryInfoKey(python_key)
+        for i in range(subkey_count):
+            sub_name = winreg.EnumKey(python_key, i)
+            if not VERSION_PATTERN.match(sub_name):
+                continue
+            try:
+                winreg.OpenKey(python_key, '{}\\InstallPath'.format(sub_name))
+            except FileNotFoundError:
+                continue
+            yield sub_name
 
 
 def get_install_path(name):

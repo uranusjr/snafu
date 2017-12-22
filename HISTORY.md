@@ -5,6 +5,7 @@
 ### UI Changes
 
 * Remove confusing `activate` and `deactivate` commands in favour of the `use` command. The previous “reactivation” behaviour is now mapped to `link --all`.
+* A newly installed Python will be used if there are no other versions detected.
 * Add `snafu upgrade self` to perform in-place upgrade without manually downloading the installer.
 * Add `snafu download <version>` to download installer of given Python version without installing.
 * More complete help messages are provided to command arguments.
