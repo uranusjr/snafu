@@ -1,8 +1,8 @@
 .. _misc:
 
-======================
-Miscellaneous Commands
-======================
+==============
+Misc. Commands
+==============
 
 Upgrade SNAFU Itself
 ====================
@@ -52,8 +52,8 @@ current working directory by default, but you can also specify another
 directory with the ``--dest`` option.
 
 
-Find where the Python installation really is
-============================================
+Find Python Installation
+========================
 
 ::
 
@@ -68,7 +68,7 @@ This is useful when you need to pass the real executable somewhere else, e.g.
 set the path to an environment variable in a Powershell script.
 
 
-Link individual scripts
+Link Individual Scripts
 =======================
 
 ::

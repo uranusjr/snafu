@@ -1,6 +1,6 @@
-=======================
-Implementation of SNAFU
-=======================
+=================
+Implementat SNAFU
+=================
 
 Some implementation notes about SNAFU, in a series of questions. Nobody ever
 asked, but I want to answer them.
@@ -23,7 +23,7 @@ Where are Pythons installed?
 to older versions as well for consistency.
 
 
-How are Executables linked?
+How are executables linked?
 ---------------------------
 
 They are not. Scripts are *copied*. ``.py`` files works as well because they
@@ -47,7 +47,7 @@ a more seamless experience.
 .. _Chocolatey: https://chocolatey.org
 
 
-Why the Name?
+Why the name?
 -------------
 
 Because Python is hard, Windows is harder, and setting up Windows for Python
