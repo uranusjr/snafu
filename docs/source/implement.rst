@@ -1,6 +1,6 @@
-=================
-Implementat SNAFU
-=================
+===============
+Implement SNAFU
+===============
 
 Some implementation notes about SNAFU, in a series of questions. Nobody ever
 asked, but I want to answer them.
