@@ -1,6 +1,6 @@
-=========================
-SNAFU the Python Manager
-=========================
+=====================
+SNAFU: Python Manager
+=====================
 
 .. image:: https://ci.appveyor.com/api/projects/status/jjix3jifn79maf8q?svg=true&branch=master
     :target: https://ci.appveyor.com/project/uranusjr/snafu
