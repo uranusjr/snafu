@@ -1,12 +1,15 @@
 {
-    "type": "cpython_msi",
-    "version_info": [3, 4, 4],
-    "amd64": {
-        "url": "https://www.python.org/ftp/python/3.4.4/python-3.4.4.amd64.msi",
-        "md5_sum": "963f67116935447fad73e09cc561c713"
-    },
-    "x86": {
-        "url": "https://www.python.org/ftp/python/3.4.4/python-3.4.4.msi",
-        "md5_sum": "e96268f7042d2a3d14f7e23b2535738b"
-    }
+	"type": "cpython_msi",
+	"version_info": [3, 4, 4],
+	"amd64": {
+		"url": "https://www.python.org/ftp/python/3.4.4/python-3.4.4.amd64.msi",
+		"md5_sum": "963f67116935447fad73e09cc561c713",
+		"product_codes:": {
+			"3.4.4": "{56EBF7CF-F2B2-30ED-9DE5-307FC2CE3449}"
+		}
+	},
+	"x86": {
+		"url": "https://www.python.org/ftp/python/3.4.4/python-3.4.4.msi",
+		"md5_sum": "e96268f7042d2a3d14f7e23b2535738b"
+	}
 }
