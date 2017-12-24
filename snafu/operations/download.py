@@ -15,7 +15,9 @@ def download_installer(version):
 @version_command()
 def download(ctx, version, dest_dir, force):
     installer = download_installer(version)
-    target = pathlib.Path(dest_dir).joinpath(installer.name)
+    if dest_dir is None:
+        dest_dir = pathlib.Path.cwd()
+    target = pathlib.Path(dest_dir, installer.name)
     if target.exists() and not force:
         click.echo('Target exists: {}'.format(target), err=True)
         click.echo('NOTE: Use --force to overwrite destination.', err=True)

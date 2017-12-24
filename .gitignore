@@ -5,6 +5,8 @@
 *.py[co]
 __pycache__
 
+/docs/build/
+
 /shims/**/target/
 **/*.rs.bk
 
