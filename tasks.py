@@ -1,7 +1,7 @@
 import invoke
 
+import docs
 import installers
 import shims
 
-
-namespace = invoke.Collection(installers, shims)
+namespace = invoke.Collection(docs, installers, shims)
