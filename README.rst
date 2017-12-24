@@ -66,7 +66,7 @@ Use ``--help`` to find more about SNAFU, or a specific command::
     $ snafu --help
     $ snafu install --help
 
-Or read the `Documentation <https://snafu.uranusjr.com>`_.
+Or read the `Documentation <https://snafu.readthedocs.io>`_.
 
 Now you’re ready to use CPython on Windows like a first-class citizen, and
 ignore people telling you to get a Mac.
