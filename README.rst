@@ -6,6 +6,10 @@ SNAFU: Python Manager
     :target: https://ci.appveyor.com/project/uranusjr/snafu
     :alt: Build status
 
+.. image:: https://readthedocs.org/projects/snafu/badge/?version=latest
+    :target: https://snafu.readthedocs.io/en/latest/
+    :alt: Documentation Status
+
 SNAFU is a Python installer manager for Windows. It helps you download,
 configure, install, and manage CPython installations, and provides utilities
 that can be integrated into your Python-related development workflows.
