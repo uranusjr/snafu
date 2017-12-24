@@ -1,3 +1,8 @@
+/// Interface to provide functionailties for shims.
+///
+/// Things in this module only make sense to the shim executables. They are
+/// provided here to avoid boilerplate code in the shims.
+
 use std::path::PathBuf;
 use std::process::{abort, exit};
 
@@ -15,7 +20,7 @@ pub fn python(find_python: fn(&Tag) -> Result<PathBuf, String>) {
     let shim = Shim::from_current_name().unwrap_or_else(print_and_abort);
     let python = find_python(shim.tag()).unwrap_or_else(print_and_abort);
     setup().unwrap_or_else(print_and_abort);
-    run_and_end(python, vec![], true);
+    run_and_end(&python, &vec![], true);
 }
 
 pub fn pymod_and_link(find_python: fn(&Tag) -> Result<PathBuf, String>) {
@@ -26,8 +31,8 @@ pub fn pymod_and_link(find_python: fn(&Tag) -> Result<PathBuf, String>) {
 
     // Run easy_install or pip.
     let code = run(
-        python,
-        vec!["-m", shim.name()],
+        &python,
+        &vec!["-m", shim.name()],
         true,
     ).unwrap_or_else(print_and_abort);
     if code != 0 {
@@ -36,8 +41,8 @@ pub fn pymod_and_link(find_python: fn(&Tag) -> Result<PathBuf, String>) {
 
     // TODO: Only relink when needed. How does Pyenv do this?;
     run_and_end(
-        find_of_snafu().unwrap_or_else(print_and_abort),
-        vec!["-m", "snafu", "link", "--all", "--overwrite=smart"],
+        &find_of_snafu().unwrap_or_else(print_and_abort),
+        &vec!["-m", "snafu", "link", "--all", "--overwrite=smart"],
         false,
     );
 }

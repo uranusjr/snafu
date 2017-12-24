@@ -103,8 +103,10 @@ impl Tag {
         Tag::parse_strict(name).unwrap()
     }
 
-    // Given another tag value, tell whether this tag contains it, i.e. the
-    // other tag is equally with or more specific than this one.
+    /// Whether this tag contain the other.
+    ///
+    /// This returns `true` if this tag contains `other`, i.e. `other` is
+    /// equally with or more specific than `self`.
     pub fn contains(&self, other: &Tag) -> bool {
         // We specify an architecture, but it does not match theirs.
         if self.arch.is_some() && self.arch != other.arch {
