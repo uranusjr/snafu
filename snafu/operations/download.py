@@ -1,4 +1,5 @@
 import pathlib
+import shutil
 
 import click
 
@@ -22,7 +23,7 @@ def download(ctx, version, dest_dir, force):
         click.echo('Target exists: {}'.format(target), err=True)
         click.echo('NOTE: Use --force to overwrite destination.', err=True)
         ctx.exit(1)
-    installer.rename(target)
+    shutil.move(str(installer), str(target))
     click.echo('{} installer is downloaded successfully to {}'.format(
         version, target,
     ))
