@@ -16,7 +16,7 @@
 
 ### Installer Changes
 
-* The accomodate the auto-use behavioural change, the installer does not specify `--use` when installing Python, leaving this decision to the `install` command.
+* To accomodate the auto-use behavioural change, the installer no longer specify `--use` when installing Python, leaving this decision to the `install` command.
 
 
 ## Unstable
