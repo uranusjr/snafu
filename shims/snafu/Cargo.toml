@@ -4,9 +4,8 @@ version = "0.1.0"
 authors = ["Tzu-ping Chung <uranusjr@gmail.com>"]
 
 [dependencies]
-kernel32-sys = "0.2.2"
-winapi = "0.2.8"
-winreg = "0.4"
+winapi = { version = "0.3.2", features = ["consoleapi", "jobapi2", "wincon"] }
+winreg = "0.5.0"
 
 [[bin]]
 name = "snafu"

@@ -1,4 +1,3 @@
-extern crate kernel32;
 extern crate winapi;
 
 use std::{env, mem};
@@ -6,8 +5,17 @@ use std::os::windows::io::AsRawHandle;
 use std::path::PathBuf;
 use std::process::{Child, Command, abort, exit};
 
-use self::kernel32::*;
-use self::winapi::*;
+use self::winapi::ctypes::c_void;
+use self::winapi::shared::minwindef::{BOOL, DWORD, LPVOID, TRUE};
+use self::winapi::um::consoleapi::SetConsoleCtrlHandler;
+use self::winapi::um::jobapi2::{
+    AssignProcessToJobObject, CreateJobObjectW, QueryInformationJobObject,
+    SetInformationJobObject};
+use self::winapi::um::wincon::{CTRL_C_EVENT, GenerateConsoleCtrlEvent};
+use self::winapi::um::winnt::{
+    JOBOBJECT_EXTENDED_LIMIT_INFORMATION,
+    JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE, JOB_OBJECT_LIMIT_SILENT_BREAKAWAY_OK,
+    JobObjectExtendedLimitInformation};
 
 
 static mut PID: u32 = 0;
@@ -50,7 +58,7 @@ unsafe fn setup_child(child: &mut Child) -> Result<(), &'static str> {
         return Err("job information set error");
     }
 
-    AssignProcessToJobObject(job, child.as_raw_handle());
+    AssignProcessToJobObject(job, child.as_raw_handle() as *mut c_void);
 
     Ok(())
 }

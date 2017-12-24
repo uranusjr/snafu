@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use super::tags::Tag;
 
 use self::winreg::RegKey;
-use self::winreg::enums::{HKEY_CURRENT_USER, KEY_READ};
+use self::winreg::enums::HKEY_CURRENT_USER;
 
 
 fn get(tag: &Tag) -> Result<PathBuf, String> {
@@ -14,12 +14,10 @@ fn get(tag: &Tag) -> Result<PathBuf, String> {
         .join(tag.to_string()).join("InstallPath");
 
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
-    let key = try! {
-        hkcu.open_subkey_with_flags(&key_path, KEY_READ).map_err(|e| {
-            let key_path_string = key_path.to_string_lossy();
-            format!("failed to open {}: {}", key_path_string, e)
-        })
-    };
+    let key = try!(hkcu.open_subkey(&key_path).map_err(|e| {
+        let key_path_string = key_path.to_string_lossy();
+        format!("failed to open {}: {}", key_path_string, e)
+    }));
 
     let value: String = try! {
         key.get_value("").map_err(|e| {
@@ -35,7 +33,7 @@ fn find_installed() -> BTreeSet<Tag> {
 
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
     let key_path_str = "Software\\Python\\PythonCore";
-    let key = match hkcu.open_subkey_with_flags(key_path_str, KEY_READ) {
+    let key = match hkcu.open_subkey(key_path_str) {
         Ok(key) => key,
         Err(e) => {
             eprintln!("failed to read {}: {}", key_path_str, e);
@@ -71,11 +69,9 @@ pub fn find_best_using(tag: &Tag) -> Result<PathBuf, String> {
     let key_path_str = "Software\\uranusjr\\SNAFU";
 
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
-    let key = try! {
-        hkcu.open_subkey_with_flags(&key_path_str, KEY_READ).map_err(|e| {
-            format!("failed to open {}: {}", key_path_str, e)
-        })
-    };
+    let key = try!(hkcu.open_subkey(&key_path_str).map_err(|e| {
+        format!("failed to open {}: {}", key_path_str, e)
+    }));
     let value: String = try! {
         key.get_value("ActivePythonVersions").map_err(|e| e.to_string())
     };
@@ -99,11 +95,9 @@ pub fn find_of_snafu() -> Result<PathBuf, String> {
     let key_path = "Software\\uranusjr\\SNAFU";
 
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
-    let key = try! {
-        hkcu.open_subkey_with_flags(key_path, KEY_READ).map_err(|e| {
-            format!("failed to open {}: {}", key_path, e)
-        })
-    };
+    let key = try!(hkcu.open_subkey(key_path).map_err(|e| {
+        format!("failed to open {}: {}", key_path, e)
+    }));
 
     let value: String = try! {
         key.get_value("InstallPath").map_err(|e| {
