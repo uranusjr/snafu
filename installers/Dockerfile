@@ -26,6 +26,4 @@ RUN snafu use 3.6
 RUN snafu use --reset
 RUN snafu list --all
 
-# This doesn't work because (I think) the installer needs user interaction.
-# We need to implement a --quiet option in the future.
-# RUN snafu uninstall 3.6
+RUN snafu uninstall 3.6

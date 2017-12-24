@@ -195,7 +195,7 @@ class CPythonVersion(Version):
         return metadata.get_bundle_cache_path(self.name)
 
     def uninstall(self, cmd):
-        subprocess.check_call([cmd, '/uninstall'])
+        subprocess.check_call([cmd, '/uninstall', '/passive'])
 
 
 def get_version(name, *, force_32):
