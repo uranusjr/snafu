@@ -1,5 +1,26 @@
 ## Next (not released)
 
+### Bug Fixes
+
+* Crash when downloading installer without specifying `--dest`.
+* Crash when downloading installer to a different drive.
+
+### UI Changes
+
+* The uninstalling processes are now as interaction-free as installing. Previously some user intervention was needed (especially the EXE-based versions).
+
+### Behavioural Changes
+
+* `snafu install` now automatically uses the version if it is the only Python installation detected. This should simplify things even more for beginners.
+* Minor update to Python 3.4 definition.
+
+### Installer Changes
+
+* The accomodate the auto-use behavioural change, the installer does not specify `--use` when installing Python, leaving this decision to the `install` command.
+
+
+## Unstable
+
 ### UI Changes
 
 * Remove confusing `activate` and `deactivate` commands in favour of the `use` command. The previous “reactivation” behaviour is now mapped to `link --all`.
