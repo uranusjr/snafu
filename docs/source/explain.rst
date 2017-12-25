@@ -105,13 +105,35 @@ it to others.
 Why Not Anaconda?
 =================
 
-I considered Anaconda very hardly, but eventually decided against it. It is
-important to me that I need to feel comforatble teaching a solution to a
-relative beginner. *Hey, let’s learn Python, but don’t download from
-`python.org`_, but this other website!* This just feels wrong to me. I also
-have spent too much time answering beginners whether they should use Conda or
-Pip. I need to stick with CPython.
+I considered Anaconda very hardly, but eventually decided against it. The
+tipping point is how Anaconda manages Python versions similar to virtualenvs,
+with manipulation of ``PATH`` and other environment variables. This is the
+wrong way to do it, [#]_ and to this day there is still no first-party
+Powershell support. [#]_
 
-Anaconda is incredibly useful for those who need it, but for other people,
-maybe not so much. And since Anaconda also conforms to `PEP 397`_, there’s
-nothing theoratically preventing SNAFU to co-live with Anaconda.
+.. [#] |virtualenv-wrong|_
+.. [#] |conda-powershell-issue|_
+
+.. |virtualenv-wrong| replace:: Virtualenv’s ``bin/activate`` is doing it wrong
+.. _virtualenv-wrong: https://gist.github.com/datagrok/2199506
+
+.. |conda-powershell-issue| replace:: Powershell activate and deactivate
+.. _conda-powershell-issue: <https://github.com/conda/conda/issues/626
+
+There is also no simple way (AFAIK) to run a particular version of Python in
+Anaconda with just one command (except specifying the absolute path to
+``python.exe``). You always need to activate the environment (and remember to
+deactivate afterwards). It just feels so tedious to me.
+
+In the end, the activate/deactivate approach requires more from the user
+mentally. It is an extra thing to wrap your head around; tedious for the
+experienced, and sometimes even too difficult for newcomers. This is why
+Pipenv_ catches on so fast—virtualenv is wonderful, but everybody has issues
+with the user interface they long for a better solution.
+
+.. _Pipenv: https://pipenv.org
+
+Anaconda is incredibly useful for those who need it, but its version management
+tooling is simply not good enough. Fortunately, since Anaconda already conforms
+to `PEP 397`_, there’s nothing theoratically preventing SNAFU to co-live with
+Anaconda, so people can use SNAFU to manage Anaconda versions instead.
