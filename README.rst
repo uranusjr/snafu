@@ -7,7 +7,7 @@ SNAFU: Python Manager
     :alt: Build status
 
 .. image:: https://readthedocs.org/projects/snafu/badge/?version=latest
-    :target: https://snafu.readthedocs.io/en/latest/
+    :target: https://snafu.uranusjr.com/en/latest/
     :alt: Documentation Status
 
 SNAFU is a Python installer manager for Windows. It helps you download,
@@ -66,7 +66,7 @@ Use ``--help`` to find more about SNAFU, or a specific command::
     $ snafu --help
     $ snafu install --help
 
-Or read the `Documentation <https://snafu.readthedocs.io>`_.
+Or read the `Documentation <https://snafu.uransjr.com>`_.
 
 Now you’re ready to use CPython on Windows like a first-class citizen, and
 ignore people telling you to get a Mac.
