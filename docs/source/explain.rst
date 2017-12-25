@@ -81,7 +81,28 @@ It is useful to have a system-wide Python setup. For developers, however, it
 is always recommended to install a seperate copy of Python for yourself, so
 you can manage it directly, without special priviledge.
 
-Why not Anaconda?
+Why Not Chocolatey?
+===================
+
+Chocolatey_ is a package manager on Windows. A lot of SNAFU’s ideas are
+inspired by it: standard Windows installers, interaction-free installation,
+and shims for execution in command prompts. It is a very good tool, and I use
+it on my Windows machine—alongside SNAFU.
+
+.. _Chocolatey: https://chocolatey.org
+
+What SNAFU is to Chocolatey is similar to Pyenv to Homebrew and API etc. The
+aims are similar, but slightly different, so we can take an approach tailored
+to Python distribution.
+
+Also I’m not very satisfied with Chocolatey’s user story. The setup is slightly
+complicated (due to Powershell’s execution policy), and requires administration
+priviledge to install packages. This is because it is fulfilling a different
+goal from SNAFU’s, but still makes me feel uncomforatble enough not to teach
+it to others.
+
+
+Why Not Anaconda?
 =================
 
 I considered Anaconda very hardly, but eventually decided against it. It is
