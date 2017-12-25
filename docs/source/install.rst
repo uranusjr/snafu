@@ -4,10 +4,8 @@
 Install Python
 ==============
 
-SNAFU installs a Python versions with a simple command, so you don’t need to
-go through the tedious *find, download, double-click, next, done* routine.
-
-Install ``<version>`` on you machine: [#]_
+SNAFU installs a Python version with a single command. To install
+``<version>`` on you machine: [#]_
 
 ::
 
@@ -16,10 +14,9 @@ Install ``<version>`` on you machine: [#]_
 .. [#] Use ``snafu list --all`` to find out what versions are available. See
     :ref:`list` for more information about the ``list`` command.
 
-This automatically downloads the installer, and guides you through the
-installation with minimal interaction. [#]_ If there’s need to install without
-Internet connection, you can download the installer yourself before hand, and
-run::
+This automatically downloads the installer, and runs it with minimal user input
+possible. [#]_ If there’s need to install without Internet connection, you can
+download the installer yourself, and run::
 
     snafu install --file=path\to\installer.exe <version>
 
