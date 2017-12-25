@@ -64,7 +64,8 @@ def get_snafu_version():
     with ROOT.parent.joinpath('snafu', '__init__.py').open() as f:
         for line in f:
             if line.startswith('__version__'):
-                return eval(line[len('__version__ = '):])
+                vs = line[len('__version__ = '):]
+                return packaging.version.parse(eval(vs))
 
 
 def get_latest_python_name():
@@ -311,9 +312,9 @@ def check_version(v):
     if not isinstance(version, packaging.version.Version):
         return
     mod_v = get_snafu_version()
-    if mod_v != v:
+    if mod_v != version:
         raise AssertionError(
-            'module version {} != installer version {}'.format(mod_v, v),
+            f'module version does not match installer: {mod_v} != {version}'
         )
 
 
