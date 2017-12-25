@@ -11,11 +11,11 @@ SNAFU: Python Distribution Manager for Windows
     :alt: Documentation Status
 
 SNAFU is a Python distribution manager for Windows. It helps you download,
-configure, install, and manage Python installations [#]_, and provides
+configure, install, and manage Python installations, [#]_ and provides
 utilities that can be integrated into your Python-related development
 workflows.
 
-.. [#]: Only CPython distributions from `python.org`_ at the moment.
+.. [#] Only CPython distributions from `python.org`_ at the moment.
 
 .. _`python.org`: https://python.org
 
