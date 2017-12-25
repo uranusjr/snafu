@@ -99,12 +99,10 @@ pub fn run_and_end(exe: PathBuf, args: Vec<&str>, own_args: bool) {
 }
 
 pub fn setup() -> Result<(), &'static str> {
-    unsafe {
-        let ok = SetConsoleCtrlHandler(Some(handle_ctrl), TRUE);
-        if ok == TRUE {
-            Ok(())
-        } else {
-            Err("control handler set error")
-        }
+    let ok = unsafe { SetConsoleCtrlHandler(Some(handle_ctrl), TRUE) };
+    if ok == TRUE {
+        Ok(())
+    } else {
+        Err("control handler set error")
     }
 }
