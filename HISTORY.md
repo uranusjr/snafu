@@ -1,25 +1,14 @@
 ## Next (not released)
 
-### Bug Fixes
-
-* Crash when downloading installer without specifying `--dest`.
-* Crash when downloading installer to a different drive.
-
-### UI Changes
-
-* The uninstalling processes are now as interaction-free as installing. Previously some user intervention was needed (especially the EXE-based versions).
-
-### Behavioural Changes
-
-* `snafu install` now automatically uses the version if it is the only Python installation detected. This should simplify things even more for beginners.
-* Minor update to Python 3.4 definition.
-
-### Installer Changes
-
-* To accomodate the auto-use behavioural change, the installer no longer specify `--use` when installing Python, leaving this decision to the `install` command.
+Nothing yet.
 
 
 ## Unstable
+
+Nothing yet.
+
+
+## Version 2.0
 
 ### UI Changes
 
@@ -28,9 +17,12 @@
 * Add `snafu upgrade self` to perform in-place upgrade without manually downloading the installer.
 * Add `snafu download <version>` to download installer of given Python version without installing.
 * More complete help messages are provided to command arguments.
+* The uninstalling processes are now as interaction-free as installing. Previously some user intervention was needed (especially the EXE-based versions).
 
 ### Behavioural Changes
 
+* `snafu install` now automatically uses the version if it is the only Python installation detected. This should simplify things even more for beginners.
+* Minor update to Python 3.4 definition.
 * Call `snafu link --all` automatically after installing with a shimmed pip command.
 * Upgrade Python 3.4 definition to 3.4.4.
 * Upgrade Python 3.6 definition to 3.6.4.
