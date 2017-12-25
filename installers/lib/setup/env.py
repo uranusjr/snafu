@@ -1,16 +1,12 @@
-import click
-
+import collections
 import contextlib
 import ctypes
 import ctypes.wintypes
-import os
+import itertools
 import pathlib
 import winreg
 
-
-def get_parsed_environ(key):
-    value = os.environ[key]
-    return value.split(';')
+import click
 
 
 @contextlib.contextmanager
@@ -43,22 +39,32 @@ def set_path_values(values, vtype):
 
 
 def add_snafu_paths(instdir):
-    paths = set(get_parsed_environ('PATH'))
-    values, vtype = get_path_values()
-    current_length = len(values)
-    for value in get_snafu_path_values(instdir):
-        if value not in paths:
-            values.append(value)
-    if current_length != len(values):
-        set_path_values(values, vtype)
+    old_paths, vtype = get_path_values()
+    snafu_paths = get_snafu_path_values(instdir)
+
+    path_index_m = collections.OrderedDict(zip(old_paths, itertools.count()))
+
+    # If the order in PATH does not match what we want, delete existing
+    # values and add again.
+    current_indexes = [path_index_m.get(p, -1) for p in snafu_paths]
+    if current_indexes != sorted(current_indexes):
+        for p in snafu_paths:
+            del path_index_m[p]
+
+    for value in snafu_paths:
+        path_index_m[value] = None  # Value irrelevant, we want only the key.
+
+    new_paths = list(path_index_m.keys())
+    if old_paths != new_paths:
+        set_path_values(new_paths, vtype)
         return True
     return False
 
 
 def get_snafu_path_values(instdir):
     return [
-        str(instdir.joinpath('cmd')),
         str(instdir.joinpath('scripts')),
+        str(instdir.joinpath('cmd')),
     ]
 
 

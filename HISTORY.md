@@ -1,6 +1,11 @@
 ## Next (not released)
 
-Nothing yet.
+### Behavioural Changes
+
+* The scripts PATH is moved ahead of the cmd. This provides potential for more
+  flexible customisations, i.e. if multiple sources install the same
+  executable (CPython and Anaconda, for example), one (CPython) can take
+  precedence in cmd, but allow the user to override this by the `use` command.
 
 
 ## Unstable
