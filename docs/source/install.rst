@@ -63,4 +63,4 @@ You probably guessed it::
 
 Similar to installing, this does nothing too fancy, but just runs the
 standard uninstaller. It does perform some additional cleanup if you are using
-the version. See :ref:manage about how you can manage/use versions.
+the version. See :ref:`manage` about how you can manage/use versions.
