@@ -63,10 +63,12 @@ encourage you to use it. But SNAFU also solves a few additional use cases that
 * Availability of versioned Python executables, e.g. ``python3.6.exe``.
 * Managing commands other than ``python.exe``.
 
-SNAFU’s implementation also relies on a lot of the same values read by
-``py.exe``, so you can view SNAFU as an extension to it, not a replacement.
+SNAFU’s implementation also relies on a lot of the same registry values read by
+``py.exe``, which are formally defined in `PEP 514`_, so you can view SNAFU as
+a supplement to ``py.exe``, not a replacement.
 
 .. _`PEP 397`: https://www.python.org/dev/peps/pep-0397/
+.. _`PEP 514`: https://www.python.org/dev/peps/pep-0514/
 .. _shebang: https://en.wikipedia.org/wiki/Shebang_(Unix)
 
 Why Not Install to All Users?
@@ -135,5 +137,5 @@ with the user interface they long for a better solution.
 
 Anaconda is incredibly useful for those who need it, but its version management
 tooling is simply not good enough. Fortunately, since Anaconda already conforms
-to `PEP 397`_, there’s nothing theoratically preventing SNAFU to co-live with
+to `PEP 514`_, there’s nothing theoratically preventing SNAFU to co-live with
 Anaconda, so people can use SNAFU to manage Anaconda versions instead.

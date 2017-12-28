@@ -27,7 +27,7 @@ How are executables linked?
 ---------------------------
 
 They are not. Scripts are *copied*. ``.py`` files works as well because they
-have appropriate shebang lines, and can be handled by the py launcher, as
+have appropriate shebang lines, and can be handled by the Python Launcher, as
 specified in `PEP 397`_.
 
 .. _`PEP 397`: https://www.python.org/dev/peps/pep-0397/
