@@ -48,9 +48,13 @@ Build the shims::
 Run Tests
 ---------
 
-::
+Run Python tests::
 
     pipenv run pytest tests
+
+Run Rust tests::
+
+    pipenv run invoke shims.test
 
 Unfortunately there are only very limited tests right now.
 

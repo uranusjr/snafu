@@ -144,8 +144,8 @@ class CPythonMSIVersion(Version):
 
     def upgrade(self, cmd):
         # There is no way to know what was installed from the previous MSI
-        # installer; all we can do is installing what we want to the same
-        # location, and leave the rest untouched hoping they won't be needed.
+        # installer; all we can do is installing what we want to the location
+        # we want, and leave the old version installation untouched.
         self._run_installer(cmd, self.get_installation().path)
 
     def get_cached_uninstaller(self):

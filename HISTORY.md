@@ -2,10 +2,9 @@
 
 ### Behavioural Changes
 
-* The scripts PATH is moved ahead of the cmd. This provides potential for more
-  flexible customisations, i.e. if multiple sources install the same
-  executable (CPython and Anaconda, for example), one (CPython) can take
-  precedence in cmd, but allow the user to override this by the `use` command.
+* The scripts PATH is moved ahead of the cmd. This provides potential for more flexible customisations, i.e. if multiple sources install the same executable (CPython and Anaconda, for example), one (CPython) can take precedence in cmd, but allow the user to override this by the `use` command.
+* SNAFU now works system-wide Python installations, and can publish shims for them as well as `snafu install`-ed ones. It still only supports installing them in per-user mode, but other commands should mostly work.  
+  **EXCEPTION**: Upgrading an MSI-based Python version (3.4 or earlier) is not supported.
 
 
 ## Unstable

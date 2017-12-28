@@ -1,26 +1,29 @@
-import contextlib
 import pathlib
 import struct
 import sys
 import winreg
 
 
-@contextlib.contextmanager
-def open_python_key():
-    key = winreg.OpenKey(
-        winreg.HKEY_CURRENT_USER,
-        'Software\\Python\\PythonCore',
-    )
-    yield key
-    winreg.CloseKey(key)
+PYTHON_KEY_PATHS = [
+    (winreg.HKEY_CURRENT_USER, 'Software\\Python\\PythonCore'),
+    (winreg.HKEY_LOCAL_MACHINE, 'Software\\Python\\PythonCore'),
+    (winreg.HKEY_LOCAL_MACHINE, 'Software\\Wow6432Node\\Python\\PythonCore'),
+]
 
 
 def get_install_path(name):
-    with open_python_key() as python_key:
-        key = winreg.OpenKey(python_key, '{}\\InstallPath'.format(name))
+    for root, prefix in PYTHON_KEY_PATHS:
+        keypath = '{}\\{}\\InstallPath'.format(prefix, name)
+        try:
+            key = winreg.OpenKey(root, keypath)
+        except FileNotFoundError:
+            continue
         install_path = winreg.QueryValue(key, None)
         winreg.CloseKey(key)
-    return pathlib.Path(install_path).resolve(strict=True)
+        return pathlib.Path(install_path).resolve(strict=True)
+    raise FileNotFoundError(
+        'Software\\Python\\PythonCore\\{}\\InstallPath'.format(name),
+    )
 
 
 def find_uninstaller_id(name):

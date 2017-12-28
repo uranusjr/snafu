@@ -1,3 +1,4 @@
+extern crate winapi;
 extern crate winreg;
 
 use std::collections::BTreeSet;
@@ -5,52 +6,61 @@ use std::path::{Path, PathBuf};
 
 use super::tags::Tag;
 
+use self::winapi::shared::minwindef::HKEY;
 use self::winreg::RegKey;
-use self::winreg::enums::HKEY_CURRENT_USER;
+use self::winreg::enums::{HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE};
 
+
+const PYTHON_KEY_PATHS: &'static [(HKEY, &str); 3] = &[
+    (HKEY_CURRENT_USER, "Software\\Python\\PythonCore"),
+    (HKEY_LOCAL_MACHINE, "Software\\Python\\PythonCore"),
+    (HKEY_LOCAL_MACHINE, "Software\\Wow6432Node\\Python\\PythonCore"),
+];
 
 fn get(tag: &Tag) -> Result<PathBuf, String> {
-    let key_path = Path::new("Software\\Python\\PythonCore")
-        .join(tag.to_string()).join("InstallPath");
+    for &(hkey, rs) in PYTHON_KEY_PATHS {
+        let key_path = Path::new(rs).join(tag.to_string()).join("InstallPath");
 
-    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
-    let key = try!(hkcu.open_subkey(&key_path).map_err(|e| {
-        let key_path_string = key_path.to_string_lossy();
-        format!("failed to open {}: {}", key_path_string, e)
-    }));
+        let key = match RegKey::predef(hkey).open_subkey(&key_path) {
+            Ok(key) => key,
+            Err(_) => {
+                continue;
+            },
+        };
 
-    let value: String = try! {
-        key.get_value("").map_err(|e| {
-            let key_path_string = key_path.to_string_lossy();
-            format!("failed to read {}: {}", key_path_string, e)
-        })
-    };
-    Ok(PathBuf::from(value).join("python.exe"))
+        let value: String = try! {
+            key.get_value("").map_err(|e| {
+                let key_path_string = key_path.to_string_lossy();
+                format!("failed to read {}: {}", key_path_string, e)
+            })
+        };
+        return Ok(PathBuf::from(value).join("python.exe"));
+    }
+    Err(format!("failed to find {}", tag))
 }
 
 fn find_installed() -> BTreeSet<Tag> {
     let mut tags = BTreeSet::new();
-
-    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
-    let key_path_str = "Software\\Python\\PythonCore";
-    let key = match hkcu.open_subkey(key_path_str) {
-        Ok(key) => key,
-        Err(e) => {
-            eprintln!("failed to read {}: {}", key_path_str, e);
-            return tags;
-        },
-    };
-
-    for enum_result in key.enum_keys() {
-        match enum_result
-                .map_err(|e| e.to_string())
-                .and_then(|name| Tag::parse_strict(&name)) {
-            Ok(tag) => {
-                tags.insert(tag);
+    for &(hkey, rs) in PYTHON_KEY_PATHS {
+        let key = match RegKey::predef(hkey).open_subkey(rs) {
+            Ok(key) => key,
+            Err(_) => {
+                continue;
             },
-            Err(e) => {
-                eprintln!("ignored entry: {}", e);
-            },
+        };
+        for enum_result in key.enum_keys() {
+            match enum_result
+                    .map_err(|e| e.to_string())
+                    .and_then(|n| Tag::parse_strict(&n)) {
+                Ok(tag) => {
+                    if !tags.contains(&tag) {
+                        tags.insert(tag);
+                    }
+                },
+                Err(e) => {
+                    eprintln!("ignored entry: {}", e);
+                },
+            }
         }
     }
     tags
