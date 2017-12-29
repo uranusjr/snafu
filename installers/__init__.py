@@ -1,11 +1,9 @@
 import itertools
 import json
-import os
 import pathlib
 import shutil
 import struct
 import subprocess
-import sys
 import zipfile
 
 import invoke
@@ -91,7 +89,7 @@ def get_latest_python_name():
     return latest_definition['name']
 
 
-ROOT = pathlib.Path(os.path.abspath(__file__)).parent
+ROOT = pathlib.Path(__file__).resolve(strict=True).parent
 
 ASSETSDIR = ROOT.joinpath('assets')
 ASSETSDIR.mkdir(exist_ok=True)
@@ -303,7 +301,6 @@ def cleanup():
     container = ROOT.joinpath('snafu')
     if container.exists():
         shutil.rmtree(str(container))
-    subprocess.check_call([sys.executable, '-m', 'invoke', 'shims.clean'])
 
 
 def check_version(v):
@@ -341,6 +338,6 @@ def build(ctx, version=None, clean=True):
         cleanup()
 
 
-@invoke.task()
+@invoke.task(pre=[invoke.call(shims.clean)])
 def clean(ctx):
     cleanup()
