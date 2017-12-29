@@ -27,10 +27,7 @@ def install(version, use, from_file):
 
     if not use and not get_versions(installed_only=True):
         use = True
-        click.echo(
-            'No Pythons detected, '
-            'will use {} after installation'.format(version),
-        )
+        click.echo('Will use {} after installation.'.format(version))
 
     click.echo('Running installer {}'.format(installer_path))
     dirpath = version.install(str(installer_path))
