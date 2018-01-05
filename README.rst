@@ -20,6 +20,21 @@ workflows.
 .. _`python.org`: https://python.org
 
 
+Notice
+======
+
+This project is undergoing a migration to be re-branded as **PythonUp**. New
+development happens on the `PythonUp-Windows repository`_. Head there if you
+wound like to report problems or constribute anything.
+
+.. _`PythonUp-Windows repository`: https://github.com/uranusjr/pythonup-windows
+
+See `#9`_ and `#11`_ for more imformation.
+
+.. _`#9`: https://github.com/uranusjr/snafu/issues/9
+.. _`#11`: https://github.com/uranusjr/snafu/issues/11
+
+
 Quick Start
 ===========
 
